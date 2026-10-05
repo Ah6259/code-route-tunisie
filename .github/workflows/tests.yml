@@ -1,0 +1,43 @@
+# Robot « Tests » : à chaque envoi sur GitHub, lance le test automatique du site.
+# S'il échoue, il ouvre (ou complète) une issue GitHub pour prévenir Ahmed.
+name: tests
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Installer jsdom (sans fichier package)
+        run: npm install --no-save --no-package-lock jsdom
+      - name: Test du site
+        run: node tools/test_site.mjs
+      - name: Prévenir par une issue si le test échoue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITRE="Le test automatique du site a échoué"
+          LIEN="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          CORPS="Le test tools/test_site.mjs a échoué après l'envoi ${{ github.sha }}. Journal : $LIEN — ne pas laisser le site dans cet état : corriger puis relancer le test."
+          NUM=$(gh issue list --state open --search "$TITRE in:title" --json number --jq '.[0].number' || true)
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "$CORPS"
+          else
+            gh issue create --title "$TITRE" --body "$CORPS"
+          fi

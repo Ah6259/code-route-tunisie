@@ -1,0 +1,304 @@
+/* Code de la route Tunisie — feuille de style (même famille que « Outils pratiques Tunisie », couleur bleu route) */
+:root{
+  --bg:#F3F6FA; --carte:#FFFFFF; --texte:#0E2238; --doux:#5A6878; --ligne:#DFE6EE;
+  --p:#1F5FA8; --p-fonce:#174A84; --p-clair:#E5EEF8; --p-tres-clair:#F2F7FC;
+  --orange:#E8731A; --orange-clair:#FDF0E5;
+  --ok:#14804A; --ok-clair:#E4F4EA; --ko:#C2382B; --ko-clair:#FBE9E7;
+  --ombre:0 1px 2px rgba(14,34,56,.06),0 8px 24px rgba(14,34,56,.07);
+  --rayon:18px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1520; --carte:#131F2D; --texte:#E5EDF6; --doux:#9AAABB; --ligne:#243447;
+    --p:#5C9BE6; --p-fonce:#3E7FCB; --p-clair:#1A2D44; --p-tres-clair:#15243A;
+    --orange:#F09040; --orange-clair:#3A2716;
+    --ok:#3CC47F; --ok-clair:#14301F; --ko:#F0705F; --ko-clair:#3A1C19;
+    --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--texte);font:16px/1.55 Figtree,"Noto Kufi Arabic",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-wrap:break-word}
+html[lang="ar"] body{font-family:"Noto Kufi Arabic",Figtree,system-ui,sans-serif;line-height:1.75}
+a{color:var(--p)}
+img,svg{display:block}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+/* ---- en-tête ---- */
+.entete{background:var(--carte);border-bottom:1px solid var(--ligne);position:sticky;top:0;z-index:10}
+.entete .haut-entete{display:flex;align-items:center;justify-content:space-between;gap:10px;height:56px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--texte);font-weight:800;font-size:17px;letter-spacing:-.01em;min-width:0}
+.logo-mark{width:34px;height:34px;flex:none}
+.logo-nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+.logo-nom small{display:block;font-size:11px;font-weight:600;color:var(--doux);letter-spacing:.02em}
+.langue{flex:none;border:1px solid var(--ligne);background:var(--bg);color:var(--texte);border-radius:999px;
+  padding:7px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.langue:hover{border-color:var(--p)}
+
+/* ---- bandeau du haut ---- */
+.hero{background:linear-gradient(160deg,var(--p) 0%,var(--p-fonce) 100%);color:#fff;padding:28px 0 64px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset-inline-end:-60px;bottom:-40px;width:240px;height:240px;border-radius:50%;
+  border:28px solid rgba(255,255,255,.06);pointer-events:none}
+.fil{font-size:13px;opacity:.85;margin:0 0 10px}
+.fil a{color:#fff}
+h1{font-size:clamp(24px,6.4vw,34px);line-height:1.15;margin:0 0 8px;letter-spacing:-.02em}
+html[lang="ar"] h1{line-height:1.4}
+.hero p.intro{margin:0;opacity:.94;max-width:600px}
+.etiquette{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:13px;font-weight:700;
+  background:rgba(255,255,255,.15);border-radius:999px;padding:5px 12px}
+.etiquette::before{content:"";width:7px;height:7px;border-radius:50%;background:#FFC27A;flex:none}
+.chevauche{margin-top:-44px;position:relative}
+
+/* ---- cartes ---- */
+.carte{background:var(--carte);border:1px solid var(--ligne);border-radius:var(--rayon);padding:18px;margin:0 0 14px;box-shadow:var(--ombre)}
+.carte h2{font-size:18px;margin:0 0 10px;letter-spacing:-.01em}
+.carte > p:last-child{margin-bottom:0}
+.doux{color:var(--doux)}
+
+/* ---- boutons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:13px 20px;
+  font:inherit;font-weight:800;font-size:16px;cursor:pointer;text-decoration:none;background:var(--p);color:#fff;transition:filter .15s,transform .1s}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.btn.large{width:100%}
+.btn.second{background:var(--p-clair);color:var(--p)}
+.btn.orange{background:var(--orange);color:#fff}
+.btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+html[dir="rtl"] .btn .sens{transform:scaleX(-1)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.actions .btn{flex:1 1 180px}
+.partage{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#1FAF5A;color:#fff;text-decoration:none;font-weight:700;border-radius:12px;padding:12px 18px;font-size:15px}
+.partage svg{width:18px;height:18px;fill:#fff}
+
+/* ---- carte d'appel examen ---- */
+.carte-examen{border-top:4px solid var(--orange)}
+.appel{display:flex;gap:14px;align-items:center;margin:0 0 14px}
+.appel .ic{background:var(--orange-clair)}
+.appel .ic svg{stroke:var(--orange)}
+.appel h2{margin:0 0 2px}
+.appel p{margin:0;color:var(--doux);font-size:14.5px}
+.appel-corps{flex:1;min-width:0}
+
+/* ---- avertissement relecture ---- */
+.relecture{display:flex;gap:10px;align-items:flex-start;background:var(--orange-clair);border:1px solid color-mix(in srgb,var(--orange) 35%,transparent);
+  color:var(--texte);border-radius:14px;padding:12px 14px;font-size:14px;margin:0 0 14px}
+.relecture svg{flex:none;width:22px;height:22px;stroke:var(--orange);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+.relecture b{display:block}
+
+/* ---- confiance ---- */
+.confiance{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px}
+.badge-c{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:12px 10px;text-align:center;font-size:12.5px;font-weight:700;color:var(--doux);line-height:1.3}
+.badge-c svg{width:24px;height:24px;margin:0 auto 6px;stroke:var(--p);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---- thèmes ---- */
+.titre-section{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:22px 2px 10px}
+.titre-section h2{font-size:19px;margin:0}
+.titre-section span{color:var(--doux);font-size:13.5px;font-weight:600}
+.themes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+.theme{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:var(--texte);background:var(--carte);border:1px solid var(--ligne);
+  border-radius:16px;padding:14px;box-shadow:var(--ombre);transition:transform .15s,border-color .15s;min-width:0}
+a.theme:hover{border-color:var(--p);transform:translateY(-2px)}
+.theme .haut{display:flex;align-items:center;gap:10px}
+.theme b{font-size:15px;line-height:1.3}
+.theme .nb{font-size:13px;color:var(--doux);font-weight:600}
+.jauge{height:6px;border-radius:999px;background:var(--ligne);overflow:hidden}
+.jauge span{display:block;height:100%;background:var(--ok);border-radius:999px}
+.ic{flex:none;width:42px;height:42px;border-radius:12px;background:var(--p-clair);display:grid;place-items:center}
+.ic svg{width:23px;height:23px;stroke:var(--p);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic.ill img{width:34px;height:34px}
+.hero-illu{display:block;width:100%;max-width:560px;height:auto;margin:18px auto -10px}
+.schema{display:block;width:100%;max-width:420px;height:auto;border-radius:14px;margin:4px auto 14px;box-shadow:0 1px 3px rgba(14,34,56,.12)}
+.num{font-size:11px;font-weight:800;color:var(--p);letter-spacing:.04em;text-transform:uppercase}
+
+/* ---- historique ---- */
+.historique{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
+.pastille{font-size:13px;font-weight:800;border-radius:999px;padding:3px 10px;background:var(--ko-clair);color:var(--ko)}
+.pastille.ok{background:var(--ok-clair);color:var(--ok)}
+
+/* ---- quiz ---- */
+.progres{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;font-weight:700;color:var(--doux);margin:0 0 8px}
+.barre{height:8px;border-radius:999px;background:var(--ligne);overflow:hidden;margin:0 0 16px}
+.barre span{display:block;height:100%;background:var(--p);border-radius:999px;transition:width .25s}
+.question{font-size:18px;font-weight:700;line-height:1.45;margin:0 0 6px}
+html[lang="ar"] .question{line-height:1.8}
+.consigne{font-size:13px;color:var(--doux);margin:0 0 14px}
+.choix-liste{display:grid;gap:10px;margin:0}
+.choix-q{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:start;border:1.5px solid var(--ligne);border-radius:14px;
+  background:var(--bg);color:var(--texte);padding:13px 14px;font:inherit;font-size:15.5px;font-weight:600;cursor:pointer;line-height:1.45;transition:border-color .12s,background .12s}
+.choix-q:hover{border-color:var(--p)}
+.choix-q .lettre{flex:none;width:28px;height:28px;border-radius:8px;border:1.5px solid var(--ligne);background:var(--carte);display:grid;place-items:center;
+  font-weight:800;font-size:14px;color:var(--doux);font-family:Figtree,system-ui,sans-serif}
+.choix-q .txt{flex:1;min-width:0;padding-top:2px}
+.choix-q.on{border-color:var(--p);background:var(--p-tres-clair)}
+.choix-q.on .lettre{background:var(--p);border-color:var(--p);color:#fff}
+.choix-q[disabled]{cursor:default}
+.choix-q.bonne{border-color:var(--ok);background:var(--ok-clair)}
+.choix-q.bonne .lettre{background:var(--ok);border-color:var(--ok);color:#fff}
+.choix-q.fausse{border-color:var(--ko);background:var(--ko-clair)}
+.choix-q.fausse .lettre{background:var(--ko);border-color:var(--ko);color:#fff}
+.choix-q .marque{display:block;font-size:12.5px;font-weight:800;margin-top:3px}
+.choix-q.bonne .marque{color:var(--ok)} .choix-q.fausse .marque{color:var(--ko)}
+.verdict{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;margin:16px 0 8px}
+.verdict.ok{color:var(--ok)} .verdict.ko{color:var(--ko)}
+.verdict svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.explication{background:var(--p-tres-clair);border-inline-start:4px solid var(--p);border-radius:10px;padding:12px 14px;font-size:15px;margin:0}
+.explication p{margin:0 0 6px}
+.source{font-size:13px;color:var(--doux);margin:0 !important}
+.source b{color:var(--texte)}
+
+/* ---- résultats ---- */
+.score{text-align:center}
+.score .grand{font-size:clamp(46px,15vw,64px);font-weight:800;letter-spacing:-.03em;line-height:1;margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.score .grand small{font-size:.45em;color:var(--doux);font-weight:700}
+.statut{display:inline-block;font-weight:800;border-radius:999px;padding:5px 14px;margin:6px 0 4px}
+.statut.ok{background:var(--ok-clair);color:var(--ok)} .statut.ko{background:var(--ko-clair);color:var(--ko)}
+.score.reussi{border-top:4px solid var(--ok)} .score.echoue{border-top:4px solid var(--ko)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:9px 0;border-bottom:1px solid var(--ligne)}
+td:last-child{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+tr:last-child td{border-bottom:0}
+.erreur{border-inline-start:4px solid var(--ko)}
+.erreur .num{color:var(--ko)}
+.erreur .question{font-size:16px}
+.rep{font-size:14.5px;margin:6px 0}
+.rep b{display:inline-block;min-width:0}
+.rep.ko{color:var(--ko)} .rep.ok{color:var(--ok)}
+
+/* ---- textes ---- */
+ul.liste,ol.etapes{padding-inline-start:20px;margin:0}
+ul.liste li,ol.etapes li{margin:0 0 8px}
+.sources{font-size:14px;color:var(--doux)}
+.avert{font-size:13px;color:var(--doux);background:var(--bg);border-radius:12px;padding:10px 12px;margin:12px 0 0}
+details summary{cursor:pointer;font-weight:700;color:var(--texte);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"＋";font-weight:800;color:var(--p)}
+details[open] summary::after{content:"－"}
+details[open] summary{margin-bottom:8px}
+.faq details{border-bottom:1px solid var(--ligne);padding:12px 0}
+.faq details:last-child{border-bottom:0;padding-bottom:0}
+.faq details p{margin:0;color:var(--doux);font-size:15px}
+.liens{margin:4px 0 18px}
+
+/* ---- pied de page ---- */
+footer{background:var(--carte);border-top:1px solid var(--ligne);margin-top:24px;padding:22px 0 30px;color:var(--doux);font-size:13.5px}
+footer .pied-logo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--texte);margin-bottom:8px}
+footer .pied-logo img{width:24px;height:24px}
+footer nav{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0}
+footer nav a{color:var(--texte);text-decoration:none;font-weight:600}
+footer p{margin:6px 0}
+
+/* ---- langues ---- */
+[data-l]{display:none}
+html[lang="fr"] [data-l="fr"],html[lang="ar"] [data-l="ar"]{display:revert}
+
+@media (max-width:420px){
+  .themes{grid-template-columns:1fr}
+  .theme{flex-direction:row;align-items:center;gap:12px;padding:12px}
+  .theme .haut{flex:1;min-width:0}
+  .theme .droite{flex:none;width:92px;text-align:end}
+  .theme .nb{white-space:nowrap;font-size:12.5px}
+  .theme .droite .jauge{margin-top:5px}
+}
+@media (min-width:421px){ .theme .droite{display:flex;flex-direction:column-reverse;gap:6px} }
+@media (max-width:380px){
+  .confiance{gap:6px}
+  .badge-c{font-size:11.5px;padding:10px 6px}
+  .logo-nom small{display:none}
+  .logo{font-size:15.5px;gap:8px}
+  .question{font-size:17px}
+  .btn{font-size:15px;padding:13px 14px}
+}
+
+/* ---- menu (en-tête) : une ligne, défilement horizontal si besoin ---- */
+.menu{border-top:1px solid var(--ligne)}
+.menu .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-top:6px;padding-bottom:6px}
+.menu .wrap::-webkit-scrollbar{display:none}
+.menu a{flex:none;text-decoration:none;color:var(--doux);font-weight:700;font-size:14px;padding:6px 10px;border-radius:999px;white-space:nowrap}
+.menu a:hover{color:var(--p);background:var(--p-tres-clair)}
+.menu a[aria-current="page"]{color:#fff;background:var(--p)}
+@media (max-width:380px){ .menu a{font-size:13px;padding:6px 8px} }
+.bandeau-relecture{background:var(--orange);color:#fff;font-size:13px;padding:6px 0}
+.bandeau-relecture a{color:#fff;font-weight:800;white-space:nowrap}
+
+/* ---- photos réelles + crédits ---- */
+.hero-visuel{position:relative;margin:18px 0 0;border-radius:16px;overflow:visible}
+.hero-photo{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.hero-permis{position:absolute;width:42%;max-width:250px;height:auto;inset-inline-end:-6px;bottom:-26px;transform:rotate(-6deg);filter:drop-shadow(0 10px 14px rgba(0,0,0,.35))}
+html[dir="rtl"] .hero-permis{transform:rotate(6deg)}
+.credit{font-size:11.5px;color:var(--doux);margin:6px 2px 0;line-height:1.4}
+.credit a{color:inherit}
+.hero .credit{color:rgba(255,255,255,.78);margin-top:34px}
+figure.photo{margin:0 0 14px}
+figure.photo img{width:100%;height:auto;border-radius:14px;display:block;background:var(--ligne)}
+figure.photo.large img{aspect-ratio:3/2;object-fit:cover}
+img,figure.photo,.panneau-img,.hero-visuel{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.protege .question,.protege .choix-q,.protege .explication,.protege .bloc,.protege .retenir,.protege .panneau,.protege td{-webkit-user-select:none;user-select:none}
+textarea,input,select{-webkit-user-select:text;user-select:text}
+
+/* ---- rubriques (accueil) ---- */
+.rubriques{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+.rubrique{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--texte);background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:12px;box-shadow:var(--ombre);min-width:0}
+.rubrique:hover{border-color:var(--p)}
+.rubrique b{display:block;font-size:15px;line-height:1.25}
+.rubrique small{display:block;color:var(--doux);font-size:12.5px;line-height:1.3}
+.rubrique .ic{width:38px;height:38px}
+.rubrique:last-child:nth-child(odd){grid-column:1/-1}
+
+/* ---- leçons ---- */
+.liste-lecons{display:grid;gap:10px}
+.lecon-carte{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--texte);background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:10px;box-shadow:var(--ombre)}
+.lecon-carte:hover{border-color:var(--p)}
+.lecon-carte img{width:96px;height:72px;object-fit:cover;border-radius:10px;flex:none}
+.lecon-carte b{display:block;font-size:15.5px;line-height:1.3}
+.lecon-carte small{display:block;color:var(--doux);font-size:12.5px;line-height:1.35;margin-top:2px}
+.lecon .intro-lecon{font-size:16.5px;font-weight:600;margin:0 0 12px}
+.lecon .bloc h2{font-size:17px;margin:14px 0 6px;color:var(--p)}
+.lecon .bloc p{margin:0}
+.retenir{background:var(--ok-clair);border-radius:12px;padding:12px 14px;margin:14px 0}
+.retenir h2{font-size:16px;margin:0 0 6px;color:var(--ok)}
+.retenir ul{margin:0;padding-inline-start:20px}
+.retenir li{margin:0 0 4px;font-weight:600}
+.signaler{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12.5px;color:var(--doux);text-decoration:none;font-weight:600}
+.signaler svg{width:14px;height:14px;fill:#1FAF5A}
+.signaler:hover{color:var(--p)}
+
+/* ---- panneaux ---- */
+.grille-panneaux{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:10px}
+.panneau{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;background:var(--bg);border-radius:12px;padding:12px 8px}
+.panneau img{width:84px;height:84px}
+.panneau b{font-size:14px;line-height:1.3}
+.panneau span{font-size:12.5px;color:var(--doux);line-height:1.35}
+.panneau small{font-size:10.5px}
+@media (max-width:380px){ .grille-panneaux{grid-template-columns:1fr 1fr} }
+
+/* ---- amendes ---- */
+.bareme{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}
+.cat-amende{background:var(--orange-clair);border-radius:12px;padding:10px;text-align:center}
+.cat-amende span{display:block;font-size:12.5px;color:var(--doux);font-weight:700}
+.cat-amende b{font-size:22px;color:var(--orange)}
+.table-defile{overflow-x:auto}
+.table-amendes th{text-align:start;font-size:12.5px;color:var(--doux);padding:6px 0;border-bottom:2px solid var(--ligne)}
+.table-amendes th:last-child{text-align:end}
+.table-amendes td{vertical-align:top;font-size:14.5px}
+.table-amendes td:last-child{white-space:normal;max-width:45%}
+.table-amendes small.source{display:block;margin-top:2px;font-size:11.5px;font-weight:400}
+.cat-old{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--p-clair);color:var(--p);font-weight:800}
+.cat-old.c4,.cat-old.c5{background:var(--ko-clair);color:var(--ko)}
+
+/* ---- permis ---- */
+.scene-cles{position:relative;border-radius:14px;overflow:hidden;background:#fff}
+.fond-cles{width:100%;height:auto;display:block}
+.carte-permis{position:absolute;width:58%;left:6%;top:12%;transform:rotate(-8deg);filter:drop-shadow(0 12px 14px rgba(0,0,0,.3))}
+
+/* ---- relecture (moniteur) ---- */
+.relu{border-top:1px solid var(--ligne);padding:12px 0}
+.relu.ok{background:var(--ok-clair)} .relu.corriger{background:var(--ko-clair)}
+.relu .question{font-size:16px}
+.choix-relu{display:flex;gap:8px;margin:6px 0}
+.choix-relu button{font:inherit;font-weight:700;border:1px solid var(--ligne);border-radius:10px;padding:6px 12px;background:var(--carte);color:var(--texte);cursor:pointer}
+.relu textarea{width:100%;font:inherit;font-size:14px;border:1px solid var(--ligne);border-radius:10px;padding:6px}
+.bonne-relu{color:var(--ok);font-weight:700}
+.barre-bilan{position:sticky;top:96px;z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.barre-bilan p{margin:0}

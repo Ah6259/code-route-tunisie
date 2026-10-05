@@ -1,0 +1,79 @@
+# Robot « Surveillance » : le 3 de chaque mois.
+# - vérifie que le texte officiel (PDF du Code de la route sur transport.tn) est toujours en ligne et n'a pas changé ;
+# - s'il a changé ou disparu : ouvre une issue GitHub « questions à revoir » ;
+# - met à jour la date « vérifié le » (assets/regles.js), lance le test, puis commit.
+#   Ce commit mensuel sert aussi de BATTEMENT DE CŒUR (GitHub met les robots en pause après 60 jours sans activité).
+name: surveillance
+
+on:
+  schedule:
+    - cron: "17 6 3 * *"    # le 3 du mois à 6h17 UTC (7h17 à Tunis)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: robots-site        # même groupe pour tous les robots qui écrivent dans ce dépôt
+  cancel-in-progress: false
+
+jobs:
+  surveiller:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Vérifier le texte officiel
+        id: surv
+        run: python tools/surveiller_source.py
+
+      - name: Alerte si le texte a changé ou a disparu
+        if: steps.surv.outputs.etat != 'inchange'
+        run: |
+          if [ "${{ steps.surv.outputs.etat }}" = "change" ]; then
+            TITRE="Le texte du Code de la route a changé : questions à revoir"
+          else
+            TITRE="Le texte du Code de la route a disparu : questions à revoir"
+          fi
+          CORPS="Surveillance du ${{ steps.surv.outputs.date }} : ${{ steps.surv.outputs.detail }}
+          Source : https://www.transport.tn/uploads/Loi/Route.pdf
+          À faire : télécharger le nouveau texte, comparer avec l'ancien, revoir les questions concernées,
+          puis mettre la nouvelle taille et la nouvelle empreinte SHA-256 dans assets/regles.js.
+          Tant que ce n'est pas fait, la date « vérifié le » du site n'avance plus."
+          NUM=$(gh issue list --state open --search "Le texte du Code de la route in:title" --json number --jq '.[0].number' || true)
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "$CORPS"
+          else
+            gh issue create --title "$TITRE" --body "$CORPS"
+          fi
+
+      - name: Test du site avant d'enregistrer
+        run: |
+          npm install --no-save --no-package-lock jsdom
+          node tools/test_site.mjs
+
+      - name: Enregistrer (commit mensuel = battement de cœur)
+        run: |
+          git config user.name "robot-surveillance"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A assets/regles.js '*.html'
+          git commit -m "Surveillance du texte officiel (${{ steps.surv.outputs.date }}) : ${{ steps.surv.outputs.etat }}" || echo "rien à enregistrer"
+          git push
+
+      - name: Prévenir si le robot lui-même a échoué
+        if: failure()
+        run: |
+          TITRE="Le robot de surveillance a échoué"
+          CORPS="Journal : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          NUM=$(gh issue list --state open --search "$TITRE in:title" --json number --jq '.[0].number' || true)
+          if [ -n "$NUM" ]; then gh issue comment "$NUM" --body "$CORPS"; else gh issue create --title "$TITRE" --body "$CORPS"; fi

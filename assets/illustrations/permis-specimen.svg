@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 236" role="img" aria-label="Illustration : carte « permis de conduire » SPÉCIMEN (dessin, pas un vrai document)">
+  <!-- Dessin fait par nous : carte stylisée SPÉCIMEN. Volontairement SANS emblème, SANS nom d'État, SANS numéro. -->
+  <defs>
+    <linearGradient id="fond" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FBE3DC"/><stop offset=".55" stop-color="#F4C2B5"/><stop offset="1" stop-color="#E9A796"/>
+    </linearGradient>
+    <linearGradient id="reflet" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".35" stop-color="#fff" stop-opacity=".08"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset=".78" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="photo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE3EA"/><stop offset="1" stop-color="#B9C4CF"/></linearGradient>
+    <radialGradient id="tete" cx=".45" cy=".4" r=".6"><stop offset="0" stop-color="#8C98A6"/><stop offset="1" stop-color="#5F6B79"/></radialGradient>
+    <linearGradient id="buste" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6F7B89"/><stop offset="1" stop-color="#4E5967"/></linearGradient>
+    <pattern id="guilloche" width="24" height="12" patternUnits="userSpaceOnUse">
+      <path d="M0 6c6-6 12-6 12 0s6 6 12 0" fill="none" stroke="#C9786A" stroke-opacity=".16" stroke-width=".8"/>
+      <path d="M0 9c6-6 12-6 12 0s6 6 12 0" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width=".6"/>
+    </pattern>
+    <filter id="ombre" x="-10%" y="-10%" width="125%" height="135%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0E2238" flood-opacity=".35"/>
+    </filter>
+    <clipPath id="carte"><rect x="12" y="10" width="336" height="212" rx="16"/></clipPath>
+  </defs>
+  <g filter="url(#ombre)"><rect x="12" y="10" width="336" height="212" rx="16" fill="url(#fond)"/></g>
+  <g clip-path="url(#carte)">
+    <rect x="12" y="10" width="336" height="212" fill="url(#guilloche)"/>
+    <circle cx="300" cy="150" r="70" fill="none" stroke="#C9786A" stroke-opacity=".13" stroke-width="10"/>
+    <circle cx="300" cy="150" r="44" fill="none" stroke="#C9786A" stroke-opacity=".1" stroke-width="6"/>
+    <!-- bandeau -->
+    <rect x="12" y="10" width="336" height="44" fill="#D8806E" opacity=".9"/>
+    <text x="28" y="38" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" fill="#fff" letter-spacing=".5">PERMIS DE CONDUIRE</text>
+    <text x="332" y="39" text-anchor="end" font-family="'Noto Kufi Arabic','Segoe UI',Tahoma,Arial,sans-serif" font-size="15" font-weight="700" fill="#fff">رخصة السياقة</text>
+    <!-- photo-silhouette -->
+    <rect x="28" y="68" width="82" height="104" rx="6" fill="url(#photo)" stroke="#fff" stroke-width="2"/>
+    <ellipse cx="69" cy="106" rx="17" ry="20" fill="url(#tete)"/>
+    <path d="M36 172c2-24 16-34 33-34s31 10 33 34z" fill="url(#buste)"/>
+    <!-- lignes à la place des données -->
+    <g fill="#9E6E66" opacity=".45">
+      <rect x="126" y="74" width="132" height="8" rx="4"/><rect x="126" y="92" width="168" height="8" rx="4"/>
+      <rect x="126" y="110" width="110" height="8" rx="4"/><rect x="126" y="128" width="150" height="8" rx="4"/>
+      <rect x="126" y="146" width="92" height="8" rx="4"/>
+    </g>
+    <!-- signature (trait libre) -->
+    <path d="M30 196c10-10 18 6 28-2s14-10 22 0 10 4 18-4" fill="none" stroke="#5F4A47" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round"/>
+    <!-- catégorie B -->
+    <rect x="252" y="168" width="80" height="40" rx="8" fill="#fff" fill-opacity=".75" stroke="#D8806E" stroke-width="1.5"/>
+    <text x="270" y="196" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="800" fill="#7A3B30">B</text>
+    <g transform="translate(286 180)" fill="#7A3B30"><path d="M2 11c0-3 1-4 4-5l4-1 4-4h12l5 4 4 1c2 0 3 2 3 4v2H2z"/><circle cx="9" cy="13" r="3.2"/><circle cx="29" cy="13" r="3.2"/></g>
+    <!-- filigrane SPÉCIMEN / نموذج -->
+    <g transform="rotate(-18 180 128)" font-weight="800" text-anchor="middle">
+      <text x="180" y="132" font-family="Arial,Helvetica,sans-serif" font-size="46" fill="#C2382B" fill-opacity=".30" letter-spacing="3">SPÉCIMEN</text>
+      <text x="180" y="176" font-family="'Noto Kufi Arabic','Segoe UI',Tahoma,Arial,sans-serif" font-size="30" fill="#C2382B" fill-opacity=".30">نموذج</text>
+    </g>
+    <!-- reflet plastifié -->
+    <rect x="12" y="10" width="336" height="212" fill="url(#reflet)"/>
+    <path d="M12 10h336v16C250 40 120 30 12 60z" fill="#fff" opacity=".12"/>
+  </g>
+  <rect x="12.75" y="10.75" width="334.5" height="210.5" rx="15.5" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/>
+</svg>
