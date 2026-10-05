@@ -1,14 +1,5 @@
 /* Affichage propre à chaque page (choisi par <body data-page="…">). Aucun script dans les pages HTML
    (la politique de sécurité CSP n'autorise que les fichiers du site). */
-const ICONES_RUB = {
-  entrainement: '<path d="M4 19h16"/><path d="M7 15l3-3 3 2 5-6"/><path d="M15 8h3v3"/>',
-  lecons: '<path d="M4 5c3-1 5-1 8 1 3-2 5-2 8-1v14c-3-1-5-1-8 1-3-2-5-2-8-1z"/><path d="M12 6v14"/>',
-  panneaux: '<path d="M12 3 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/>',
-  amendes: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',
-  erreurs: '<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
-  permis: '<rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="8.5" cy="12" r="2"/><path d="M13 11h5M13 14h3"/>'
-};
-const ico = n => `<svg viewBox="0 0 24 24">${ICONES_RUB[n]}</svg>`;
 const racineP = () => document.documentElement.dataset.racine || "";
 
 /* ---------------- accueil ---------------- */
@@ -24,7 +15,7 @@ function pageAccueil() {
     ["amendes/", "amendes", T("Amendes et points", "الخطايا والنقاط"), T("Barème 2025 et délits", "سلّم 2025 والجنح")],
     ["entrainement/?erreurs=1", "erreurs", T("Mes erreurs", "أخطائي"), nbErr ? T(`${nbErr} question(s) à revoir`, `${iso(String(nbErr))} سؤال للمراجعة`) : T("Rien à revoir pour l'instant", "لا شيء للمراجعة الآن")],
     ["permis/", "permis", T("Passer le permis", "اجتياز الرخصة"), T("Dossier, épreuves, âge", "الملف، الاختبارات، السن")]
-  ].map(([h, i, t, s]) => `<a class="rubrique" href="${h}"><span class="ic">${ico(i)}</span><span><b>${t}</b><small>${s}</small></span></a>`).join("");
+  ].map(([h, i, t, s]) => `<a class="rubrique" href="${h}"><span class="ic ill"><img src="${racineP()}assets/illustrations/rub-${i}.svg" alt="" width="46" height="46"></span><span><b>${t}</b><small>${s}</small></span></a>`).join("");
   const cr = document.getElementById("credit-hero");
   if (cr) cr.innerHTML = htmlCreditSeul("accueil-route");
 }

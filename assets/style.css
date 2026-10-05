@@ -245,7 +245,9 @@ textarea,input,select{-webkit-user-select:text;user-select:text}
 .rubrique:hover{border-color:var(--p)}
 .rubrique b{display:block;font-size:15px;line-height:1.25}
 .rubrique small{display:block;color:var(--doux);font-size:12.5px;line-height:1.3}
-.rubrique .ic{width:38px;height:38px}
+.rubrique .ic{width:46px;height:46px;flex:none}
+.rubrique .ic.ill{background:none;padding:0;border-radius:12px}
+.rubrique .ic.ill img{width:46px;height:46px;display:block}
 .rubrique:last-child:nth-child(odd){grid-column:1/-1}
 
 /* ---- leçons ---- */
