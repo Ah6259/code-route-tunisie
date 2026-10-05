@@ -202,6 +202,9 @@ const svgOk = f => { if (!existsSync(join(root, f))) return false;
   const doc = new w.DOMParser().parseFromString(lire(f), "image/svg+xml");
   return !doc.querySelector("parsererror") && doc.documentElement.nodeName === "svg" && doc.documentElement.getAttribute("viewBox"); };
 const avecImage = QUESTIONS.filter(q => q.image);
+// règle du 05/10/2026 : chaque question publiée a son image (comme à l'examen officiel) ; sinon on ne publie pas
+const sansImage = QUESTIONS.filter(q => !q.image).map(q => q.id);
+check(`chaque question publiée a une image${sansImage.length ? " — manque : " + sansImage.join(", ") : ""}`, !sansImage.length);
 check(`illustrations : accueil + 10 thèmes + ${avecImage.length} schémas de questions, fichiers SVG valides`, avecImage.length >= 5 &&
   ["assets/illustrations/accueil.svg", ...[1,2,3,4,5,6,7,8,9,10].map(t => `assets/illustrations/theme-${t}.svg`), ...avecImage.map(q => "assets/illustrations/" + q.image)].every(svgOk));
 check("illustrations : légères (moins de 8 Ko chacune)", [...new Set(["accueil.svg", ...avecImage.map(q => q.image)])].every(f => existsSync(join(root, "assets/illustrations", f)) && lire("assets/illustrations/" + f).length < 8000));
@@ -209,8 +212,14 @@ w = await page("entrainement/index.html", { query: "&theme=2" }); d = w.document
 { const e = w.eval("entrainement"); const k = e.liste.findIndex(q => q.image); e.i = k; w.eval("rendreEntrainement()");
   const img = d.querySelector("#quiz img.schema");
   check("entraînement : le schéma de la question est affiché", img && img.getAttribute("src") === "../assets/illustrations/" + e.liste[k].image && img.alt.length > 5);
-  const sans = e.liste.findIndex(q => !q.image); e.i = sans; w.eval("rendreEntrainement()");
-  check("entraînement : pas d'image vide pour une question sans schéma", !d.querySelector("#quiz img.schema")); }
+  let toutes = true;
+  for (let i = 0; i < e.liste.length; i++) { e.i = i; w.eval("rendreEntrainement()");
+    const im = d.querySelectorAll("#quiz img.schema");
+    if (im.length !== 1 || im[0].getAttribute("src") !== "../assets/illustrations/" + e.liste[i].image) toutes = false; }
+  check("entraînement : chaque question du thème affiche une seule image, la sienne", toutes); }
+w = await page("examen/index.html"); d = w.document;
+check("examen : photo dans le bandeau et son crédit (auteur, licence, Wikimedia)", d.querySelector(".hero img.hero-photo[src='../assets/photos/lecons-route.webp']") &&
+  /Wikimedia Commons/.test(d.getElementById("credit-hero").textContent) && d.querySelector("#credit-hero a[rel~='license']"));
 w = await page("index.html"); d = w.document;
 check("accueil : vraie photo + carte permis SPÉCIMEN dans le bandeau, et 10 illustrations de thèmes", d.querySelector(".hero img.hero-photo[src='assets/photos/accueil-route.webp']") && d.querySelector(".hero img.hero-permis[src='assets/illustrations/permis-specimen.svg']") && d.querySelectorAll("#themes .ill img").length === 10 &&
   [...d.querySelectorAll("#themes .ill img")].every((im, i) => im.getAttribute("src") === `assets/illustrations/theme-${i + 1}.svg`));

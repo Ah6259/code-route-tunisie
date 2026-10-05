@@ -94,3 +94,13 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Annexes A à H du décret 2000-150 (modèles officiels des panneaux) : comparer nos 31 dessins.
 - Démarches actuelles ATTT (inscription en ligne, contrat d'auto-école 2025) : marquées « à vérifier » sur `permis/`.
 - Puis : dépôt public, GitHub Pages, Search Console + sitemap, moyen de signaler une erreur (formulaire).
+
+## Images des questions (05/10/2026, décision d'Ahmed)
+- **Chaque question publiée a une image** (comme l'examen officiel) : le test bloque la publication sinon.
+- Schémas dessinés par `tools/construire_schemas.mjs` (SVG 320 × 200 dans `assets/illustrations/q-*.svg`, style du site :
+  vue de dessus, bleu = votre voiture, orange = les autres, panneaux repris de `assets/panneaux/`). Le script écrit aussi le
+  champ `image` dans `../questions/questions-v1.json` ; ensuite `node tools/construire_questions.mjs`, changer le `?v=` des pages.
+- **Un schéma montre la situation, jamais la réponse** (pas de chiffre de vitesse, distance, points ; pas d'objet qui trahit
+  la réponse). Nouvelle question = nouveau schéma dans `S` + ligne dans `ASSOC`.
+- Page Examen : photo du bandeau `lecons-route` avec crédit (`#credit-hero[data-photo]`, rempli par pages.js).
+

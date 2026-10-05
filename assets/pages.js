@@ -157,6 +157,8 @@ function bilan() {
 let entrainementLance = false;
 document.addEventListener("langue", () => {
   const p = document.body.dataset.page;
+  const crp = document.getElementById("credit-hero");   // crédit de la photo du bandeau (pages autres que l'accueil)
+  if (crp && crp.dataset.photo && typeof PHOTOS !== "undefined") crp.innerHTML = htmlCreditSeul(crp.dataset.photo);
   if (p === "accueil") pageAccueil();
   else if (p === "a-propos") pageAPropos();
   else if (p === "lecons") pageLecons();
