@@ -29,6 +29,8 @@ jobs:
         run: node tools/test_site.mjs
       - name: Test du service worker (installation sur le telephone)
         run: node tools/test_sw.mjs
+      - name: Test de la section Votre avis (envoi Formspree simule)
+        run: node tools/test_avis.mjs
       - name: Prévenir par une issue si le test échoue
         if: failure()
         env:
@@ -36,7 +38,7 @@ jobs:
         run: |
           TITRE="Le test automatique du site a échoué"
           LIEN="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          CORPS="Le test tools/test_site.mjs ou tools/test_sw.mjs a échoué après l'envoi ${{ github.sha }}. Journal : $LIEN — ne pas laisser le site dans cet état : corriger puis relancer le test."
+          CORPS="Le test tools/test_site.mjs, tools/test_sw.mjs ou tools/test_avis.mjs a échoué après l'envoi ${{ github.sha }}. Journal : $LIEN — ne pas laisser le site dans cet état : corriger puis relancer le test."
           NUM=$(gh issue list --state open --search "$TITRE in:title" --json number --jq '.[0].number' || true)
           if [ -n "$NUM" ]; then
             gh issue comment "$NUM" --body "$CORPS"

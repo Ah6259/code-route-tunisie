@@ -57,7 +57,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Détails et marche à suivre en cas d'alerte : README, « Plan de continuité ».
 
 ## Avant chaque publication / après chaque modification
-1. `node tools/test_site.mjs` (170 vérifications) puis `node tools/test_sw.mjs` (service worker). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
+1. `node tools/test_site.mjs` (170 vérifications) puis `node tools/test_sw.mjs` (service worker) et `node tools/test_avis.mjs` (Votre avis). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
 2. Changer le `?v=` des fichiers `assets/` dans **toutes** les pages (le test vérifie qu'il est le même partout).
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.
@@ -78,6 +78,14 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
    (on ne supprime QUE les nôtres : origine partagée). Vieille version bloquée sur un téléphone → changer `CACHE_VERSION`.
    Meta iPhone (`apple-mobile-web-app-capable`, `-title` « Code route ») sur chaque page.
    Test : `node tools/test_sw.mjs` (faux navigateur ; accepte un dossier en argument pour tester une copie sabotée).
+
+9. **Votre avis** (05/10/2026, règle d'Ahmed : sur chacun de ses sites) : section `#avis` sur l'accueil (carte FR + AR, note 😀🙂😐🙁
+   facultative, message obligatoire ≤ 1000 caractères, e-mail facultatif), lien « Votre avis » dans le pied de page (`page.js`).
+   Envoi par `assets/avis.js` (fichier externe, `fetch` vers `https://formspree.io/f/mwlpakqj`, Accept JSON) seulement au clic ;
+   champs cachés `site` = « Code de la route Tunisie », `page` = adresse, `_subject`, piège `_gotcha`. CSP : `connect-src` et
+   `form-action` + `https://formspree.io` sur toutes les pages. Le service worker laisse passer formspree.io (autre origine, POST).
+   Formspree gratuit = 50 envois/mois pour TOUS les sites (même formulaire). Test : `node tools/test_avis.mjs` (envoi simulé ;
+   accepte un dossier en argument), aussi dans tests.yml.
 
 ## Reste à faire avant publication
 - Relecture des 126 questions par un moniteur ; confirmer 30 questions / 24 bonnes réponses.

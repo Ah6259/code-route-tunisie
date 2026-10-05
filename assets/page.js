@@ -58,6 +58,7 @@ const MENU_SITE = [
           <a href="${racine}amendes/">${T("Amendes et points", "الخطايا والنقاط")}</a>
           <a href="${racine}permis/">${T("Passer le permis", "اجتياز رخصة السياقة")}</a>
           <a href="${racine}a-propos/">${T("À propos et sources", "من نحن والمصادر")}</a>
+          <a href="${racine}#avis">${T("Votre avis", "رأيك")}</a>
         </nav>
         <p>${T(`Sources : Code de la route (loi n° 99-71 du 26 juillet 1999) et ses décrets d'application, recueil officiel de l'IORT (édition 2012) publié sur transport.tn ; loi de finances 2025 (JORT n° 149). Texte vérifié le ${MAJ}.`,
                `المصادر: مجلة الطرقات (القانون عدد ${iso("99-71")} المؤرخ في 26 جويلية 1999) ونصوصها التطبيقية، المجموعة الرسمية للمطبعة الرسمية (طبعة 2012) المنشورة على ${iso("transport.tn")}؛ قانون المالية لسنة 2025 (الرائد الرسمي عدد 149). تم التثبت من النص في ${iso(MAJ)}.`)}</p>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://prix-eaux-tunisie.goatcounter.com; connect-src 'self' https://prix-eaux-tunisie.goatcounter.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://prix-eaux-tunisie.goatcounter.com; connect-src 'self' https://prix-eaux-tunisie.goatcounter.com https://formspree.io; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noai, noimageai">
 <title>Code de la route Tunisie 2026 — questions gratuites et examen blanc en français et en arabe</title>
@@ -27,7 +27,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261005u">
+<link rel="stylesheet" href="assets/style.css?v=20261005v">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"Combien de questions compte l'examen du code de la route en Tunisie ?","acceptedAnswer":{"@type":"Answer","text":"D'après nos recherches, l'examen théorique de l'ATTT compte 30 questions et il faut 24 bonnes réponses pour réussir. Ces chiffres sont à confirmer auprès de votre auto-école."}},
@@ -38,14 +38,15 @@
 {"@type":"Question","name":"Y a-t-il des leçons et les panneaux ?","acceptedAnswer":{"@type":"Answer","text":"Oui : 10 leçons courtes (une par thème) avec schémas et article de loi, et un catalogue des panneaux par famille avec leur sens en français et en arabe."}}
 ]}
 </script>
-<script src="assets/regles.js?v=20261005u"></script>
-<script src="assets/questions.js?v=20261005u"></script>
-<script src="assets/photos.js?v=20261005u"></script>
-<script src="assets/panneaux.js?v=20261005u"></script>
-<script src="assets/page.js?v=20261005u"></script>
-<script src="assets/protection.js?v=20261005u"></script>
-<script src="assets/quiz.js?v=20261005u"></script>
-<script src="assets/pages.js?v=20261005u"></script>
+<script src="assets/regles.js?v=20261005v"></script>
+<script src="assets/questions.js?v=20261005v"></script>
+<script src="assets/photos.js?v=20261005v"></script>
+<script src="assets/panneaux.js?v=20261005v"></script>
+<script src="assets/page.js?v=20261005v"></script>
+<script src="assets/protection.js?v=20261005v"></script>
+<script src="assets/quiz.js?v=20261005v"></script>
+<script src="assets/pages.js?v=20261005v"></script>
+<script src="assets/avis.js?v=20261005v"></script>
 </head>
 <body data-page="accueil">
 <header class="entete" id="entete"></header>
@@ -128,6 +129,36 @@
       <p><span data-l="fr">Depuis la loi de finances 2025 (article 49, JORT n° 149) : 3 catégories, 20, 40 et 60 DT. Le classement de chaque infraction est en cours de vérification : voir la page Amendes.</span><span data-l="ar">منذ قانون المالية لسنة 2025 (الفصل 49، الرائد الرسمي عدد 149): 3 أصناف، 20 و40 و60 د. تصنيف كل مخالفة قيد التثبت: انظر صفحة الخطايا.</span></p></details>
     <details><summary><span data-l="fr">Y a-t-il des leçons et les panneaux ?</span><span data-l="ar">هل توجد دروس والعلامات؟</span></summary>
       <p><span data-l="fr">Oui : 10 leçons courtes avec schémas et article de loi, et les panneaux par famille avec leur sens.</span><span data-l="ar">نعم: 10 دروس قصيرة مع رسوم والفصل القانوني، والعلامات حسب الأصناف مع معانيها.</span></p></details>
+  </section>
+
+  <section class="carte avis" id="avis" aria-labelledby="avis-titre">
+    <h2 id="avis-titre"><span data-l="fr">Votre avis</span><span data-l="ar">رأيك يهمّنا</span></h2>
+    <p class="avis-intro"><span data-l="fr">Une remarque, une erreur, une idée ? Écrivez-nous : chaque message est lu.</span><span data-l="ar">ملاحظة، خطأ، فكرة؟ اكتب لنا: كل رسالة تُقرأ.</span></p>
+    <form id="avis-form" action="https://formspree.io/f/mwlpakqj" method="POST">
+      <fieldset>
+        <legend><span data-l="fr">Votre note (facultatif)</span><span data-l="ar">تقييمك (اختياري)</span></legend>
+        <div class="avis-notes">
+          <label><input type="radio" name="note" value="😀 Très bien"><span class="emoji" aria-hidden="true">😀</span><span class="avis-cache"><span data-l="fr">Très bien</span><span data-l="ar">ممتاز</span></span></label>
+          <label><input type="radio" name="note" value="🙂 Bien"><span class="emoji" aria-hidden="true">🙂</span><span class="avis-cache"><span data-l="fr">Bien</span><span data-l="ar">جيد</span></span></label>
+          <label><input type="radio" name="note" value="😐 Moyen"><span class="emoji" aria-hidden="true">😐</span><span class="avis-cache"><span data-l="fr">Moyen</span><span data-l="ar">متوسط</span></span></label>
+          <label><input type="radio" name="note" value="🙁 Pas bien"><span class="emoji" aria-hidden="true">🙁</span><span class="avis-cache"><span data-l="fr">Pas bien</span><span data-l="ar">سيئ</span></span></label>
+        </div>
+      </fieldset>
+      <label class="avis-etiquette" for="avis-message"><span data-l="fr">Votre message</span><span data-l="ar">رسالتك</span></label>
+      <textarea id="avis-message" name="message" required maxlength="1000" rows="4" data-ph-fr="Ce qui vous plaît, ce qui manque, une erreur à corriger…" data-ph-ar="ما يعجبك، ما ينقص، خطأ يجب تصحيحه…"></textarea>
+      <span class="avis-compte" id="avis-compte" aria-live="off">0 / 1000</span>
+      <label class="avis-etiquette" for="avis-email"><span data-l="fr">Votre e-mail (facultatif, pour vous répondre)</span><span data-l="ar">بريدك الإلكتروني (اختياري، للرد عليك)</span></label>
+      <input type="email" id="avis-email" name="email" autocomplete="email" maxlength="200" data-ph-fr="nom@example.com" data-ph-ar="nom@example.com">
+      <input type="hidden" name="site" value="Code de la route Tunisie">
+      <input type="hidden" name="page" value="">
+      <input type="hidden" name="_subject" value="Avis — Code de la route Tunisie">
+      <input type="text" name="_gotcha" class="avis-piege" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="avis-actions">
+        <button type="submit" class="avis-envoyer"><span data-l="fr">Envoyer</span><span data-l="ar">إرسال</span></button>
+        <span id="avis-status" role="status" aria-live="polite"></span>
+      </div>
+      <p class="avis-mention"><span data-l="fr">Votre avis est envoyé au créateur du site (service Formspree). Rien n'est envoyé sans clic sur « Envoyer ».</span><span data-l="ar">يُرسل رأيك إلى صاحب الموقع (خدمة ⁨Formspree⁩). لا يُرسل أي شيء دون الضغط على «إرسال».</span></p>
+    </form>
   </section>
 
   <p class="liens"><a href="lecons/"><span data-l="fr">→ Commencer par les leçons</span><span data-l="ar">← ابدأ بالدروس</span></a> · <a href="a-propos/"><span data-l="fr">→ À propos, méthode et sources officielles</span><span data-l="ar">← من نحن، المنهجية والمصادر الرسمية</span></a></p>

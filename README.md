@@ -21,6 +21,9 @@ Adresse prévue : https://ah6259.github.io/code-route-tunisie/
 - **Examen blanc** (`examen/`) : 30 questions tirées au hasard (3 par thème), score sur 30, réussite à 24
   (**chiffres à confirmer**), résultat par thème, revue des erreurs expliquées, partage WhatsApp.
 - **À propos et sources** (`a-propos/`) : texte officiel utilisé, méthode, limites connues.
+- **Votre avis** (accueil, `#avis`, lien dans le pied de page de toutes les pages) : note facultative (😀🙂😐🙁), message
+  (obligatoire, 1000 caractères max), e-mail facultatif ; envoyé **seulement au clic** à Formspree (formulaire `mwlpakqj`, le même
+  que le site des prix de l'eau) avec les champs cachés `site` = « Code de la route Tunisie » et `page`. Code : `assets/avis.js`.
 - Progression gardée **dans le navigateur** (localStorage), jamais envoyée. Aucun serveur.
 
 ## Fichiers
@@ -39,6 +42,7 @@ Adresse prévue : https://ah6259.github.io/code-route-tunisie/
 | `assets/protection.js` | Anti-copie légère, source ajoutée au texte copié, anti-cadre |
 | `tools/test_site.mjs` | Test automatique (165 vérifications) |
 | `sw.js`, `tools/test_sw.mjs` | Service worker (réseau d'abord, installation sur le téléphone) et son test |
+| `assets/avis.js`, `tools/test_avis.mjs` | Section « Votre avis » (envoi Formspree) et son test (envoi simulé) |
 | `tools/surveiller_source.py` | Surveillance mensuelle du texte officiel (appelé par le robot) |
 | `tools/changer_annee.py` | Change l'année des titres et balises meta |
 | `tools/captures.sh` | Captures mobiles 340/390 px, FR et AR (dossier `captures/`, non publié), via un serveur local |
@@ -48,7 +52,7 @@ Adresse prévue : https://ah6259.github.io/code-route-tunisie/
 ### Ce qui tourne tout seul
 | Robot | Quand | Ce qu'il fait |
 |---|---|---|
-| `tests.yml` | à chaque envoi sur GitHub | installe jsdom, lance `node tools/test_site.mjs` et `node tools/test_sw.mjs` |
+| `tests.yml` | à chaque envoi sur GitHub | installe jsdom, lance `node tools/test_site.mjs`, `node tools/test_sw.mjs` et `node tools/test_avis.mjs` |
 | `surveillance.yml` | le 3 de chaque mois, 7h17 (Tunis) | télécharge le PDF officiel du Code de la route (transport.tn), compare sa taille et son empreinte SHA-256 ; si rien n'a changé, avance la date « texte vérifié le » ; au 1er passage d'une nouvelle année, change l'année des titres ; change le `?v=` des pages ; lance le test ; **commit** |
 
 Le commit mensuel sert aussi de **battement de cœur** : GitHub met les robots en pause après 60 jours sans activité.
