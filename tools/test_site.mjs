@@ -396,7 +396,7 @@ async function nouvellesRubriques() {
   ww = await page("entrainement/index.html", { query: "&erreurs=1" }); dd = ww.document;
   check("« Mes erreurs » : message clair quand il n'y a rien à revoir", !!dd.getElementById("aucune-erreur"));
   ww = await page("index.html", { stockage: { q: { "T2-001": 0 }, examens: [] } }); dd = ww.document;
-  check("accueil : 6 rubriques (entraînement en premier, leçons, panneaux, amendes, mes erreurs, permis) avec le nombre d'erreurs", dd.querySelectorAll("#rubriques .rubrique").length === 6 && dd.querySelector("#rubriques .rubrique").getAttribute("href") === "entrainement/" && texte(dd.getElementById("rubriques")).includes("1 question(s) à revoir"));
+  check("accueil : 7 rubriques (entraînement en premier, …, permis, annuaire des auto-écoles) avec le nombre d'erreurs", dd.querySelectorAll("#rubriques .rubrique").length === 7 && dd.querySelector("#rubriques .rubrique:last-child").getAttribute("href").includes("auto-ecoles-tunisie") && dd.querySelector("#rubriques .rubrique").getAttribute("href") === "entrainement/" && texte(dd.getElementById("rubriques")).includes("1 question(s) à revoir"));
 
   // -- « Signaler une erreur » (WhatsApp) sur les questions
   ww = await page("entrainement/index.html", { query: "&theme=5" }); dd = ww.document;

@@ -14,7 +14,8 @@ function pageAccueil() {
     ["panneaux/", "panneaux", T("Panneaux", "العلامات"), T(`${PANNEAUX_NB} panneaux expliqués`, `${iso(String(PANNEAUX_NB))} علامة مشروحة`)],
     ["amendes/", "amendes", T("Amendes et points", "الخطايا والنقاط"), T("Barème 2025 et délits", "سلّم 2025 والجنح")],
     ["entrainement/?erreurs=1", "erreurs", T("Mes erreurs", "أخطائي"), nbErr ? T(`${nbErr} question(s) à revoir`, `${iso(String(nbErr))} سؤال للمراجعة`) : T("Rien à revoir pour l'instant", "لا شيء للمراجعة الآن")],
-    ["permis/", "permis", T("Passer le permis", "اجتياز الرخصة"), T("Dossier, épreuves, âge", "الملف، الاختبارات، السن")]
+    ["permis/", "permis", T("Passer le permis", "اجتياز الرخصة"), T("Dossier, épreuves, âge", "الملف، الاختبارات، السن")],
+    ["https://ah6259.github.io/auto-ecoles-tunisie/", "auto-ecole", T("Trouver une auto-école", "ابحث عن مدرسة سياقة"), T("Près de chez vous, par gouvernorat (annuaire gratuit)", "قريبة منك، حسب الولاية (دليل مجاني)")]
   ].map(([h, i, t, s]) => `<a class="rubrique" href="${h}"><span class="ic ill"><img src="${racineP()}assets/illustrations/rub-${i}.svg" alt="" width="46" height="46"></span><span><b>${t}</b><small>${s}</small></span></a>`).join("");
   const cr = document.getElementById("credit-hero");
   if (cr) cr.innerHTML = htmlCreditSeul("accueil-route");
