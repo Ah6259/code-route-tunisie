@@ -2,7 +2,7 @@
   "id": "/code-route-tunisie/",
   "name": "Code de la route Tunisie",
   "short_name": "Code route",
-  "description": "Leçons, panneaux, entraînement, examen blanc et amendes du code de la route tunisien, en français et en arabe.",
+  "description": "Gratuit : leçons, panneaux, entraînement, examen blanc et amendes du code de la route tunisien, en français et en arabe.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
