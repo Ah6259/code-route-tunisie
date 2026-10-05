@@ -239,7 +239,7 @@ check("regles.js : date au format jj/mm/aaaa et année cohérente", /^\d{2}\/\d{
 for (const p of PAGES) {
   const s = lire(p);
   check(`${p} : titre, description, canonical`, /<title>.{20,}<\/title>/.test(s) && /name="description" content=".{50,}"/.test(s) && s.includes('rel="canonical" href="https://ah6259.github.io/code-route-tunisie/'));
-  check(`${p} : image d'aperçu og-image-v3.jpg et icône`, s.includes('property="og:image" content="https://ah6259.github.io/code-route-tunisie/assets/og-image-v3.jpg"') && !s.includes("og-image-v1") && s.includes('rel="icon"'));
+  check(`${p} : image d'aperçu og-image-v4.jpg et icône`, s.includes('property="og:image" content="https://ah6259.github.io/code-route-tunisie/assets/og-image-v4.jpg"') && !s.includes("og-image-v1") && s.includes('rel="icon"'));
   check(`${p} : même version ?v= pour tous les fichiers`, new Set(s.match(/\?v=\d+\w/g)).size === 1);
   check(`${p} : regles.js chargé en premier`, s.indexOf("assets/regles.js") > 0 && s.indexOf("assets/regles.js") < s.indexOf("assets/page.js"));
   const ww = await page(p);
@@ -248,8 +248,8 @@ for (const p of PAGES) {
 }
 const ld = JSON.parse(lire("index.html").match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
 check("FAQ Google (JSON-LD) valide sur l'accueil", ld["@type"] === "FAQPage" && ld.mainEntity.length >= 3);
-check("image d'aperçu, logo et icône présents", ["assets/og-image-v3.jpg", "assets/logo.svg", "assets/icone-180.png"].every(f => existsSync(join(root, f))));
-const ogJpg = readFileSync(join(root, "assets/og-image-v3.jpg"));
+check("image d'aperçu, logo et icône présents", ["assets/og-image-v4.jpg", "assets/logo.svg", "assets/icone-180.png"].every(f => existsSync(join(root, f))));
+const ogJpg = readFileSync(join(root, "assets/og-image-v4.jpg"));
 check(`image d'aperçu JPEG < 250 Ko (sinon WhatsApp n'affiche qu'une petite vignette), og:image:type sur chaque page : ${Math.round(ogJpg.length / 1024)} Ko`,
   ogJpg[0] === 0xFF && ogJpg[1] === 0xD8 && ogJpg.length < 250000 && PAGES.every(p => lire(p).includes('<meta property="og:image:type" content="image/jpeg">')));
 // manifeste : id UNIQUE = chemin du site (sinon Chrome croit le site « déjà installé » : tous les sites partagent ah6259.github.io)

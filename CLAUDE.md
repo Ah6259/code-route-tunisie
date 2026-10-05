@@ -62,8 +62,8 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.
 4. Texte arabe : nombres et mots latins isolés (`iso()`, `isoAr()`, `frac()` pour « 25 / 30 », `<bdi dir="ltr">`).
-5. Image d'aperçu `assets/og-image-v3.jpg` (modèle `tools/og-image.html`, photo + carte SPÉCIMEN) : si on la change,
-   **nouveau nom** (`og-image-v4.jpg`) et mettre à jour toutes les pages. Toujours en **JPEG < 250 Ko** (capture PNG puis
+5. Image d'aperçu `assets/og-image-v4.jpg` (modèle `tools/og-image.html`, photo + carte SPÉCIMEN) : si on la change,
+   **nouveau nom** (`og-image-v5.jpg`) et mettre à jour toutes les pages. Toujours en **JPEG < 250 Ko** (capture PNG puis
    conversion Pillow qualité 88) : au-delà, WhatsApp n'affiche qu'une petite vignette. L'ancien `og-image-v2.png` n'est plus utilisé.
 6. Statistiques **GoatCounter** (anonymes, sans cookies, 05/10/2026) sur les 8 pages publiques, **jamais sur `relecture/`** :
    compteur partagé `https://prix-eaux-tunisie.goatcounter.com` (pages séparées par chemin) ; CSP : `script-src` + `https://gc.zgo.at`,
