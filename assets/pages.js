@@ -1,6 +1,7 @@
 /* Affichage propre à chaque page (choisi par <body data-page="…">). Aucun script dans les pages HTML
    (la politique de sécurité CSP n'autorise que les fichiers du site). */
 const ICONES_RUB = {
+  entrainement: '<path d="M4 19h16"/><path d="M7 15l3-3 3 2 5-6"/><path d="M15 8h3v3"/>',
   lecons: '<path d="M4 5c3-1 5-1 8 1 3-2 5-2 8-1v14c-3-1-5-1-8 1-3-2-5-2-8-1z"/><path d="M12 6v14"/>',
   panneaux: '<path d="M12 3 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/>',
   amendes: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',
@@ -17,6 +18,7 @@ function pageAccueil() {
   document.getElementById("total-q").textContent = T(QUESTIONS.length + " questions", iso(String(QUESTIONS.length)) + " سؤالًا");
   const nbErr = questionsRatees().length;
   document.getElementById("rubriques").innerHTML = [
+    ["entrainement/", "entrainement", T("Entraînement", "التدريب"), T("Questions par thème, correction immédiate", "أسئلة حسب المحور مع تصحيح فوري")],
     ["lecons/", "lecons", T("Leçons", "الدروس"), T("10 cours courts avec schémas", "10 دروس قصيرة مع رسوم")],
     ["panneaux/", "panneaux", T("Panneaux", "العلامات"), T(`${PANNEAUX_NB} panneaux expliqués`, `${iso(String(PANNEAUX_NB))} علامة مشروحة`)],
     ["amendes/", "amendes", T("Amendes et points", "الخطايا والنقاط"), T("Barème 2025 et délits", "سلّم 2025 والجنح")],

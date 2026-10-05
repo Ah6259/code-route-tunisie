@@ -83,7 +83,7 @@ check("accueil : 10 thèmes affichés", d.querySelectorAll("#themes .theme").len
 const somme = [...d.querySelectorAll("#themes .nb")].reduce((s, e) => s + parseInt(texte(e)), 0);
 check(`accueil : nombre de questions par thème (total ${somme} = ${QUESTIONS.length})`, somme === QUESTIONS.length);
 check("accueil : bouton « Examen blanc (30 questions) »", texte(d.getElementById("cta-examen")).includes("Examen blanc (30 questions)") && d.getElementById("cta-examen").getAttribute("href") === "examen/");
-check("accueil : 3 badges de confiance", d.querySelectorAll(".badge-c").length === 3 && texte(d.querySelector(".confiance")).includes("texte officiel"));
+check("accueil : pas de badges inutiles (retirés le 05/10/2026 à la demande d'Ahmed)", !d.querySelector(".confiance, .badge-c"));
 check("accueil : avertissement « relecture par un moniteur »", texte(d.querySelector(".relecture")).includes("relecture par un moniteur"));
 check("accueil : pas d'historique sans examen passé", d.getElementById("historique").hidden);
 check("accueil : la date « vérifié le » vient de REGLES_SITE", texte(d.querySelector("[data-maj]")) === REGLES_SITE.verifie_le);
@@ -396,7 +396,7 @@ async function nouvellesRubriques() {
   ww = await page("entrainement/index.html", { query: "&erreurs=1" }); dd = ww.document;
   check("« Mes erreurs » : message clair quand il n'y a rien à revoir", !!dd.getElementById("aucune-erreur"));
   ww = await page("index.html", { stockage: { q: { "T2-001": 0 }, examens: [] } }); dd = ww.document;
-  check("accueil : 5 rubriques (leçons, panneaux, amendes, mes erreurs, permis) avec le nombre d'erreurs", dd.querySelectorAll("#rubriques .rubrique").length === 5 && texte(dd.getElementById("rubriques")).includes("1 question(s) à revoir"));
+  check("accueil : 6 rubriques (entraînement en premier, leçons, panneaux, amendes, mes erreurs, permis) avec le nombre d'erreurs", dd.querySelectorAll("#rubriques .rubrique").length === 6 && dd.querySelector("#rubriques .rubrique").getAttribute("href") === "entrainement/" && texte(dd.getElementById("rubriques")).includes("1 question(s) à revoir"));
 
   // -- « Signaler une erreur » (WhatsApp) sur les questions
   ww = await page("entrainement/index.html", { query: "&theme=5" }); dd = ww.document;
