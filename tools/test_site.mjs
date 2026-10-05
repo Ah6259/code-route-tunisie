@@ -243,6 +243,14 @@ check("image d'aperçu, logo et icône présents", ["assets/og-image-v3.jpg", "a
 const ogJpg = readFileSync(join(root, "assets/og-image-v3.jpg"));
 check(`image d'aperçu JPEG < 250 Ko (sinon WhatsApp n'affiche qu'une petite vignette), og:image:type sur chaque page : ${Math.round(ogJpg.length / 1024)} Ko`,
   ogJpg[0] === 0xFF && ogJpg[1] === 0xD8 && ogJpg.length < 250000 && PAGES.every(p => lire(p).includes('<meta property="og:image:type" content="image/jpeg">')));
+// manifeste : id UNIQUE = chemin du site (sinon Chrome croit le site « déjà installé » : tous les sites partagent ah6259.github.io)
+let man = {}; try { man = JSON.parse(lire("manifest.webmanifest")); } catch (e) {}
+check("manifeste présent, id unique = chemin du site, start_url/scope ./, icônes 192, 512 et maskable existantes",
+  man.id === "/code-route-tunisie/" && man.start_url === "./" && man.scope === "./" && man.display === "standalone" && !!man.name && !!man.short_name
+  && ["192x192", "512x512"].every(t => man.icons?.some(i => i.sizes === t)) && man.icons?.some(i => i.purpose === "maskable")
+  && man.icons.every(i => existsSync(join(root, i.src))));
+check("toutes les pages : lien vers le manifeste, icône iPhone et theme-color", PAGES.every(p => { const s = lire(p), r = p.includes("/") ? "../" : "";
+  return s.includes(`<link rel="manifest" href="${r}manifest.webmanifest">`) && s.includes(`<link rel="apple-touch-icon" href="${r}assets/icone-180.png">`) && s.includes('<meta name="theme-color"'); }));
 check("plan du site : 8 pages publiques (sans relecture/)", (lire("sitemap.xml").match(/<loc>https:\/\/ah6259\.github\.io\/code-route-tunisie\//g) || []).length === 8 && !lire("sitemap.xml").includes("relecture"));
 check("robots.txt indique le plan du site", lire("robots.txt").includes("code-route-tunisie/sitemap.xml"));
 check("LICENSE tous droits réservés", lire("LICENSE").includes("Tous droits réservés"));

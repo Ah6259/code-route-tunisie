@@ -1,0 +1,31 @@
+{
+  "id": "/code-route-tunisie/",
+  "name": "Code de la route Tunisie",
+  "short_name": "Code route",
+  "description": "Leçons, panneaux, entraînement, examen blanc et amendes du code de la route tunisien, en français et en arabe.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "lang": "fr",
+  "dir": "auto",
+  "theme_color": "#1F5FA8",
+  "background_color": "#F3F6FA",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -57,7 +57,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Détails et marche à suivre en cas d'alerte : README, « Plan de continuité ».
 
 ## Avant chaque publication / après chaque modification
-1. `node tools/test_site.mjs` (168 vérifications). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
+1. `node tools/test_site.mjs` (170 vérifications). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
 2. Changer le `?v=` des fichiers `assets/` dans **toutes** les pages (le test vérifie qu'il est le même partout).
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.
@@ -68,6 +68,9 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 6. Statistiques **GoatCounter** (anonymes, sans cookies, 05/10/2026) sur les 8 pages publiques, **jamais sur `relecture/`** :
    compteur partagé `https://prix-eaux-tunisie.goatcounter.com` (pages séparées par chemin) ; CSP : `script-src` + `https://gc.zgo.at`,
    `connect-src` / `img-src` + le compteur. Mentionné dans À propos. Le test le vérifie.
+7. Installation sur le téléphone : `manifest.webmanifest` avec `"id": "/code-route-tunisie/"` (UNIQUE : tous les sites d'Ahmed
+   partagent l'origine ah6259.github.io ; sans id, Chrome disait « cette page est déjà installée »), icônes `assets/icons/`
+   (192, 512, maskable) tirées de `assets/logo.svg`. Lien sur chaque page ; vérifié par le test.
 
 ## Reste à faire avant publication
 - Relecture des 126 questions par un moniteur ; confirmer 30 questions / 24 bonnes réponses.
