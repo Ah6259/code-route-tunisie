@@ -221,7 +221,7 @@ w = await page("examen/index.html"); d = w.document;
 check("examen : photo dans le bandeau et son crédit (auteur, licence, Wikimedia)", d.querySelector(".hero img.hero-photo[src='../assets/photos/lecons-route.webp']") &&
   /Wikimedia Commons/.test(d.getElementById("credit-hero").textContent) && d.querySelector("#credit-hero a[rel~='license']"));
 w = await page("index.html"); d = w.document;
-check("accueil : vraie photo + carte permis SPÉCIMEN dans le bandeau, et 10 illustrations de thèmes", d.querySelector(".hero img.hero-photo[src='assets/photos/accueil-route.webp']") && d.querySelector(".hero img.hero-permis[src='assets/illustrations/permis-specimen.svg']") && d.querySelectorAll("#themes .ill img").length === 10 &&
+check("accueil : vraie photo + carte permis SPÉCIMEN dans le bandeau, et 10 illustrations de thèmes", d.querySelector(".hero img.hero-photo[src='assets/photos/accueil-route.webp']") && d.querySelector(".hero img.hero-permis[src='assets/specimen/permis-specimen-attt.webp']") && d.querySelectorAll("#themes .ill img").length === 10 &&
   [...d.querySelectorAll("#themes .ill img")].every((im, i) => im.getAttribute("src") === `assets/illustrations/theme-${i + 1}.svg`));
 
 // -- à propos
@@ -361,7 +361,7 @@ async function nouvellesRubriques() {
     ["SPÉCIMEN", "نموذج", "PERMIS DE CONDUIRE", "رخصة السياقة", "B"].every(t => textesPermis.includes(t)));
   check("carte permis : sans emblème ni État ni numéro (pas de République, Tunisie, armoiries, croissant, étoile, chiffres)",
     !/r[ée]publique|tunisi|الجمهورية|التونسية|تونس|armoirie|croissant|[ée]toile|star|crescent/i.test(permis) && !/\d/.test(textesPermis));
-  check("carte permis : posée sur une vraie photo (accueil et page permis) et dans l'image d'aperçu", lire("index.html").includes("hero-permis") && lire("permis/index.html").includes("carte-permis") && lire("tools/og-image.html").includes("permis-specimen.svg"));
+  check("carte permis : spécimen officiel ATTT (accueil et page permis) avec son crédit, dessin SPÉCIMEN dans l'image d'aperçu", ["index.html", "permis/index.html"].every(f => lire(f).includes("permis-specimen-attt.webp") && /image ATTT|Transports Terrestres/.test(lire(f))) && existsSync(join(root, "assets/specimen/permis-specimen-attt.webp")) && lire("tools/og-image.html").includes("permis-specimen.svg"));
 
   // -- menu présent partout, liens internes vers des fichiers existants (en ligne ET depuis le PC en file://)
   const versFichier = (base, href) => {

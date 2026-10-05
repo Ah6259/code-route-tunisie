@@ -227,6 +227,7 @@ html[lang="fr"] [data-l="fr"],html[lang="ar"] [data-l="ar"]{display:revert}
 .hero-photo{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .hero-visuel.court .hero-photo{aspect-ratio:21/9}
 .hero-visuel.court + .credit{margin-top:8px}
+.hero-permis,.carte-permis{border-radius:10px;height:auto}
 .hero-permis{position:absolute;width:42%;max-width:250px;height:auto;inset-inline-end:-6px;bottom:-26px;transform:rotate(-6deg);filter:drop-shadow(0 10px 14px rgba(0,0,0,.35))}
 html[dir="rtl"] .hero-permis{transform:rotate(6deg)}
 .credit{font-size:11.5px;color:var(--doux);margin:6px 2px 0;line-height:1.4}
