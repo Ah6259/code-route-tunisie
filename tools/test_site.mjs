@@ -94,7 +94,7 @@ check("accueil : jauge du thème 2 remplie après une bonne réponse", d.querySe
 w = await page("index.html", { stockage: "pas du JSON" });
 check("accueil : stockage abîmé = pas de plantage", w.fautes.length === 0 && w.document.querySelectorAll("#themes .theme").length === 10);
 w = await page("index.html", { lang: "ar" }); d = w.document;
-check("accueil en arabe : lang=ar, dir=rtl, thèmes en arabe", d.documentElement.dir === "rtl" && AR.test(texte(d.querySelector("#themes .theme b"))));
+check("accueil en arabe : lang=ar, dir=rtl, thèmes en arabe, translate=no gardé", d.documentElement.dir === "rtl" && d.documentElement.getAttribute("translate") === "no" &&AR.test(texte(d.querySelector("#themes .theme b"))));
 check("accueil en arabe : date isolée et identique", texte(d.querySelector("[data-maj]")) === REGLES_SITE.verifie_le);
 
 // -- logique de l'examen
@@ -397,7 +397,7 @@ async function nouvellesRubriques() {
   const interdit = a => groupes.some(g => g.agents.includes(a) && /^Disallow:\s*\/\s*$/m.test(g.regles));
   check("robots.txt : tous les robots d'IA et aspirateurs interdits", IA.every(interdit));
   check("robots.txt : Google, Bing et les autres moteurs NON interdits", !interdit("Googlebot") && !interdit("*") && !interdit("Bingbot") && groupes.some(g => g.agents.includes("Googlebot")));
-  const malSecu = [];
+  const malSecu = [], malTrad = [];
   for (const p of PAGES) {
     const s = lire(p);
     if (!/<meta name="robots" content="[^"]*noai, noimageai"/.test(s)) malSecu.push(p + " noai");
@@ -406,10 +406,13 @@ async function nouvellesRubriques() {
     if (!s.includes('name="referrer" content="strict-origin-when-cross-origin"')) malSecu.push(p + " referrer");
     if (!s.includes("assets/protection.js")) malSecu.push(p + " anti-copie");
     if (/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>/.test(s)) malSecu.push(p + " script dans la page");
+    if (!/<html translate="no"[ >]/.test(s) || !/<meta charset="utf-8">\s*<meta name="google" content="notranslate">/.test(s)) malTrad.push(p);
     const wx = await page(p);
+    if (wx.document.documentElement.getAttribute("translate") !== "no") malTrad.push(p + " (retiré par le JS)");
     wx.document.querySelectorAll('a[href^="http"]').forEach(a => { if (!a.href.startsWith("https://ah6259.github.io/") && !/noopener/.test(a.rel)) malSecu.push(p + " noopener " + a.href.slice(0, 40)); });
   }
   check(`sécurité : chaque page a noai, CSP, referrer, anti-copie, aucun script dans la page, liens externes noopener ; noindex seulement sur relecture/ ${malSecu.slice(0, 6)}`, malSecu.length === 0);
+  check(`pas de traduction automatique : translate="no" sur <html> (gardé après le JS) et meta google notranslate sur toutes les pages ${malTrad.slice(0, 6)}`, malTrad.length === 0);
   const prot = lire("assets/protection.js");
   check("anti-copie : images protégées, texte copié suivi de la source, anti-cadre", prot.includes("contextmenu") && prot.includes("Source : ") && prot.includes("window.top !== window.self") && lire("assets/style.css").includes("user-select:none"));
   const tous = []; (function parcourir(dir) { for (const f of readdirSync(dir)) { if (["node_modules", "captures", ".git"].includes(f)) continue; const c = join(dir, f); statSync(c).isDirectory() ? parcourir(c) : tous.push(c); } })(root);
