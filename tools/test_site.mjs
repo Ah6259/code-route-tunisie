@@ -58,7 +58,8 @@ check("au moins 3 questions publiées par thème (pour l'examen)", [1,2,3,4,5,6,
 // ---- 2. Pages chargées comme un navigateur ---------------------------------------
 async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false } = {}) {
   const dossier = dirname(join(root, chemin));
-  const html = lire(chemin).replace(/<script([^>]*) src="([^"?]+)(\?[^"]*)?"([^>]*)><\/script>/g,
+  // (les scripts externes, comme GoatCounter, ne sont pas chargés)
+  const html = lire(chemin).replace(/<script([^>]*) src="(?!https?:)([^"?]+)(\?[^"]*)?"([^>]*)><\/script>/g,
     (_, a, src) => `<script>${readFileSync(join(dossier, src), "utf8")}</script>`);
   const fautes = [];
   const vc = new VirtualConsole();
@@ -229,7 +230,7 @@ check("regles.js : date au format jj/mm/aaaa et année cohérente", /^\d{2}\/\d{
 for (const p of PAGES) {
   const s = lire(p);
   check(`${p} : titre, description, canonical`, /<title>.{20,}<\/title>/.test(s) && /name="description" content=".{50,}"/.test(s) && s.includes('rel="canonical" href="https://ah6259.github.io/code-route-tunisie/'));
-  check(`${p} : image d'aperçu og-image-v2.png et icône`, s.includes('property="og:image" content="https://ah6259.github.io/code-route-tunisie/assets/og-image-v2.png"') && !s.includes("og-image-v1") && s.includes('rel="icon"'));
+  check(`${p} : image d'aperçu og-image-v3.jpg et icône`, s.includes('property="og:image" content="https://ah6259.github.io/code-route-tunisie/assets/og-image-v3.jpg"') && !s.includes("og-image-v1") && s.includes('rel="icon"'));
   check(`${p} : même version ?v= pour tous les fichiers`, new Set(s.match(/\?v=\d+\w/g)).size === 1);
   check(`${p} : regles.js chargé en premier`, s.indexOf("assets/regles.js") > 0 && s.indexOf("assets/regles.js") < s.indexOf("assets/page.js"));
   const ww = await page(p);
@@ -238,7 +239,10 @@ for (const p of PAGES) {
 }
 const ld = JSON.parse(lire("index.html").match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
 check("FAQ Google (JSON-LD) valide sur l'accueil", ld["@type"] === "FAQPage" && ld.mainEntity.length >= 3);
-check("image d'aperçu, logo et icône présents", ["assets/og-image-v2.png", "assets/logo.svg", "assets/icone-180.png"].every(f => existsSync(join(root, f))));
+check("image d'aperçu, logo et icône présents", ["assets/og-image-v3.jpg", "assets/logo.svg", "assets/icone-180.png"].every(f => existsSync(join(root, f))));
+const ogJpg = readFileSync(join(root, "assets/og-image-v3.jpg"));
+check(`image d'aperçu JPEG < 250 Ko (sinon WhatsApp n'affiche qu'une petite vignette), og:image:type sur chaque page : ${Math.round(ogJpg.length / 1024)} Ko`,
+  ogJpg[0] === 0xFF && ogJpg[1] === 0xD8 && ogJpg.length < 250000 && PAGES.every(p => lire(p).includes('<meta property="og:image:type" content="image/jpeg">')));
 check("plan du site : 8 pages publiques (sans relecture/)", (lire("sitemap.xml").match(/<loc>https:\/\/ah6259\.github\.io\/code-route-tunisie\//g) || []).length === 8 && !lire("sitemap.xml").includes("relecture"));
 check("robots.txt indique le plan du site", lire("robots.txt").includes("code-route-tunisie/sitemap.xml"));
 check("LICENSE tous droits réservés", lire("LICENSE").includes("Tous droits réservés"));
@@ -397,12 +401,17 @@ async function nouvellesRubriques() {
   const interdit = a => groupes.some(g => g.agents.includes(a) && /^Disallow:\s*\/\s*$/m.test(g.regles));
   check("robots.txt : tous les robots d'IA et aspirateurs interdits", IA.every(interdit));
   check("robots.txt : Google, Bing et les autres moteurs NON interdits", !interdit("Googlebot") && !interdit("*") && !interdit("Bingbot") && groupes.some(g => g.agents.includes("Googlebot")));
-  const malSecu = [], malTrad = [];
+  const malSecu = [], malTrad = [], malGc = [];
   for (const p of PAGES) {
     const s = lire(p);
     if (!/<meta name="robots" content="[^"]*noai, noimageai"/.test(s)) malSecu.push(p + " noai");
     if ((p === "relecture/index.html") !== /content="noindex/.test(s)) malSecu.push(p + " noindex");
-    if (!s.includes('http-equiv="Content-Security-Policy"') || !s.includes("script-src 'self';")) malSecu.push(p + " CSP");
+    const publique = p !== "relecture/index.html";
+    if (!s.includes('http-equiv="Content-Security-Policy"') || !s.includes(publique ? "script-src 'self' https://gc.zgo.at;" : "script-src 'self';")) malSecu.push(p + " CSP");
+    // statistiques GoatCounter (anonymes, sans cookies) : sur les pages publiques, jamais sur relecture/
+    const gc = s.includes('<script data-goatcounter="https://prix-eaux-tunisie.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>')
+      && /connect-src[^;]*https:\/\/prix-eaux-tunisie\.goatcounter\.com/.test(s) && /img-src[^;]*https:\/\/prix-eaux-tunisie\.goatcounter\.com/.test(s);
+    if (gc !== publique || (!publique && /goatcounter|gc\.zgo\.at/.test(s))) malGc.push(p);
     if (!s.includes('name="referrer" content="strict-origin-when-cross-origin"')) malSecu.push(p + " referrer");
     if (!s.includes("assets/protection.js")) malSecu.push(p + " anti-copie");
     if (/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>/.test(s)) malSecu.push(p + " script dans la page");
@@ -412,6 +421,7 @@ async function nouvellesRubriques() {
     wx.document.querySelectorAll('a[href^="http"]').forEach(a => { if (!a.href.startsWith("https://ah6259.github.io/") && !/noopener/.test(a.rel)) malSecu.push(p + " noopener " + a.href.slice(0, 40)); });
   }
   check(`sécurité : chaque page a noai, CSP, referrer, anti-copie, aucun script dans la page, liens externes noopener ; noindex seulement sur relecture/ ${malSecu.slice(0, 6)}`, malSecu.length === 0);
+  check(`statistiques GoatCounter (sans cookies) sur les pages publiques avec CSP compatible, absentes de relecture/ ${malGc.slice(0, 6)}`, malGc.length === 0);
   check(`pas de traduction automatique : translate="no" sur <html> (gardé après le JS) et meta google notranslate sur toutes les pages ${malTrad.slice(0, 6)}`, malTrad.length === 0);
   const prot = lire("assets/protection.js");
   check("anti-copie : images protégées, texte copié suivi de la source, anti-cadre", prot.includes("contextmenu") && prot.includes("Source : ") && prot.includes("window.top !== window.self") && lire("assets/style.css").includes("user-select:none"));

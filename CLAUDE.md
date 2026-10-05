@@ -57,13 +57,17 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Détails et marche à suivre en cas d'alerte : README, « Plan de continuité ».
 
 ## Avant chaque publication / après chaque modification
-1. `node tools/test_site.mjs` (166 vérifications). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
+1. `node tools/test_site.mjs` (168 vérifications). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
 2. Changer le `?v=` des fichiers `assets/` dans **toutes** les pages (le test vérifie qu'il est le même partout).
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.
 4. Texte arabe : nombres et mots latins isolés (`iso()`, `isoAr()`, `frac()` pour « 25 / 30 », `<bdi dir="ltr">`).
-5. Image d'aperçu `assets/og-image-v2.png` (modèle `tools/og-image.html`, photo + carte SPÉCIMEN) : si on la change,
-   **nouveau nom** (`og-image-v3.png`) et mettre à jour toutes les pages.
+5. Image d'aperçu `assets/og-image-v3.jpg` (modèle `tools/og-image.html`, photo + carte SPÉCIMEN) : si on la change,
+   **nouveau nom** (`og-image-v4.jpg`) et mettre à jour toutes les pages. Toujours en **JPEG < 250 Ko** (capture PNG puis
+   conversion Pillow qualité 88) : au-delà, WhatsApp n'affiche qu'une petite vignette. L'ancien `og-image-v2.png` n'est plus utilisé.
+6. Statistiques **GoatCounter** (anonymes, sans cookies, 05/10/2026) sur les 8 pages publiques, **jamais sur `relecture/`** :
+   compteur partagé `https://prix-eaux-tunisie.goatcounter.com` (pages séparées par chemin) ; CSP : `script-src` + `https://gc.zgo.at`,
+   `connect-src` / `img-src` + le compteur. Mentionné dans À propos. Le test le vérifie.
 
 ## Reste à faire avant publication
 - Relecture des 126 questions par un moniteur ; confirmer 30 questions / 24 bonnes réponses.
@@ -71,4 +75,4 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Version arabe officielle du code.
 - Annexes A à H du décret 2000-150 (modèles officiels des panneaux) : comparer nos 31 dessins.
 - Démarches actuelles ATTT (inscription en ligne, contrat d'auto-école 2025) : marquées « à vérifier » sur `permis/`.
-- Puis : dépôt public, GitHub Pages, Search Console + sitemap, GoatCounter, moyen de signaler une erreur (formulaire).
+- Puis : dépôt public, GitHub Pages, Search Console + sitemap, moyen de signaler une erreur (formulaire).
