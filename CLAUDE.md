@@ -57,7 +57,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Détails et marche à suivre en cas d'alerte : README, « Plan de continuité ».
 
 ## Avant chaque publication / après chaque modification
-1. `node tools/test_site.mjs` (170 vérifications). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
+1. `node tools/test_site.mjs` (170 vérifications) puis `node tools/test_sw.mjs` (service worker). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
 2. Changer le `?v=` des fichiers `assets/` dans **toutes** les pages (le test vérifie qu'il est le même partout).
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.
@@ -71,6 +71,13 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 7. Installation sur le téléphone : `manifest.webmanifest` avec `"id": "/code-route-tunisie/"` (UNIQUE : tous les sites d'Ahmed
    partagent l'origine ah6259.github.io ; sans id, Chrome disait « cette page est déjà installée »), icônes `assets/icons/`
    (192, 512, maskable) tirées de `assets/logo.svg`. Lien sur chaque page ; vérifié par le test.
+8. **Service worker** (05/10/2026, installation complète Chrome/Android + iPhone) : `sw.js` à la racine, portée `/code-route-tunisie/`,
+   enregistré à la fin de `assets/page.js` (https seulement, try/catch). **Réseau d'abord** pour les pages HTML et les données (le cache
+   ne sert que hors connexion ; sinon page « Hors connexion » FR+AR) ; CSS/JS/images avec `?v=` : cache puis mise à jour en arrière-plan.
+   Jamais en cache : non-GET, autres origines, autres sites d'Ahmed, **`relecture/`**. Caches `code-route-tunisie-<CACHE_VERSION>`
+   (on ne supprime QUE les nôtres : origine partagée). Vieille version bloquée sur un téléphone → changer `CACHE_VERSION`.
+   Meta iPhone (`apple-mobile-web-app-capable`, `-title` « Code route ») sur chaque page.
+   Test : `node tools/test_sw.mjs` (faux navigateur ; accepte un dossier en argument pour tester une copie sabotée).
 
 ## Reste à faire avant publication
 - Relecture des 126 questions par un moniteur ; confirmer 30 questions / 24 bonnes réponses.

@@ -160,3 +160,11 @@ function htmlPhoto(id, classe) {
     <figcaption class="credit">${T("Photo", "صورة")} : <bdi>${esc(p.auteur)}</bdi>, <a href="${p.licence_url || p.source}" rel="noopener license" target="_blank"><bdi dir="ltr">${esc(p.licence)}</bdi></a>, <a href="${p.source}" rel="noopener" target="_blank">Wikimedia Commons</a>${p.lieu ? " — " + esc(p.lieu) : ""}</figcaption>
   </figure>`;
 }
+
+/* Installation sur le téléphone : service worker PRUDENT (sw.js : réseau d'abord pour les pages et les données).
+   Seulement en https (jamais en file: pendant les tests locaux). */
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => {
+    try { navigator.serviceWorker.register("/code-route-tunisie/sw.js", { scope: "/code-route-tunisie/" }).catch(() => {}); } catch (e) { /* rien : le site marche sans */ }
+  });
+}

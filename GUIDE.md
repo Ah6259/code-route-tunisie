@@ -46,3 +46,11 @@ Guide réutilisable pour créer un autre site du même genre. Une ligne par éta
 - Relecture par un moniteur ; confirmer 30 / 24.
 - Créer le dépôt public `Ah6259/code-route-tunisie` avec le contenu de `site/`, activer GitHub Pages.
 - Search Console + sitemap ; GoatCounter ; lancer une fois `surveillance.yml` à la main pour vérifier qu'il lit transport.tn depuis GitHub.
+
+## 05/10/2026 — Installation complète sur le téléphone (service worker)
+- `sw.js` à la racine (portée `/code-route-tunisie/`), enregistré par `assets/page.js` (https seulement, jamais en `file:`).
+- **Réseau d'abord** pour les pages et les données (dernière version toujours servie ; cache seulement hors connexion,
+  sinon page « Hors connexion » FR + AR) ; fichiers `?v=` : cache puis mise à jour. `relecture/` jamais en cache.
+- Meta iPhone sur chaque page : `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`.
+- Test `node tools/test_sw.mjs` (faux navigateur) ; sabotage vérifié (HTML en cache d'abord, POST, portée, relecture/).
+- Vieille version bloquée sur un téléphone : changer `CACHE_VERSION` dans `sw.js`.

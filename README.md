@@ -38,6 +38,7 @@ Adresse prévue : https://ah6259.github.io/code-route-tunisie/
 | `assets/pages.js` | Affichage propre à chaque page (aucun script dans les pages HTML : CSP) |
 | `assets/protection.js` | Anti-copie légère, source ajoutée au texte copié, anti-cadre |
 | `tools/test_site.mjs` | Test automatique (165 vérifications) |
+| `sw.js`, `tools/test_sw.mjs` | Service worker (réseau d'abord, installation sur le téléphone) et son test |
 | `tools/surveiller_source.py` | Surveillance mensuelle du texte officiel (appelé par le robot) |
 | `tools/changer_annee.py` | Change l'année des titres et balises meta |
 | `tools/captures.sh` | Captures mobiles 340/390 px, FR et AR (dossier `captures/`, non publié), via un serveur local |
@@ -47,11 +48,15 @@ Adresse prévue : https://ah6259.github.io/code-route-tunisie/
 ### Ce qui tourne tout seul
 | Robot | Quand | Ce qu'il fait |
 |---|---|---|
-| `tests.yml` | à chaque envoi sur GitHub | installe jsdom, lance `node tools/test_site.mjs` |
+| `tests.yml` | à chaque envoi sur GitHub | installe jsdom, lance `node tools/test_site.mjs` et `node tools/test_sw.mjs` |
 | `surveillance.yml` | le 3 de chaque mois, 7h17 (Tunis) | télécharge le PDF officiel du Code de la route (transport.tn), compare sa taille et son empreinte SHA-256 ; si rien n'a changé, avance la date « texte vérifié le » ; au 1er passage d'une nouvelle année, change l'année des titres ; change le `?v=` des pages ; lance le test ; **commit** |
 
 Le commit mensuel sert aussi de **battement de cœur** : GitHub met les robots en pause après 60 jours sans activité.
 Le site lui-même n'a besoin de rien : tout se passe dans le téléphone du visiteur.
+
+**Installation sur le téléphone** : `sw.js` (service worker) = **réseau d'abord** pour les pages et les données (le cache ne sert
+que hors connexion ; `relecture/` jamais en cache) ; CSS/JS/images versionnés (?v=) = cache puis mise à jour. Si un téléphone garde
+une vieille version : changer `CACHE_VERSION` dans `sw.js`.
 
 ### Ce qui alerte (issues GitHub, notification par e-mail au propriétaire du dépôt)
 | Issue | Cause |
