@@ -290,6 +290,13 @@ S["q-sans-permis"] = () => fond() + permis(40, 60, 120, 76, true) + volant(240, 
 S["q-sens-inverse-autoroute"] = () => fond() + routeH(20, 70) + rect(0, 90, 320, 16, "#9CC79A") + routeH(106, 70) + tiretsH(55) + tiretsH(141) + voiture(80, 40, 90, "gris") + voiture(220, 72, 90, "gris") + voiture(160, 123, -90, "gris") + voiture(170, 72, -90) + chemin("M150 72h-30", C.rouge, 4) + interro(260, 160);
 S["q-age-permis"] = () => fond() + permis(40, 60, 120, 76) + gateau(240, 110);
 
+// questions vérifiées et publiées le 05/10/2026
+S["q-panneau-50"] = () => fond() + campagne() + routeH(110, 70) + tiretsH(145) + panneau("C-vitesse", 160, 52, 64) + voiture(60, 162, 90);
+S["q-amende-telephone"] = () => fond() + volant(80, 104) + telephone(165, 100) + contravention(220, 60);
+S["q-ceinture"] = () => fond() + ville().slice(0, 0) + immeuble(14, 20, 44, 40) + immeuble(64, 20, 34, 40) + panneau("F-autoroute", 270, 40, 34, false) + routeH(110, 60) + tiretsH(140) + `<g transform="translate(160 140) rotate(90) scale(1.9)">${rect(-11, -19, 22, 38, C.bleu, 6)}${cercle(-5, -2, 3.5, "#fff")}${cercle(5, -2, 3.5, "#fff")}${cercle(-5, 9, 3.5, "#fff")}${cercle(5, 9, 3.5, "#fff")}</g>` + interro(160, 52, 12);
+S["q-numero-samu"] = () => fond() + telephone(90, 100, 1.5) + ambulance(220, 100, 90) + interro(90, 92, 12);
+S["q-alcool-stagiaire"] = () => fond() + verre(80, 100) + permis(140, 64, 120, 76) + interro(270, 50);
+
 // question -> schéma (les 6 schémas d'origine sont gardés)
 const ASSOC = {
   "T1-001": "q-familles-panneaux", "T1-002": "q-danger-hors-agglo", "T1-003": "q-danger-agglo", "T1-004": "q-panneau-danger",
@@ -323,6 +330,7 @@ const ASSOC = {
   "T10-001": "q-capital-points", "T10-002": "q-points-vitesse", "T10-003": "q-recuperer-points", "T10-004": "q-stage-points",
   "T10-005": "q-points-perdus", "T10-006": "q-amende-15-jours", "T10-007": "q-amende-un-mois", "T10-008": "q-amende-vitesse",
   "T10-009": "q-sanction-depassement", "T10-011": "q-sans-permis", "T10-012": "q-sens-inverse-autoroute", "T10-014": "q-age-permis",
+  "T1-016": "q-panneau-50", "T7-009": "q-amende-telephone", "T8-012": "q-ceinture", "T9-012": "q-numero-samu", "T7-013": "q-alcool-stagiaire",
 };
 
 const seuls = process.argv.slice(2);

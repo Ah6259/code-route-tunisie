@@ -128,8 +128,8 @@ var LECONS = [
    intro_ar: "الكحول والأدوية والتعب والهاتف تُضعف ردّة الفعل. والقانون يعاقب عليها بشدة.",
    blocs: [
     { t_fr: "L'alcool", t_ar: "الكحول",
-      fr: "À partir de 0,5 g d'alcool par litre de sang, on est « sous l'empire d'un état alcoolique ». C'est un délit : jusqu'à 6 mois de prison et/ou une amende de 200 à 500 DT, retrait du permis (6 mois au plus la première fois), et 4 points après jugement définitif. Refuser le dépistage est puni de la même façon. L'agent peut retirer le permis sur-le-champ.",
-      ar: "ابتداءً من 0,5 غ من الكحول في اللتر من الدم، يكون السائق «تحت تأثير حالة كحولية». وهي جنحة: سجن إلى 6 أشهر و/أو خطية من 200 إلى 500 د، وسحب الرخصة (6 أشهر على الأكثر في المرة الأولى) و4 نقاط بعد حكم بات. ورفض الفحص يُعاقب بنفس الطريقة. ويمكن للعون سحب الرخصة فورًا." },
+      fr: "À partir de 0,3 g d'alcool par litre de sang (0 g/l pour les conducteurs stagiaires, les poids lourds, le transport de personnes et les moniteurs), on est « sous l'empire d'un état alcoolique ». C'est un délit : jusqu'à 6 mois de prison et/ou une amende de 200 à 500 DT, retrait du permis (6 mois au plus la première fois), et 4 points après jugement définitif. Refuser le dépistage est puni de la même façon. L'agent peut retirer le permis sur-le-champ.",
+      ar: "ابتداءً من 0,3 غ من الكحول في اللتر من الدم (0 غ/ل للسائقين المتربصين وسائقي الوزن الثقيل ونقل الأشخاص والمدربين)، يكون السائق «تحت تأثير حالة كحولية». وهي جنحة: سجن إلى 6 أشهر و/أو خطية من 200 إلى 500 د، وسحب الرخصة (6 أشهر على الأكثر في المرة الأولى) و4 نقاط بعد حكم بات. ورفض الفحص يُعاقب بنفس الطريقة. ويمكن للعون سحب الرخصة فورًا." },
     { t_fr: "Fatigue et médicaments", t_ar: "التعب والأدوية",
       fr: "Il faut s'abstenir de conduire si on est fatigué ou si on a pris des tranquillisants ou des produits qui diminuent les aptitudes. Des signes évidents de fatigue entraînent l'immobilisation du véhicule. Pour les poids lourds : pause d'au moins 45 minutes après 4 h 30 de conduite.",
       ar: "يجب الامتناع عن السياقة عند التعب أو بعد تناول مهدئات أو مواد تُضعف القدرات. وعلامات التعب الواضحة تؤدي إلى إيقاف العربة. وبالنسبة إلى الشاحنات الثقيلة: راحة لا تقل عن 45 دقيقة بعد 4 ساعات و30 دقيقة من السياقة." },
@@ -137,11 +137,11 @@ var LECONS = [
       fr: "Interdit de téléphoner en conduisant, sauf si la communication se fait sans utiliser les mains (kit mains libres).",
       ar: "يُمنع استعمال الهاتف أثناء السياقة، إلا إذا تمّت المكالمة دون استعمال اليدين (عدّة اليدين الحرّتين)." } ],
    retenir: [
-    { fr: "0,5 g/l = délit.", ar: "0,5 غ/ل = جنحة." },
+    { fr: "0,3 g/l = délit (0 g/l en période de stage).", ar: "0,3 غ/ل = جنحة (0 غ/ل في فترة التربص)." },
     { fr: "Refuser l'alcootest = mêmes sanctions.", ar: "رفض الفحص = نفس العقوبات." },
     { fr: "Fatigué ? On ne conduit pas.", ar: "متعب؟ لا تسق." },
     { fr: "Téléphone : seulement mains libres.", ar: "الهاتف: فقط دون استعمال اليدين." } ],
-   sources: "Code de la route, art. 7, 87, 92 à 94 bis et 105 ; décret n° 2000-146, art. 5 et 6 ; décret n° 2000-145, art. 1 à 4 ; décret n° 2000-144, art. 3 ; décret n° 2000-151, art. 2" },
+   sources: "Code de la route, art. 7, 87, 92 à 94 bis et 105 ; décret n° 2000-146, art. 5 et 6 (modifié par le décret gouvernemental n° 2016-292 du 1er mars 2016) ; décret n° 2000-145, art. 1 à 4 ; décret n° 2000-144, art. 3 ; décret n° 2000-151, art. 2" },
 
  { theme: 8, photo: "lecon-8", schema: "lecon-pneus.svg",
    intro_fr: "Un véhicule bien entretenu freine mieux et voit mieux. Le propriétaire est responsable de son état et de la visite technique.",
