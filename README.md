@@ -95,3 +95,6 @@ L'année des titres, du © et la date « vérifié le » changent seules au prem
 ### Si GitHub ou le PC disparaît
 Tout le site est dans ce dépôt : le cloner sur un nouveau PC suffit. Les questions sources (`../questions/`) et les
 preuves (`../sources/`, `../preuves…/`) sont hors du dépôt : les garder sauvegardées (Dropbox / disque).
+
+## Nouveautés
+- 05/10/2026 : nouvelle icône ; une image pour chaque question ; taux d'alcool corrigé (0,3 g/l) ; lien vers le paiement officiel des amendes.

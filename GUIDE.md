@@ -54,3 +54,8 @@ Guide réutilisable pour créer un autre site du même genre. Une ligne par éta
 - Meta iPhone sur chaque page : `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`.
 - Test `node tools/test_sw.mjs` (faux navigateur) ; sabotage vérifié (HTML en cache d'abord, POST, portée, relecture/).
 - Vieille version bloquée sur un téléphone : changer `CACHE_VERSION` dans `sw.js`.
+
+## 05/10/2026 (soir) — images, vérification, icône
+- Une image par question : `node tools/construire_schemas.mjs` puis `node tools/construire_questions.mjs` (règle : l'image montre la situation, jamais la réponse ; le test bloque une question sans image).
+- Vérification des réponses auprès d'un site tunisien de code, de la presse et de l'ISST : alcool 0,3 g/l corrigé partout ; rapport privé dans le dossier parent.
+- Icône route en S (famille commune) ; « gratuit » dans les titres ; lien officiel de paiement des amendes.
