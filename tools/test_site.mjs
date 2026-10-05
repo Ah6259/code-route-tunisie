@@ -211,11 +211,11 @@ check("illustrations : légères (moins de 8 Ko chacune)", [...new Set(["accueil
 w = await page("entrainement/index.html", { query: "&theme=2" }); d = w.document;
 { const e = w.eval("entrainement"); const k = e.liste.findIndex(q => q.image); e.i = k; w.eval("rendreEntrainement()");
   const img = d.querySelector("#quiz img.schema");
-  check("entraînement : le schéma de la question est affiché", img && img.getAttribute("src") === "../assets/illustrations/" + e.liste[k].image && img.alt.length > 5);
+  check("entraînement : le schéma de la question est affiché", img && img.getAttribute("src").split("?v=")[0] === "../assets/illustrations/" + e.liste[k].image && img.alt.length > 5);
   let toutes = true;
   for (let i = 0; i < e.liste.length; i++) { e.i = i; w.eval("rendreEntrainement()");
     const im = d.querySelectorAll("#quiz img.schema");
-    if (im.length !== 1 || im[0].getAttribute("src") !== "../assets/illustrations/" + e.liste[i].image) toutes = false; }
+    if (im.length !== 1 || im[0].getAttribute("src").split("?v=")[0] !== "../assets/illustrations/" + e.liste[i].image) toutes = false; }
   check("entraînement : chaque question du thème affiche une seule image, la sienne", toutes); }
 w = await page("examen/index.html"); d = w.document;
 check("examen : photo dans le bandeau et son crédit (auteur, licence, Wikimedia)", d.querySelector(".hero img.hero-photo[src='../assets/photos/lecons-route.webp']") &&

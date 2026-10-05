@@ -81,10 +81,12 @@ function htmlProgres(i, total, droite) {
   return `<div class="progres"><span>${T("Question", "السؤال")} ${frac(i + 1, total)}</span><span>${droite || ""}</span></div>
     <div class="barre" aria-hidden="true"><span style="width:${(i / total * 100).toFixed(1)}%"></span></div>`;
 }
+// changer ce numéro quand les schémas sont redessinés (sinon les téléphones gardent les anciens)
+const VERSION_SCHEMAS = "2";
 function htmlSchema(q) {
   if (!q.image) return "";
   const racine = document.documentElement.dataset.racine || "";
-  return `<img class="schema" src="${racine}assets/illustrations/${q.image}" width="320" height="200" alt="${T("Schéma de la situation", "رسم توضيحي للوضعية")}">`;
+  return `<img class="schema" src="${racine}assets/illustrations/${q.image}?v=${VERSION_SCHEMAS}" width="320" height="200" alt="${T("Schéma de la situation", "رسم توضيحي للوضعية")}">`;
 }
 function htmlSignalerQ(q) {
   return htmlSignaler(q.id, q.question_fr, q.bonnes.map(b => q.choix[b].fr).join(" + "));

@@ -116,3 +116,12 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Rubriques de l'accueil (05/10/2026) : images en couleur `assets/illustrations/rub-<nom>.svg` (même style que les thèmes, fond pastel), à la place des icônes au trait.
 - **Carte permis (05/10/2026, décision d'Ahmed)** : le dessin SPÉCIMEN est remplacé (accueil et page Permis) par le **spécimen officiel du nouveau permis publié par l'ATTT** (données fictives « BEN FOULEN »), `assets/specimen/permis-specimen-attt.webp`, recadré et remis aux vraies proportions depuis l'image parue dans la presse le 21/02/2023. Crédit « image ATTT » affiché. **Pas de licence libre** : si l'ATTT ou le journal demande le retrait, remettre `assets/illustrations/permis-specimen.svg` (toujours utilisé dans l'image d'aperçu). Exception voulue par Ahmed à la règle « pas d'emblème de l'État » (le spécimen montre le drapeau).
 - Images changées sans changer de nom : toujours ajouter `?v=` à leur adresse (sinon les téléphones gardent l'ancienne jusqu'à 10 min ou plus). Fait pour le spécimen du permis le 05/10/2026.
+
+## Schémas des questions redessinés (05/10/2026, retour de visiteurs : « images pas claires »)
+- Voitures plus grandes (× 1,18) avec roues, phares et contour blanc ; dessinées une fois par fichier (`<defs>` + `<use>`) pour rester < 8 Ko.
+- Plus aucun « ? » isolé (il embrouillait) ; le « ? » reste seulement sur les cotes de distance.
+- Étiquette **« Vous / أنت »** (en haut à gauche, position modifiable dans `POS_VOUS`) dès que votre véhicule (bleu) est dessiné.
+- Chaque objet (permis, amende, alcool, tribunal, points, vitesse, pneu…) porte son **nom en français et en arabe** (`etiq()`,
+  2 lignes : l'arabe dans son propre texte pour rester bien ordonné). `lab = false` pour l'enlever quand la place manque.
+- Le script n'exige plus `../questions/questions-v1.json` (absent du dépôt) : il redessine, et ne relie les questions que si le fichier existe.
+- Images changées sans changer de nom : `VERSION_SCHEMAS` dans `assets/quiz.js` (ajouté en `?v=`) — **l'augmenter à chaque nouveau dessin**.

@@ -3,7 +3,7 @@
 //   node tools/construire_schemas.mjs   puis   node tools/construire_questions.mjs
 // Règle : un schéma montre la SITUATION, jamais la réponse (pas de chiffre de vitesse, de distance ni de points).
 // Couleurs : bleu = votre voiture, orange = les autres usagers.
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
@@ -38,9 +38,19 @@ const routeV = (x = 120, w = 80, f = C.route) => rect(x, 0, w, 200, f);
 const carrefour = (f = C.route) => forme("M120 0h80v60h120v80H200v60h-80v-60H0V60h120z", f);
 
 // véhicules (vue de dessus, avant vers le haut quand a = 0)
-function voiture(x, y, a = 0, c = "bleu", ech = 1) {
+// (05/10/2026, retour des visiteurs « images pas claires ») : voitures plus grandes, avec roues, phares et contour
+let vousPresent = false;   // le schéma contient « votre » véhicule (bleu) -> étiquette « Vous » ajoutée
+const modelesUtilises = new Set();   // chaque modèle de voiture est dessiné une fois (<defs>) puis réutilisé (<use>) : fichiers légers
+function modeleVoiture(c) {
   const [f, v] = c === "bleu" ? [C.bleu, C.bleuC] : c === "orange" ? [C.orange, C.orangeC] : [C.gris, C.grisC];
-  return `<g transform="translate(${r1(x)} ${r1(y)}) rotate(${a})${ech !== 1 ? ` scale(${ech})` : ""}">${rect(-11, -19, 22, 38, f, 6)}${rect(-8, -11, 16, 8, v, 2)}${rect(-8, 8, 16, 5, v, 2)}</g>`;
+  const roues = [[-14, -15], [11, -15], [-14, 6], [11, 6]].map(([rx, ry]) => rect(rx, ry, 3, 9, C.encre, 1.5)).join("");
+  return `<g id="v-${c}">${roues}${rect(-11, -19, 22, 38, f, 6, ' stroke="#fff" stroke-width="1.5"')}${rect(-8, -12, 16, 9, v, 2)}${rect(-8, 9, 16, 5, v, 2)}${rect(-7, -3, 14, 12, f, 2, ' stroke="#0E2238" stroke-opacity=".25" stroke-width="1"')}${cercle(-6.5, -17.5, 2, "#FFF6C2")}${cercle(6.5, -17.5, 2, "#FFF6C2")}</g>`;
+}
+function voiture(x, y, a = 0, c = "bleu", ech = 1) {
+  if (c !== "bleu" && c !== "orange") c = "gris";
+  if (c === "bleu") vousPresent = true;
+  modelesUtilises.add(c);
+  return `<use href="#v-${c}" transform="translate(${r1(x)} ${r1(y)}) rotate(${a}) scale(${r1(1.18 * ech * 100) / 100})"/>`;
 }
 function camion(x, y, a = 0, c = C.orange) {
   return `<g transform="translate(${r1(x)} ${r1(y)}) rotate(${a})">${rect(-13, -34, 26, 18, c, 4)}${rect(-10, -30, 20, 7, C.orangeC, 2)}${rect(-14, -14, 28, 50, "#B9C2CC", 3)}</g>`;
@@ -49,6 +59,7 @@ function ambulance(x, y, a = 0, gyro = "#fff") {
   return `<g transform="translate(${r1(x)} ${r1(y)}) rotate(${a})">${rect(-13, -24, 26, 48, "#F4F6F8", 6, ` stroke="${C.gris}" stroke-width="1.5"`)}${rect(-9, -16, 18, 7, C.bleuC, 2)}${rect(-2.5, 0, 5, 16, C.rouge)}${rect(-8, 5.5, 16, 5, C.rouge)}${rect(-8, -24, 16, 5, gyro, 2, ` stroke="${C.gris}" stroke-width="1"`)}</g>`;
 }
 function moto(x, y, a = 0, c = C.orange, passager = false) {
+  if (c === C.bleu) vousPresent = true;
   return `<g transform="translate(${r1(x)} ${r1(y)}) rotate(${a})">${rect(-3, -18, 6, 36, C.encre, 3)}${rect(-9, -6, 18, 4, C.encre, 2)}${cercle(0, 2, 6, c)}${passager ? cercle(0, 12, 5.5, C.gris) : ""}</g>`;
 }
 function velo(x, y, a = 0, c = C.orange) {
@@ -77,9 +88,10 @@ function cote(x1, y1, x2, y2) {
   const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
   const ang = Math.atan2(y2 - y1, x2 - x1), L = 7;
   const tete = (bx, by, s) => chemin(`M${r1(bx - s * L * Math.cos(ang - 0.6))} ${r1(by - s * L * Math.sin(ang - 0.6))}L${r1(bx)} ${r1(by)}L${r1(bx - s * L * Math.cos(ang + 0.6))} ${r1(by - s * L * Math.sin(ang + 0.6))}`, C.encre, 2.5);
-  return chemin(`M${r1(x1)} ${r1(y1)}L${r1(x2)} ${r1(y2)}`, C.encre, 2.5, ' stroke-dasharray="5 4"') + tete(x2, y2, 1) + tete(x1, y1, -1) + interro(mx, my);
+  return chemin(`M${r1(x1)} ${r1(y1)}L${r1(x2)} ${r1(y2)}`, C.encre, 2.5, ' stroke-dasharray="5 4"') + tete(x2, y2, 1) + tete(x1, y1, -1) + bulleQ(mx, my);
 }
-const interro = (x, y, r = 10) => `${cercle(x, y, r, "#fff", ` stroke="${C.encre}" stroke-width="2"`)}<text x="${r1(x)}" y="${r1(y + r * 0.42)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="${r1(r * 1.3)}" fill="${C.encre}">?</text>`;
+const interro = () => "";
+const bulleQ = (x, y, r = 10) => `${cercle(x, y, r, "#fff", ` stroke="${C.encre}" stroke-width="2"`)}<text x="${r1(x)}" y="${r1(y + r * 0.42)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="${r1(r * 1.3)}" fill="${C.encre}">?</text>`;
 
 // panneau du site (assets/panneaux/<nom>.svg) sur un poteau ; s = taille du panneau
 const cachePanneaux = {};
@@ -110,47 +122,89 @@ const phares = (x, y, a = 0, long = 70, larg = 26) => `<g transform="translate($
 const lune = (x, y) => forme(`M${x} ${y - 14}a14 14 0 1 0 12 22a11 11 0 1 1 -12 -22z`, "#F6E7A8");
 const zzz = (x, y) => `<text x="${x}" y="${y}" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="20" fill="${C.bleu}">z<tspan font-size="15" dy="-8">z</tspan><tspan font-size="11" dy="-7">z</tspan></text>`;
 
+/* ---------------- étiquettes (français · arabe) ---------------- */
+// petit nom sous un objet, pour qu'on comprenne ce qu'il représente (jamais la réponse)
+const POLICE_AR = `font-family="Tahoma,'Noto Sans Arabic','Noto Kufi Arabic','Geeza Pro',Arial,sans-serif" direction="rtl"`;
+// étiquette sur 2 lignes (français en haut, arabe en dessous : chaque langue dans son propre texte, l'arabe reste bien ordonné)
+function etiq(x, y, fr, ar) {
+  const w = Math.round(Math.max(fr.length * 7.2, ar.length * 7.4) + 18);
+  x = Math.min(Math.max(x, w / 2 + 4), 316 - w / 2); y = Math.min(y, 162);
+  return rect(x - w / 2, y - 12, w, 34, "#fff", 9, ` stroke="${C.encre}" stroke-opacity=".25" stroke-width="1"`) +
+    `<text x="${r1(x)}" y="${r1(y + 2)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="12" fill="${C.encre}">${fr}</text>` +
+    `<text x="${r1(x)}" y="${r1(y + 17)}" text-anchor="middle" ${POLICE_AR} font-weight="700" font-size="12" fill="${C.encre}">${ar}</text>`;
+}
+// repère « Vous / أنت » (votre véhicule = bleu), en haut à gauche sauf indication contraire
+const POS_VOUS = { "q-danger-hors-agglo": [236, 8], "q-rue-eclairee": [236, 170], "q-jeune-conducteur": [228, 170] };
+const vous = (x = 8, y = 8) => rect(x, y, 84, 22, "#fff", 11, ` stroke="${C.bleu}" stroke-width="2"`) + rect(x + 8, y + 5, 8, 12, C.bleu, 2) +
+  `<text x="${x + 22}" y="${y + 15.5}" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="12" fill="${C.bleu}">Vous</text>` +
+  `<text x="${x + 76}" y="${y + 15.5}" text-anchor="start" ${POLICE_AR} font-weight="700" font-size="12" fill="${C.bleu}">أنت</text>`;
+
 /* ---------------- icônes (scènes « connaissance ») ---------------- */
 const carte = (x, y, w, h) => rect(x, y, w, h, "#fff", 14, ` stroke="${C.grisC}" stroke-width="2"`);
 function compteur(x, y, r = 46) {
   let s = forme(`M${x - r} ${y}A${r} ${r} 0 0 1 ${x + r} ${y}`, "none") + chemin(`M${x - r} ${y}A${r} ${r} 0 0 1 ${x + r} ${y}`, C.encre, 8);
   for (let k = 0; k <= 8; k++) { const a = Math.PI + k * Math.PI / 8; s += chemin(`M${r1(x + (r - 12) * Math.cos(a))} ${r1(y + (r - 12) * Math.sin(a))}L${r1(x + (r - 4) * Math.cos(a))} ${r1(y + (r - 4) * Math.sin(a))}`, C.encre, 3); }
-  return s + chemin(`M${x} ${y}L${r1(x + (r - 14) * Math.cos(-0.9))} ${r1(y + (r - 14) * Math.sin(-0.9))}`, C.rouge, 5) + cercle(x, y, 6, C.encre) + interro(x, y + 22, 11);
+  return s + chemin(`M${x} ${y}L${r1(x + (r - 14) * Math.cos(-0.9))} ${r1(y + (r - 14) * Math.sin(-0.9))}`, C.rouge, 5) + cercle(x, y, 6, C.encre) + etiq(x, y + 26, "Vitesse", "السرعة");
 }
-const verre = (x, y) => forme(`M${x - 14} ${y - 26}h28l-4 44a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4z`, "#FFF6DB", ` stroke="${C.encre}" stroke-width="3"`) + forme(`M${x - 12.5} ${y - 8}h25l-2.6 26h-19.8z`, C.jaune) + rect(x - 10, y - 30, 20, 6, "#fff", 3, ` stroke="${C.encre}" stroke-width="2"`);
-const telephone = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${rect(-14, -26, 28, 52, C.encre, 6)}${rect(-10, -20, 20, 36, C.bleuC, 2)}${cercle(0, 21, 2.5, "#fff")}</g>`;
-const pilule = (x, y) => `<g transform="translate(${x} ${y}) rotate(-35)">${rect(-26, -11, 52, 22, "#fff", 11, ` stroke="${C.encre}" stroke-width="3"`)}${forme("M0 -11h15a11 11 0 0 1 0 22H0z", C.rouge)}</g>`;
-function horloge(x, y, r = 26) { return cercle(x, y, r, "#fff", ` stroke="${C.encre}" stroke-width="4"`) + chemin(`M${x} ${y}v-${r * 0.6}M${x} ${y}l${r * 0.45} ${r * 0.3}`, C.encre, 4); }
-function calendrier(x, y, w = 70, h = 64) {
+const verre0 = (x, y) => forme(`M${x - 14} ${y - 26}h28l-4 44a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4z`, "#FFF6DB", ` stroke="${C.encre}" stroke-width="3"`) + forme(`M${x - 12.5} ${y - 8}h25l-2.6 26h-19.8z`, C.jaune) + rect(x - 10, y - 30, 20, 6, "#fff", 3, ` stroke="${C.encre}" stroke-width="2"`);
+const telephone0 = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${rect(-14, -26, 28, 52, C.encre, 6)}${rect(-10, -20, 20, 36, C.bleuC, 2)}${cercle(0, 21, 2.5, "#fff")}</g>`;
+const pilule0 = (x, y) => `<g transform="translate(${x} ${y}) rotate(-35)">${rect(-26, -11, 52, 22, "#fff", 11, ` stroke="${C.encre}" stroke-width="3"`)}${forme("M0 -11h15a11 11 0 0 1 0 22H0z", C.rouge)}</g>`;
+function horloge0(x, y, r = 26) { return cercle(x, y, r, "#fff", ` stroke="${C.encre}" stroke-width="4"`) + chemin(`M${x} ${y}v-${r * 0.6}M${x} ${y}l${r * 0.45} ${r * 0.3}`, C.encre, 4); }
+function calendrier0(x, y, w = 70, h = 64) {
   let s = rect(x, y, w, h, "#fff", 8, ` stroke="${C.encre}" stroke-width="3"`) + rect(x, y, w, 16, C.rouge, 8) + rect(x, y + 8, w, 8, C.rouge);
   for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) s += rect(x + 8 + j * ((w - 16) / 4), y + 24 + i * 12, (w - 16) / 4 - 5, 7, C.grisC, 2);
   return s;
 }
-const marteau = (x, y) => `<g transform="translate(${x} ${y}) rotate(-35)">${rect(-26, -10, 34, 20, "#8B5A2B", 4)}${rect(-3, -3, 46, 6, "#A0703F", 3)}</g>` + rect(x - 30, y + 22, 50, 8, "#8B5A2B", 3);
-function permis(x, y, w = 96, h = 60, barre = false) {
+const marteau0 = (x, y) => `<g transform="translate(${x} ${y}) rotate(-35)">${rect(-26, -10, 34, 20, "#8B5A2B", 4)}${rect(-3, -3, 46, 6, "#A0703F", 3)}</g>` + rect(x - 30, y + 22, 50, 8, "#8B5A2B", 3);
+function permis0(x, y, w = 96, h = 60, barre = false) {
   let s = rect(x, y, w, h, "#F7D9E3", 8, ` stroke="${C.encre}" stroke-width="2.5"`) + rect(x + 8, y + 10, w * 0.26, h * 0.62, "#fff", 4) + cercle(x + 8 + w * 0.13, y + 10 + h * 0.22, 6, C.gris) +
     rect(x + w * 0.42, y + 12, w * 0.48, 6, C.encre, 3) + rect(x + w * 0.42, y + 25, w * 0.4, 5, C.gris, 2.5) + rect(x + w * 0.42, y + 36, w * 0.44, 5, C.gris, 2.5);
   if (barre) s += chemin(`M${x - 6} ${y + h + 6}L${x + w + 6} ${y - 6}`, C.rouge, 6);
   return s;
 }
-function jaugePoints(x, y, w = 120, part = 0.7) { return rect(x, y, w, 18, C.grisC, 9) + rect(x, y, w * part, 18, C.vert, 9) + cercle(x - 14, y + 9, 11, C.encre) + `<text x="${x - 14}" y="${y + 14}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="13" fill="#fff">P</text>`; }
-function contravention(x, y) { return rect(x, y, 62, 78, "#fff", 6, ` stroke="${C.encre}" stroke-width="2.5"`) + rect(x, y, 62, 14, C.orange, 6) + rect(x, y + 7, 62, 7, C.orange) + [24, 36, 48, 60].map(d => rect(x + 9, y + d, d === 60 ? 26 : 44, 5, C.grisC, 2.5)).join(""); }
-function pneu(x, y, r = 34) { return cercle(x, y, r, C.encre) + cercle(x, y, r * 0.55, "#B9C2CC") + cercle(x, y, r * 0.2, C.gris); }
-function bande(x, y, w = 90, h = 120) { let s = rect(x, y, w, h, "#2B3440", 8); for (let k = 0; k < 4; k++) s += rect(x + 12 + k * (w - 24) / 3.4, y + 6, 6, h - 12, "#151B22", 3); return s; }
+function jaugePoints0(x, y, w = 120, part = 0.7) { return rect(x, y, w, 18, C.grisC, 9) + rect(x, y, w * part, 18, C.vert, 9) + cercle(x - 14, y + 9, 11, C.encre) + `<text x="${x - 14}" y="${y + 14}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="13" fill="#fff">P</text>`; }
+function contravention0(x, y) { return rect(x, y, 62, 78, "#fff", 6, ` stroke="${C.encre}" stroke-width="2.5"`) + rect(x, y, 62, 14, C.orange, 6) + rect(x, y + 7, 62, 7, C.orange) + [24, 36, 48, 60].map(d => rect(x + 9, y + d, d === 60 ? 26 : 44, 5, C.grisC, 2.5)).join(""); }
+function pneu0(x, y, r = 34) { return cercle(x, y, r, C.encre) + cercle(x, y, r * 0.55, "#B9C2CC") + cercle(x, y, r * 0.2, C.gris); }
+function bande0(x, y, w = 90, h = 120) { let s = rect(x, y, w, h, "#2B3440", 8); for (let k = 0; k < 4; k++) s += rect(x + 12 + k * (w - 24) / 3.4, y + 6, 6, h - 12, "#151B22", 3); return s; }
 const triangle = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${forme("M0 -16L15 11H-15z", "none", ` stroke="${C.rouge}" stroke-width="5" stroke-linejoin="round"`)}${rect(-3, 11, 6, 6, C.encre)}</g>`;
 const casque = (x, y) => forme(`M${x - 20} ${y + 8}a20 20 0 0 1 40 0v6h-40z`, C.bleu) + rect(x - 4, y - 4, 22, 9, C.bleuC, 4);
-const trousse = (x, y) => rect(x - 30, y - 22, 60, 44, "#fff", 8, ` stroke="${C.encre}" stroke-width="3"`) + rect(x - 5, y - 14, 10, 28, C.rouge) + rect(x - 14, y - 5, 28, 10, C.rouge) + rect(x - 10, y - 30, 20, 8, C.encre, 3);
-const volant = (x, y) => cercle(x, y, 28, "none", ` stroke="${C.encre}" stroke-width="7"`) + cercle(x, y, 7, C.encre) + chemin(`M${x - 26} ${y + 4}L${x - 7} ${y + 2}M${x + 26} ${y + 4}L${x + 7} ${y + 2}M${x} ${y + 7}V${y + 27}`, C.encre, 6);
-const ethylo = (x, y) => rect(x - 14, y - 30, 28, 56, C.encre, 6) + rect(x - 9, y - 22, 18, 12, "#8FD1A8", 2) + rect(x - 3, y - 44, 6, 16, "#fff", 2, ` stroke="${C.encre}" stroke-width="2"`) + cercle(x, y + 10, 5, C.rouge);
-const papiers = (x, y) => rect(x, y + 14, 70, 46, C.bleuC, 6, ` stroke="${C.encre}" stroke-width="2"`) + rect(x + 20, y + 6, 70, 46, "#FFF1C9", 6, ` stroke="${C.encre}" stroke-width="2"`) + permis(x + 44, y, 70, 44);
-const tableau = (x, y) => rect(x, y, 140, 70, C.encre, 12) + cercle(x + 40, y + 35, 24, "#24364A") + cercle(x + 100, y + 35, 24, "#24364A") + rect(x + 58, y + 50, 24, 16, "#3A4654", 4) + forme(`M${x + 70} ${y + 52}l6 11h-12z`, C.rouge);
-const echappement = (x, y) => rect(x - 50, y - 9, 70, 18, C.gris, 6) + rect(x + 16, y - 6, 26, 12, "#7C8794", 4) + [0, 1, 2].map(k => chemin(`M${x + 52 + k * 10} ${y - 14 + k * 2}q8 14 0 28`, C.orange, 3)).join("");
-const disque = (x, y) => cercle(x, y, 32, "#B9C2CC", ` stroke="${C.encre}" stroke-width="3"`) + cercle(x, y, 10, C.encre) + forme(`M${x + 18} ${y - 26}h16v26h-16z`, C.rouge);
-const retro = (x, y) => forme(`M${x - 26} ${y - 14}h52a8 8 0 0 1 8 8v12a8 8 0 0 1 -8 8h-52a8 8 0 0 1 -8 -8v-12a8 8 0 0 1 8 -8z`, C.encre) + rect(x - 22, y - 9, 44, 18, C.bleuC, 4) + rect(x - 3, y + 14, 6, 12, C.encre);
-const parebrise = (x, y) => forme(`M${x - 80} ${y + 40}l20 -60h120l20 60z`, C.bleuC, ` stroke="${C.encre}" stroke-width="4"`) + chemin(`M${x - 30} ${y + 36}l40 -34M${x + 18} ${y + 36}l40 -34`, C.encre, 3);
-const salle = (x, y) => rect(x, y, 120, 70, "#2F5D3A", 6) + rect(x + 6, y + 6, 108, 58, "#3E7A4C", 4) + chemin(`M${x + 20} ${y + 24}h50M${x + 20} ${y + 38}h70M${x + 20} ${y + 52}h40`, "#E9F0E6", 3) + [0, 1, 2, 3].map(k => cercle(x + 14 + k * 30, y + 92, 9, k % 2 ? C.orange : C.bleu)).join("");
-const gateau = (x, y) => rect(x - 32, y - 6, 64, 34, "#F7D9E3", 6, ` stroke="${C.encre}" stroke-width="2.5"`) + rect(x - 32, y + 6, 64, 6, C.rouge) + [-14, 0, 14].map(d => rect(x + d - 2, y - 22, 4, 16, C.bleu, 2) + cercle(x + d, y - 25, 3.5, C.jaune)).join("");
-const usine = (x, y) => rect(x, y, 110, 60, C.bati, 4) + rect(x + 10, y + 26, 30, 34, C.batiF, 2) + rect(x + 52, y + 14, 48, 22, "#fff", 3) + chemin(`M${x + 58} ${y + 20}h30M${x + 58} ${y + 28}h22`, C.vert, 3);
+const trousse0 = (x, y) => rect(x - 30, y - 22, 60, 44, "#fff", 8, ` stroke="${C.encre}" stroke-width="3"`) + rect(x - 5, y - 14, 10, 28, C.rouge) + rect(x - 14, y - 5, 28, 10, C.rouge) + rect(x - 10, y - 30, 20, 8, C.encre, 3);
+const volant0 = (x, y) => cercle(x, y, 28, "none", ` stroke="${C.encre}" stroke-width="7"`) + cercle(x, y, 7, C.encre) + chemin(`M${x - 26} ${y + 4}L${x - 7} ${y + 2}M${x + 26} ${y + 4}L${x + 7} ${y + 2}M${x} ${y + 7}V${y + 27}`, C.encre, 6);
+const ethylo0 = (x, y) => rect(x - 14, y - 30, 28, 56, C.encre, 6) + rect(x - 9, y - 22, 18, 12, "#8FD1A8", 2) + rect(x - 3, y - 44, 6, 16, "#fff", 2, ` stroke="${C.encre}" stroke-width="2"`) + cercle(x, y + 10, 5, C.rouge);
+const papiers0 = (x, y) => rect(x, y + 14, 70, 46, C.bleuC, 6, ` stroke="${C.encre}" stroke-width="2"`) + rect(x + 20, y + 6, 70, 46, "#FFF1C9", 6, ` stroke="${C.encre}" stroke-width="2"`) + permis0(x + 44, y, 70, 44);
+const tableau0 = (x, y) => rect(x, y, 140, 70, C.encre, 12) + cercle(x + 40, y + 35, 24, "#24364A") + cercle(x + 100, y + 35, 24, "#24364A") + rect(x + 58, y + 50, 24, 16, "#3A4654", 4) + forme(`M${x + 70} ${y + 52}l6 11h-12z`, C.rouge);
+const echappement0 = (x, y) => rect(x - 50, y - 9, 70, 18, C.gris, 6) + rect(x + 16, y - 6, 26, 12, "#7C8794", 4) + [0, 1, 2].map(k => chemin(`M${x + 52 + k * 10} ${y - 14 + k * 2}q8 14 0 28`, C.orange, 3)).join("");
+const disque0 = (x, y) => cercle(x, y, 32, "#B9C2CC", ` stroke="${C.encre}" stroke-width="3"`) + cercle(x, y, 10, C.encre) + forme(`M${x + 18} ${y - 26}h16v26h-16z`, C.rouge);
+const retro0 = (x, y) => forme(`M${x - 26} ${y - 14}h52a8 8 0 0 1 8 8v12a8 8 0 0 1 -8 8h-52a8 8 0 0 1 -8 -8v-12a8 8 0 0 1 8 -8z`, C.encre) + rect(x - 22, y - 9, 44, 18, C.bleuC, 4) + rect(x - 3, y + 14, 6, 12, C.encre);
+const parebrise0 = (x, y) => forme(`M${x - 80} ${y + 40}l20 -60h120l20 60z`, C.bleuC, ` stroke="${C.encre}" stroke-width="4"`) + chemin(`M${x - 30} ${y + 36}l40 -34M${x + 18} ${y + 36}l40 -34`, C.encre, 3);
+const salle0 = (x, y) => rect(x, y, 120, 70, "#2F5D3A", 6) + rect(x + 6, y + 6, 108, 58, "#3E7A4C", 4) + chemin(`M${x + 20} ${y + 24}h50M${x + 20} ${y + 38}h70M${x + 20} ${y + 52}h40`, "#E9F0E6", 3) + [0, 1, 2, 3].map(k => cercle(x + 14 + k * 30, y + 92, 9, k % 2 ? C.orange : C.bleu)).join("");
+const gateau0 = (x, y) => rect(x - 32, y - 6, 64, 34, "#F7D9E3", 6, ` stroke="${C.encre}" stroke-width="2.5"`) + rect(x - 32, y + 6, 64, 6, C.rouge) + [-14, 0, 14].map(d => rect(x + d - 2, y - 22, 4, 16, C.bleu, 2) + cercle(x + d, y - 25, 3.5, C.jaune)).join("");
+const usine0 = (x, y) => rect(x, y, 110, 60, C.bati, 4) + rect(x + 10, y + 26, 30, 34, C.batiF, 2) + rect(x + 52, y + 14, 48, 22, "#fff", 3) + chemin(`M${x + 58} ${y + 20}h30M${x + 58} ${y + 28}h22`, C.vert, 3);
+
+// mêmes icônes, avec leur nom en dessous (lab = false pour l'enlever)
+function permis(x, y, w = 96, h = 60, barre = false, lab = true) { return permis0(x, y, w, h, barre) + (lab ? etiq(x + w / 2, y + h + 17, "Permis", "رخصة السياقة") : ""); }
+function contravention(x, y, lab = true) { return contravention0(x, y) + (lab ? etiq(x + 31, y + 94, "Amende", "خطية") : ""); }
+function calendrier(x, y, w = 70, h = 64, lab = true) { return calendrier0(x, y, w, h) + (lab ? etiq(x + w / 2, y + h + 17, "Durée", "المدة") : ""); }
+function verre(x, y, lab = true) { return verre0(x, y) + (lab ? etiq(x, y + 41, "Alcool", "الكحول") : ""); }
+function marteau(x, y, lab = true) { return marteau0(x, y) + (lab ? etiq(x - 5, y + 48, "Tribunal", "المحكمة") : ""); }
+function jaugePoints(x, y, w = 120, part = 0.7, lab = true) { return jaugePoints0(x, y, w, part) + (lab ? etiq(x + w / 2 - 7, y + 38, "Points", "النقاط") : ""); }
+function horloge(x, y, r = 26, lab = true) { return horloge0(x, y, r) + (lab ? etiq(x, y + r + 17, "Temps", "الوقت") : ""); }
+function telephone(x, y, s = 1, lab = true) { return telephone0(x, y, s) + (lab ? etiq(x, y + 26 * s + 17, "Téléphone", "الهاتف") : ""); }
+function volant(x, y, lab = true) { return volant0(x, y) + (lab ? etiq(x, y + 47, "Conduite", "السياقة") : ""); }
+function pilule(x, y, lab = true) { return pilule0(x, y) + (lab ? etiq(x, y + 42, "Médicament", "دواء") : ""); }
+function trousse(x, y, lab = true) { return trousse0(x, y) + (lab ? etiq(x, y + 40, "Secours", "إسعاف") : ""); }
+function ethylo(x, y, lab = true) { return ethylo0(x, y) + (lab ? etiq(x, y + 46, "Alcootest", "كاشف الكحول") : ""); }
+function gateau(x, y, lab = true) { return gateau0(x, y) + (lab ? etiq(x, y + 46, "Âge", "السن") : ""); }
+function salle(x, y, lab = true) { return salle0(x, y) + (lab ? etiq(x + 60, y + 120, "Stage", "دورة تحسيسية") : ""); }
+function usine(x, y, lab = true) { return usine0(x, y) + (lab ? etiq(x + 55, y + 78, "Visite technique", "الفحص الفني") : ""); }
+function papiers(x, y, lab = true) { return papiers0(x, y) + (lab ? etiq(x + 57, y + 78, "Papiers", "الوثائق") : ""); }
+function pneu(x, y, r = 34, lab = true) { return pneu0(x, y, r) + (lab ? etiq(x, y + r + 17, "Pneu", "العجلة") : ""); }
+function bande(x, y, w = 90, h = 120, lab = true) { return bande0(x, y, w, h) + (lab ? etiq(x + w / 2, y + h + 17, "Pneu", "العجلة") : ""); }
+function disque(x, y, lab = true) { return disque0(x, y) + (lab ? etiq(x, y + 50, "Freins", "الفرامل") : ""); }
+function retro(x, y, lab = true) { return retro0(x, y) + (lab ? etiq(x, y + 44, "Rétroviseur", "المرآة العاكسة") : ""); }
+function parebrise(x, y, lab = true) { return parebrise0(x, y) + (lab ? etiq(x, y + 60, "Pare-brise", "البلور الأمامي") : ""); }
+function echappement(x, y, lab = true) { return echappement0(x, y) + (lab ? etiq(x - 10, y + 32, "Échappement", "كاتم الصوت") : ""); }
+function tableau(x, y, lab = true) { return tableau0(x, y) + (lab ? etiq(x + 70, y + 88, "Tableau de bord", "لوحة القيادة") : ""); }
 
 /* ---------------- éléments de route ---------------- */
 const passagePietons = (x, y, w = 40, h = 80, vertical = true) => { let s = ""; if (vertical) for (let k = 0; k < 7; k++) s += rect(x, y + 4 + k * (h / 7), w, h / 14, "#fff", 1); else for (let k = 0; k < 7; k++) s += rect(x + 4 + k * (w / 7), y, w / 14, h, "#fff", 1); return s; };
@@ -208,7 +262,7 @@ S["q-vehicule-lent"] = () => fond() + campagne() + routeH(72, 56) + tracteur(200
 // 4. Vitesse et distances
 S["q-vitesse-agglo"] = () => fond() + ville() + trottoirsH(70, 60) + routeH(70, 60) + tiretsH(100) + voiture(70, 112, 90) + carte(196, 64, 108, 74) + compteur(250, 118, 36);
 S["q-vitesse-route"] = () => fond() + campagne() + routeH(70, 60) + tiretsH(100) + voiture(70, 112, 90) + carte(196, 64, 108, 74) + compteur(250, 118, 36);
-S["q-vitesse-autoroute"] = () => fond() + routeH(30, 140) + rect(0, 96, 320, 8, "#B9C2CC") + tiretsH(63) + tiretsH(137) + panneau("F-autoroute", 40, 18, 26, false) + voiture(80, 150, 90) + carte(196, 108, 108, 74) + compteur(250, 162, 36);
+S["q-vitesse-autoroute"] = () => fond() + routeH(30, 140) + rect(0, 96, 320, 8, "#B9C2CC") + tiretsH(63) + tiretsH(137) + panneau("F-autoroute", 40, 18, 26, false) + voiture(80, 150, 90) + carte(196, 96, 108, 70) + compteur(250, 146, 34);
 S["q-vitesse-mini-autoroute"] = () => fond() + routeH(30, 140) + rect(0, 96, 320, 8, "#B9C2CC") + tiretsH(63) + tiretsH(137) + voiture(80, 150, 90) + voiture(200, 120, 90, "orange") + forme("M60 158l-30 0", "none") + chemin("M54 150h-30M54 158h-22", C.gris, 3) + interro(150, 66);
 S["q-pluie-autoroute"] = () => fond("#DCE6EE") + routeH(30, 140) + rect(0, 96, 320, 8, "#B9C2CC") + tiretsH(63) + tiretsH(137) + voiture(120, 150, 90) + voiture(230, 120, 90, "gris") + pluie() + interro(270, 60);
 S["q-brouillard-agglo"] = () => fond() + ville() + trottoirsH(70, 60) + routeH(70, 60) + tiretsH(100) + voiture(120, 112, 90) + phares(120, 112, 90, 50, 18) + brouillard() + interro(260, 100);
@@ -218,8 +272,8 @@ S["q-cyclomoteur"] = () => fond() + campagne() + routeH(70, 60) + tiretsH(100) +
 S["q-distance-securite"] = () => fond() + routeH(60, 80) + tiretsH(100) + voiture(70, 120, 90) + voiture(230, 120, 90, "orange") + cote(84, 150, 216, 150);
 S["q-ralentir"] = () => fond() + ville() + trottoirsH(70, 60) + routeH(70, 60) + passagePietons(180, 70, 36, 60) + pieton(198, 88) + pieton(192, 112, C.bleu) + panneau("A-pietons", 250, 36, 30) + voiture(80, 112, 90);
 // 5. Arrêt et stationnement
-S["q-arret-stationnement"] = () => fond() + ville() + rect(0, 60, 320, 14, C.trottoir) + routeH(74, 76) + voiture(90, 92, 90) + cercle(100, 92, 4, C.jaune) + voiture(220, 92, 90, "gris") + horloge(260, 160, 18) + interro(160, 160);
-S["q-stationnement-abusif"] = () => fond() + ville() + rect(0, 60, 320, 14, C.trottoir) + routeH(74, 76) + voiture(80, 92, 90, "gris") + calendrier(150, 112, 70, 64) + interro(260, 145);
+S["q-arret-stationnement"] = () => fond() + ville() + rect(0, 60, 320, 14, C.trottoir) + routeH(74, 76) + voiture(90, 92, 90) + cercle(100, 92, 4, C.jaune) + voiture(220, 92, 90, "gris") + horloge(260, 160, 18, false);
+S["q-stationnement-abusif"] = () => fond() + ville() + rect(0, 60, 320, 14, C.trottoir) + routeH(74, 76) + voiture(80, 92, 90, "gris") + calendrier(150, 104, 60, 44);
 S["q-se-garer-double-sens"] = () => fond() + ville() + trottoirsH(70, 60) + routeH(70, 60) + tiretsH(100) + voiture(120, 112, 90) + fleche([[60, 112], [96, 112]]) + voiture(250, 84, -90, "orange") + interro(160, 150);
 S["q-accotement"] = () => fond() + campagne() + rect(0, 120, 320, 30, "#C9B99A") + routeH(60, 60) + tiretsH(90) + voiture(160, 102, 90) + interro(200, 160);
 S["q-arret-intersection"] = () => fond() + ville() + carrefour() + voiture(160, 120 - 26, 0, "gris") + rect(122, 60, 4, 80, "#fff") + voiture(80, 128, 90, "gris") + cote(52, 150, 120, 150);
@@ -227,9 +281,9 @@ S["q-arret-passage-niveau"] = () => fond() + campagne() + routeH(60, 80) + tiret
 S["q-virage-visibilite"] = () => fond() + campagne() + forme("M0 70H180Q260 70 260 150V200H180V150Q180 140 170 140H0z", C.route) + immeuble(196, 0, 120, 60) + voiture(220, 160, 0, "gris") + voiture(60, 105, 90) + interro(150, 40);
 S["q-stationnements-genants"] = () => fond() + ville() + rect(0, 54, 320, 22, C.trottoir) + routeH(76, 74) + voiture(90, 66, 90, "gris") + rect(200, 54, 40, 22, "#B7A88F") + voiture(220, 96, 90, "gris") + voiture(150, 128, 90, "orange") + interro(270, 140);
 S["q-arret-passage-pietons"] = () => fond() + ville() + rect(0, 60, 320, 14, C.trottoir) + routeH(74, 76) + passagePietons(200, 74, 36, 76) + voiture(150, 92, 90, "gris") + cote(166, 150, 198, 150);
-S["q-stationnement-alterne"] = () => fond() + ville() + trottoirsH(70, 60) + routeH(70, 60) + panneau("E-stationnement", 270, 40, 30) + voiture(100, 82, 90, "gris") + calendrier(140, 110, 60, 56) + horloge(240, 150, 20);
+S["q-stationnement-alterne"] = () => fond() + ville() + trottoirsH(70, 60) + routeH(70, 60) + panneau("E-stationnement", 270, 40, 30) + voiture(100, 82, 90, "gris") + calendrier(130, 104, 50, 42, false) + horloge(230, 140, 18, false);
 S["q-ouvrir-portiere"] = () => fond() + rect(0, 50, 320, 20, C.trottoir) + routeH(70, 90) + voiture(150, 90, 90) + forme("M140 101l-22 22l-4 -4l20 -20z", C.bleu) + velo(60, 124, 90, C.orange) + fleche([[80, 124], [104, 124]], C.orange, 3);
-S["q-bande-arret-urgence"] = () => fond() + routeH(20, 130) + rect(0, 120, 320, 4, "#fff") + rect(0, 124, 320, 26, "#7C8794") + tiretsH(70) + voiture(200, 137, 90) + telephone(60, 175, 0.7) + horloge(110, 175, 14) + interro(270, 175, 11);
+S["q-bande-arret-urgence"] = () => fond() + routeH(20, 130) + rect(0, 120, 320, 4, "#fff") + rect(0, 124, 320, 26, "#7C8794") + tiretsH(70) + voiture(200, 137, 90) + telephone(40, 175, 0.6, false) + horloge(85, 175, 14, false);
 // 6. Feux, éclairage, avertisseurs
 S["q-feux-obligatoires"] = () => fond(C.nuit) + routeH(60, 80, C.routeNuit) + tiretsH(100, 0, 320, "#9AA5B1") + lune(270, 30) + voiture(80, 120, 90) + interro(200, 160);
 S["q-suivre-nuit"] = () => fond(C.nuit) + routeH(60, 80, C.routeNuit) + tiretsH(100, 0, 320, "#9AA5B1") + lune(270, 30) + voiture(100, 120, 90) + voiture(170, 120, 90, "orange") + phares(100, 120, 90, 30, 16) + interro(240, 160);
@@ -246,13 +300,13 @@ S["q-taux-alcool"] = () => fond() + verre(90, 100) + voiture(200, 100, 0, "bleu"
 S["q-peine-alcool"] = () => fond() + verre(80, 100) + marteau(210, 90);
 S["q-refus-depistage"] = () => fond() + ethylo(110, 110) + agent(220, 130, "cote", 1.3) + interro(280, 40);
 S["q-retrait-alcool"] = () => fond() + verre(70, 100) + permis(140, 60, 120, 76) + calendrier(250, 128, 50, 46);
-S["q-agent-retrait"] = () => fond() + agent(80, 124, "cote", 1.3) + permis(150, 40, 120, 76) + verre(270, 160);
+S["q-agent-retrait"] = () => fond() + agent(70, 124, "cote", 1.3) + permis(140, 30, 110, 70) + verre(275, 110);
 S["q-fatigue"] = () => fond() + volant(110, 110) + lune(220, 70) + zzz(230, 130);
 S["q-medicament"] = () => fond() + pilule(100, 100) + volant(220, 110);
 S["q-telephone"] = () => fond() + volant(110, 110) + telephone(230, 100);
 S["q-camion-pause"] = () => fond() + routeH(100, 60) + tiretsH(130) + camion(140, 130, 90) + horloge(250, 60, 28);
 S["q-points-alcool"] = () => fond() + verre(70, 100) + jaugePoints(150, 92, 130, 0.45);
-S["q-accident-alcool"] = () => fond() + routeH(60, 80) + voiture(120, 100, 70, "orange") + voiture(165, 106, -60, "bleu") + coup(143, 100) + verre(270, 150).replace(/scale/, "scale") + marteau(60, 160).replace(/scale/, "scale");
+S["q-accident-alcool"] = () => fond() + routeH(60, 80) + voiture(120, 100, 70, "orange") + voiture(165, 106, -60, "bleu") + coup(143, 100) + marteau(60, 165, false) + etiq(145, 162, "Tribunal", "المحكمة") + verre(225, 170, false) + etiq(282, 162, "Alcool", "الكحول");
 // 8. Mécanique et entretien
 S["q-temoin-usure"] = () => fond() + bande(115, 40, 90, 120) + rect(115, 96, 90, 8, "#4B5563") + interro(250, 100);
 S["q-mesure-pneu"] = () => fond() + pneu(110, 100, 60) + [0, 90, 180, 270].map(a => cercle(110 + 48 * Math.cos(a * Math.PI / 180), 100 + 48 * Math.sin(a * Math.PI / 180), 7, C.jaune)).join("") + interro(230, 100);
@@ -275,24 +329,24 @@ S["q-triangle-route"] = () => fond() + campagne() + routeH(60, 80) + tiretsH(100
 S["q-triangle-autoroute"] = () => fond() + routeH(30, 130) + rect(0, 130, 320, 4, "#fff") + rect(0, 134, 320, 26, "#7C8794") + tiretsH(80) + voiture(260, 147, 90) + triangle(80, 147, 0.8) + cote(92, 178, 246, 178);
 S["q-panne-autoroute"] = () => fond() + routeH(30, 130) + rect(0, 130, 320, 4, "#fff") + rect(0, 134, 320, 26, "#7C8794") + tiretsH(80) + voiture(180, 147, 90) + clignote(196, 138) + voiture(80, 110, 90, "orange") + interro(270, 60);
 S["q-enlever-vehicule"] = () => fond() + routeH(60, 80) + tiretsH(100) + voiture(130, 120, 70, "gris") + coup(140, 104) + calendrier(210, 20, 70, 64);
-S["q-delit-fuite"] = () => fond() + routeH(60, 80) + voiture(150, 100, 90) + fleche([[175, 100], [260, 100]], C.bleu, 3) + pieton(110, 120, C.rouge) + coup(118, 112) + marteau(250, 160);
+S["q-delit-fuite"] = () => fond() + routeH(60, 80) + voiture(150, 100, 90) + fleche([[175, 100], [260, 100]], C.bleu, 3) + pieton(110, 120, C.rouge) + coup(118, 112) + marteau(200, 165, false) + etiq(276, 160, "Tribunal", "المحكمة");
 // 10. Infractions et sanctions
 S["q-capital-points"] = () => fond() + permis(40, 52, 110, 70) + jaugePoints(180, 80, 110, 1);
 S["q-points-vitesse"] = () => fond() + carte(30, 50, 120, 100) + compteur(90, 118, 42) + jaugePoints(185, 90, 110, 0.6) + chemin("M300 70v-26M290 60l10 10 10 -10", C.rouge, 4);
 S["q-recuperer-points"] = () => fond() + calendrier(40, 60, 90, 84) + jaugePoints(170, 92, 120, 0.8) + chemin("M300 110v-26M290 94l10 -10 10 10", C.vert, 4);
 S["q-stage-points"] = () => fond() + salle(40, 40) + jaugePoints(190, 92, 110, 0.7) + chemin("M310 110v-26M300 94l10 -10 10 10", C.vert, 4);
-S["q-points-perdus"] = () => fond() + permis(40, 52, 110, 70, true) + jaugePoints(190, 80, 100, 0.02) + calendrier(205, 120, 60, 56);
+S["q-points-perdus"] = () => fond() + permis(20, 40, 100, 64, true) + jaugePoints(165, 40, 130, 0.02) + calendrier(200, 106, 50, 42);
 S["q-amende-15-jours"] = () => fond() + contravention(60, 60) + calendrier(170, 64, 90, 84);
-S["q-amende-un-mois"] = () => fond() + contravention(40, 60) + calendrier(120, 64, 70, 64) + permis(210, 74, 90, 56);
+S["q-amende-un-mois"] = () => fond() + contravention(30, 50) + calendrier(120, 58, 70, 64) + permis(215, 64, 90, 56);
 S["q-amende-vitesse"] = () => fond() + carte(30, 50, 120, 100) + compteur(90, 118, 42) + contravention(200, 60);
-S["q-sanction-depassement"] = () => fond() + routeH(40, 80) + ligneContinue(80) + voiture(80, 100, 90, "orange") + voiture(100, 60, 70) + fleche([[120, 60], [180, 60], [200, 96]], C.bleu, 3, true) + marteau(250, 160);
+S["q-sanction-depassement"] = () => fond() + routeH(40, 80) + ligneContinue(80) + voiture(80, 100, 90, "orange") + voiture(100, 60, 70) + fleche([[120, 60], [180, 60], [200, 96]], C.bleu, 3, true) + marteau(200, 165, false) + etiq(276, 160, "Tribunal", "المحكمة");
 S["q-sans-permis"] = () => fond() + permis(40, 60, 120, 76, true) + volant(240, 100);
 S["q-sens-inverse-autoroute"] = () => fond() + routeH(20, 70) + rect(0, 90, 320, 16, "#9CC79A") + routeH(106, 70) + tiretsH(55) + tiretsH(141) + voiture(80, 40, 90, "gris") + voiture(220, 72, 90, "gris") + voiture(160, 123, -90, "gris") + voiture(170, 72, -90) + chemin("M150 72h-30", C.rouge, 4) + interro(260, 160);
 S["q-age-permis"] = () => fond() + permis(40, 60, 120, 76) + gateau(240, 110);
 
 // questions vérifiées et publiées le 05/10/2026
 S["q-panneau-50"] = () => fond() + campagne() + routeH(110, 70) + tiretsH(145) + panneau("C-vitesse", 160, 52, 64) + voiture(60, 162, 90);
-S["q-amende-telephone"] = () => fond() + volant(80, 104) + telephone(165, 100) + contravention(220, 60);
+S["q-amende-telephone"] = () => fond() + volant(60, 96) + telephone(160, 92) + contravention(225, 44);
 S["q-ceinture"] = () => fond() + ville().slice(0, 0) + immeuble(14, 20, 44, 40) + immeuble(64, 20, 34, 40) + panneau("F-autoroute", 270, 40, 34, false) + routeH(110, 60) + tiretsH(140) + `<g transform="translate(160 140) rotate(90) scale(1.9)">${rect(-11, -19, 22, 38, C.bleu, 6)}${cercle(-5, -2, 3.5, "#fff")}${cercle(5, -2, 3.5, "#fff")}${cercle(-5, 9, 3.5, "#fff")}${cercle(5, 9, 3.5, "#fff")}</g>` + interro(160, 52, 12);
 S["q-numero-samu"] = () => fond() + telephone(90, 100, 1.5) + ambulance(220, 100, 90) + interro(90, 92, 12);
 S["q-alcool-stagiaire"] = () => fond() + verre(80, 100) + permis(140, 64, 120, 76) + interro(270, 50);
@@ -337,9 +391,13 @@ const seuls = process.argv.slice(2);
 let n = 0;
 for (const [nom, f] of Object.entries(S)) {
   if (seuls.length && !seuls.includes(nom)) continue;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">${f()}</svg>`;
+  vousPresent = false; modelesUtilises.clear();
+  const dessin = f();
+  const defs = modelesUtilises.size ? `<defs>${[...modelesUtilises].map(modeleVoiture).join("")}</defs>` : "";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">${defs}${dessin}${vousPresent ? vous(...(POS_VOUS[nom] || [])) : ""}</svg>`;
   writeFileSync(join(ILL, nom + ".svg"), svg, "utf8"); n++;
 }
+if (!existsSync(SOURCE)) { console.log(`${n} schémas dessinés (fichier des questions absent : liens non mis à jour)`); process.exit(0); }
 const questions = JSON.parse(readFileSync(SOURCE, "utf8"));
 let lies = 0;
 for (const q of questions) if (ASSOC[q.id]) { if (!S[ASSOC[q.id]]) throw new Error("schéma inconnu : " + ASSOC[q.id]); q.image = ASSOC[q.id] + ".svg"; lies++; }
