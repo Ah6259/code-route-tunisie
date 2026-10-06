@@ -58,7 +58,7 @@ check("au moins 3 questions publiées par thème (pour l'examen)", [1,2,3,4,5,6,
 // ---- 2. Pages chargées comme un navigateur ---------------------------------------
 // Pass Examen actif dans le navigateur (code factice gardé sur l'appareil, date de fin lointaine)
 const PASS_TEST = JSON.stringify({ code: "ABCDEF23", fin: "2099-12-31", verifie: "2099-12-31" });
-async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false, pass = false } = {}) {
+async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false, pass = false, examenFait = false } = {}) {
   const dossier = dirname(join(root, chemin));
   // (les scripts externes, comme GoatCounter, ne sont pas chargés)
   const html = lire(chemin).replace(/<script([^>]*) src="(?!https?:)([^"?]+)(\?[^"]*)?"([^>]*)><\/script>/g,
@@ -70,7 +70,8 @@ async function page(chemin, { lang = "fr", query = "", stockage = null, fichier 
     url: fichier ? `${pathToFileURL(join(root, chemin)).href}?lang=${lang}${query}` : `https://ah6259.github.io/code-route-tunisie/${chemin.replace("index.html", "")}?lang=${lang}${query}`,
     runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: vc,
     beforeParse(w) { if (stockage) w.localStorage.setItem("crt-progression-v1", typeof stockage === "string" ? stockage : JSON.stringify(stockage));
-      if (pass) w.localStorage.setItem("crt-pass-v1", PASS_TEST); }
+      if (pass) w.localStorage.setItem("crt-pass-v1", PASS_TEST);
+      if (examenFait) { const n = new Date(); w.localStorage.setItem("crt-examen-gratuit-v1", n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0")); } }
   });
   await new Promise(ok => dom.window.addEventListener("load", ok));
   dom.window.fautes = fautes;
@@ -104,7 +105,7 @@ check("accueil en arabe : date isolée et identique", texte(d.querySelector("[da
 // -- logique de l'examen
 w = await page("examen/index.html"); d = w.document;
 check("examen : aucune erreur JavaScript", w.fautes.length === 0);
-check("examen : encart Pass Examen visible DÈS L'ARRIVÉE, avant de commencer (prix, essai, lien vers pass/, « J'ai déjà un code »)", (() => { const o = d.getElementById("offre-pass-examen"), q = d.getElementById("quiz"); return !!o && q.firstElementChild === o && /Dès 9 DT/.test(o.textContent) && /essai gratuit/.test(o.textContent) && !!o.querySelector('a[href="../pass/"]') && !!o.querySelector('a[href="../pass/#code-acces"]'); })());
+check("examen, examen gratuit du jour PAS encore fait : aucun bouton ni encart Pass (règle d'Ahmed)", !d.getElementById("offre-pass-examen") && !d.querySelector("#entete a.entete-pass") && !d.querySelector('#quiz a[href="../pass/"]'));
 const tirerExamen = w.eval("tirerExamen"), noter = w.eval("noter"), estJuste = w.eval("estJuste"), EX = w.eval("EXAMEN");
 check("examen : 30 questions, réussite à 24", EX.nb === 30 && EX.seuil === 24);
 const exclues = new Set(toutes.filter(q => q.a_verifier).map(q => q.id).concat(QUESTIONS_INFO.exclues));
@@ -557,58 +558,31 @@ async function passExamen() {
   check("conditions : vendeur « l'éditeur du site », prix, essai 2 jours, pas de renouvellement, aucune période payée remboursée, INPDP",
     ["l'éditeur du site", "9 DT pour 7 jours", "19 DT pour 30 jours", "29 DT pour 90 jours", "2 jours d'essai gratuit", "Aucun renouvellement automatique", "Aucune période payée n'est remboursée", "INPDP"].every(m => tc.includes(m)));
 
-  // -- bouton doré « Pass Examen » SEULEMENT sur les pages Examen et Pass (décision d'Ahmed : jamais sur l'accueil)
-  const mauvais = [];
-  for (const p of PAGES) { const wx = await page(p); const a = wx.document.querySelector("#entete a.entete-pass");
-    const doit = /^(examen|pass)\//.test(p);
-    if (doit !== !!a || (a && !new URL(a.getAttribute("href"), wx.location.href).href.endsWith("/code-route-tunisie/pass/"))) mauvais.push(p); }
-  check(`bouton doré « Pass Examen » dans l'en-tête des pages Examen et Pass seulement ${mauvais}`, mauvais.length === 0);
+  // -- bouton doré « Pass Examen » (règle d'Ahmed) : caché tant que l'examen gratuit du jour n'est pas fait ;
+  //    dès qu'il est fait : sur TOUTES les pages jusqu'au lendemain ; toujours sur les pages Pass ; avec un Pass actif : partout (coché)
+  const mauvais = [], mauvaisApres = [], mauvaisPass = [];
+  for (const p of PAGES) {
+    const avant = (await page(p)).document.querySelector("#entete a.entete-pass");
+    if (!!avant !== /^pass\//.test(p)) mauvais.push(p);
+    const wa = await page(p, { examenFait: true }); const apres = wa.document.querySelector("#entete a.entete-pass");
+    if (!apres || !new URL(apres.getAttribute("href"), wa.location.href).href.endsWith("/code-route-tunisie/pass/")) mauvaisApres.push(p);
+    if (!(await page(p, { pass: true })).document.querySelector("#entete a.entete-pass.actif")) mauvaisPass.push(p);
+  }
+  check(`examen gratuit pas encore fait : bouton Pass seulement sur les pages Pass ${mauvais}`, mauvais.length === 0);
+  check(`examen gratuit du jour fait : bouton Pass dans l'en-tête de TOUTES les pages ${mauvaisApres}`, mauvaisApres.length === 0);
+  check(`Pass actif : bouton « Pass » coché sur toutes les pages ${mauvaisPass}`, mauvaisPass.length === 0);
   w = await page("index.html"); d = w.document;
-  check("accueil : AUCUN bouton Pass Examen (ni bandeau, ni en-tête)", !d.getElementById("cta-pass") && !d.getElementById("cta-pass-zone") && !d.querySelector("#entete a.entete-pass"));
-  w = await page("index.html", { pass: true }); d = w.document;
-  check("accueil avec Pass : toujours aucun bouton Pass", !d.getElementById("cta-pass") && !d.querySelector("#entete a.entete-pass"));
+  check("accueil : pas de gros bouton Pass dans le bandeau", !d.getElementById("cta-pass") && !d.getElementById("cta-pass-zone"));
+  { const hier = await page("index.html"); hier.localStorage.setItem("crt-examen-gratuit-v1", "2000-01-01");
+    check("le lendemain : examen gratuit de nouveau disponible, donc plus de bouton Pass", hier.eval("accesExamen()") === "gratuit"); }
 
-  // -- vérification d'un code dans le navigateur (empreinte PBKDF2-SHA-256 salée)
-  const SEL = "sel-de-test", TOURS = 1000;
-  const h = c => pbkdf2Sync(c, SEL, TOURS, 32, "sha256").toString("hex");
-  const LISTE = { maj: "2026-10-06", sel: SEL, tours: TOURS, codes: [{ h: h("ABCD2345"), fin: "2099-12-31" }, { h: h("EFGH6789"), fin: "2020-01-01" }] };
-  const avecReseau = (wx, liste, panne) => { Object.defineProperty(wx, "crypto", { value: webcrypto, configurable: true });
-    wx.fetch = () => panne ? Promise.reject(new TypeError("Failed to fetch")) : Promise.resolve({ ok: true, status: 200, json: async () => JSON.parse(JSON.stringify(liste)) }); };
-  w = await page("pass/index.html"); d = w.document; avecReseau(w, LISTE);
-  check("empreinte JS = empreinte Python du robot (même vecteur de test, 100 000 tours)",
-    await w.eval('empreinteCode("ABCD2345", "sel-de-test", 100000)') === "517bf9a9ea3ad38b3adcbeef5808d4efe420fbf10a2b7bd9179640f4d1c7c2dd");
-  const r = await w.eval('verifierCode("abcd-2345")');
-  check("code valide (tapé en minuscules avec un tiret) : accepté", r.etat === "ok" && r.fin === "2099-12-31");
-  check("code expiré : refusé « expire »", (await w.eval('verifierCode("EFGH6789")')).etat === "expire");
-  check("code faux : refusé « inconnu »", (await w.eval('verifierCode("ZZZZ2222")')).etat === "inconnu");
-  check("code mal formé (O, 0, I, 1 ou longueur) : refusé « forme »", (await w.eval('verifierCode("ABCD0O1I")')).etat === "forme" && (await w.eval('verifierCode("ABC")')).etat === "forme");
-  const cf = d.getElementById("code-form");
-  cf.querySelector("input[name=code]").value = "abcd 2345";
-  cf.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(200);
-  check("page pass/ : code accepté -> message, Pass gardé sur l'appareil, état « actif » affiché, en-tête coché",
-    d.getElementById("code-status").className === "ok" && JSON.parse(w.localStorage.getItem("crt-pass-v1")).fin === "2099-12-31" && w.eval("passActif()") &&
-    !d.getElementById("pass-etat").hidden && !!d.querySelector(".entete-pass.actif"));
-  cf.querySelector("input[name=code]").value = "ZZZZ2222";
-  cf.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(200);
-  check("page pass/ : code faux -> message d'erreur", d.getElementById("code-status").className === "err" && /non reconnu/.test(texte(d.getElementById("code-status"))));
-  avecReseau(w, LISTE, true);
-  check("pas de connexion : « reseau », rien n'est effacé", (await w.eval('verifierCode("ABCD2345")')).etat === "reseau" && w.eval("passActif()"));
-  w.localStorage.setItem("crt-pass-v1", JSON.stringify({ code: "ABCD2345", fin: "2099-12-31", verifie: "2000-01-01" }));
-  avecReseau(w, { ...LISTE, codes: [] }); await w.eval("reverifierPass()");
-  check("revérification : code arrêté (absent de pass.json) -> effacé de l'appareil, retour au gratuit", !w.localStorage.getItem("crt-pass-v1") && !w.eval("passActif()"));
-  w.localStorage.setItem("crt-pass-v1", JSON.stringify({ code: "ABCD2345", fin: "2020-01-01", verifie: "2020-01-01" }));
-  avecReseau(w, LISTE); await w.eval("reverifierPass()");
-  check("revérification : code expiré sur l'appareil mais prolongé -> nouvelle date de fin", JSON.parse(w.localStorage.getItem("crt-pass-v1") || "{}").fin === "2099-12-31");
-  w.localStorage.setItem("crt-pass-v1", JSON.stringify({ code: "EFGH6789", fin: "2020-01-01", verifie: "2020-01-01" }));
-  await w.eval("reverifierPass()");
-  check("revérification : code expiré -> nettoyé de l'appareil", !w.localStorage.getItem("crt-pass-v1"));
   w = await page("index.html");
   { let n = 0; w.fetch = () => { n++; return Promise.reject(new Error("x")); }; await w.eval("reverifierPass()");
     check("aucun appel réseau au chargement d'une page sans code gardé", n === 0); }
 
   // -- 1 examen gratuit par jour (compté sur l'appareil)
   w = await page("examen/index.html"); d = w.document;
-  check("examen : « Examen gratuit du jour » annoncé, statistiques verrouillées", texte(d.getElementById("acces-examen")).includes("1 examen blanc gratuit par jour") && !!d.getElementById("stats-verrou") && !d.getElementById("stats"));
+  check("examen : « Examen gratuit du jour » annoncé, pas de statistiques sans Pass", texte(d.getElementById("acces-examen")).includes("1 examen blanc gratuit par jour") && !d.getElementById("stats"));
   w.localStorage.setItem("crt-examen-gratuit-v1", "2000-01-01");
   check("examen gratuit utilisé un AUTRE jour : de nouveau disponible", w.eval("accesExamen()") === "gratuit");
   w.localStorage.setItem("crt-examen-gratuit-v1", w.eval("aujourdhui()"));
