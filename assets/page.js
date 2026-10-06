@@ -42,7 +42,7 @@ const MENU_SITE = [
             <small>${T("Révision gratuite du permis", "مراجعة مجانية لرخصة السياقة")}</small></span>
         </a>
         <div class="entete-boutons">
-          <a class="entete-pass${typeof passActif === "function" && passActif() ? " actif" : ""}" href="${racine}pass/"><span class="long">${T("Pass Examen", "باقة الامتحان")}</span><span class="court">${T("Pass", "الباقة")}</span></a>
+          ${/\/(examen|pass)\//.test(location.pathname) ? `<a class="entete-pass${typeof passActif === "function" && passActif() ? " actif" : ""}" href="${racine}pass/"><span class="long">${T("Pass Examen", "باقة الامتحان")}</span><span class="court">${T("Pass", "الباقة")}</span></a>` : ""}
           <button class="langue" type="button">${T("العربية", "Français")}</button>
         </div>
       </div>

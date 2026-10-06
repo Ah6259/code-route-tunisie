@@ -557,15 +557,16 @@ async function passExamen() {
   check("conditions : vendeur « l'éditeur du site », prix, essai 2 jours, pas de renouvellement, aucune période payée remboursée, INPDP",
     ["l'éditeur du site", "9 DT pour 7 jours", "19 DT pour 30 jours", "29 DT pour 90 jours", "2 jours d'essai gratuit", "Aucun renouvellement automatique", "Aucune période payée n'est remboursée", "INPDP"].every(m => tc.includes(m)));
 
-  // -- bouton doré sur toutes les pages, gros bouton sur l'accueil
-  const sansBouton = [];
+  // -- bouton doré « Pass Examen » SEULEMENT sur les pages Examen et Pass (décision d'Ahmed : jamais sur l'accueil)
+  const mauvais = [];
   for (const p of PAGES) { const wx = await page(p); const a = wx.document.querySelector("#entete a.entete-pass");
-    if (!a || !new URL(a.getAttribute("href"), wx.location.href).href.endsWith("/code-route-tunisie/pass/") || !texte(a).includes("Pass")) sansBouton.push(p); }
-  check(`bouton doré « Pass Examen » dans l'en-tête de chaque page ${sansBouton}`, sansBouton.length === 0);
+    const doit = /^(examen|pass)\//.test(p);
+    if (doit !== !!a || (a && !new URL(a.getAttribute("href"), wx.location.href).href.endsWith("/code-route-tunisie/pass/"))) mauvais.push(p); }
+  check(`bouton doré « Pass Examen » dans l'en-tête des pages Examen et Pass seulement ${mauvais}`, mauvais.length === 0);
   w = await page("index.html"); d = w.document;
-  check("accueil : gros bouton doré Pass Examen en haut (bandeau) vers pass/", d.querySelector(".hero #cta-pass.btn-pass-grand")?.getAttribute("href") === "pass/");
+  check("accueil : AUCUN bouton Pass Examen (ni bandeau, ni en-tête)", !d.getElementById("cta-pass") && !d.getElementById("cta-pass-zone") && !d.querySelector("#entete a.entete-pass"));
   w = await page("index.html", { pass: true }); d = w.document;
-  check("accueil avec Pass : bouton « Pass Examen actif » et coche dans l'en-tête", texte(d.getElementById("cta-pass")).includes("Pass Examen actif") && !!d.querySelector(".entete-pass.actif"));
+  check("accueil avec Pass : toujours aucun bouton Pass", !d.getElementById("cta-pass") && !d.querySelector("#entete a.entete-pass"));
 
   // -- vérification d'un code dans le navigateur (empreinte PBKDF2-SHA-256 salée)
   const SEL = "sel-de-test", TOURS = 1000;
