@@ -157,3 +157,4 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   `../questions/questions-v1.sauvegarde-2026-10-06.json`. Détails : `../verification des questions 2026-10-05.md` (ajout du 06/10).
   **117 questions publiées**. Un test bloque toute question publiée sur les points.
 - Captures Edge 500 px : la CSP interdit `eval` → les actions de capture appellent les fonctions globales directement.
+- **Bouton « Partager »** (06/10/2026, demande d'Ahmed) : icône ronde `.partager` dans `.entete-boutons` de toutes les pages, juste avant le bouton de langue (page.js, FR+AR ; la règle d'affichage du bouton Pass est inchangée) ; menu de partage du téléphone (`navigator.share`), sinon WhatsApp (`wa.me`) avec l'adresse sans `#` ni `?lang` ; clic compté `partage/<page>` dans GoatCounter. Test : `boutonPartager()` dans test_site.mjs.

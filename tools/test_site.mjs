@@ -309,6 +309,7 @@ check("robot surveillance.yml : mensuel, groupe de concurrence, issue + commit",
 
 await nouvellesRubriques();
 await passExamen();
+await boutonPartager();
 // ---- Affichage : éléments cachés et faux boutons (06/10/2026) ----
 check("style : [hidden]{display:none!important} (écrans de l'examen, du Pass, messages : un display:flex/grid ne les fait jamais réapparaître)",
       /\[hidden\]\{display:none!important\}/.test(lire("assets/style.css").replace(/\s+/g, "")));
@@ -327,6 +328,27 @@ for (const p of PAGES) {
   const morts = tuilesSansLien(new JSDOM(lire(p)).window.document);
   check(`${p} : aucune carte avec une icône sans lien (pas de faux bouton)${morts.length ? " → " + morts.join(" | ") : ""}`, !morts.length);
 }
+// ---- Bouton « Partager » (demande d'Ahmed, 06/10/2026 : plus de partages entre visiteurs) ----
+async function boutonPartager() {
+  const ko = [];
+  for (const p of PAGES) for (const lang of ["fr", "ar"]) {
+    const wx = await page(p, { lang }), b = wx.document.querySelector("#entete button.partager");
+    if (!b || b.getAttribute("aria-label") !== (lang === "fr" ? "Partager cette page" : "شارك هذه الصفحة") || !b.querySelector("svg")) ko.push(p + " " + lang);
+  }
+  check(`en-tête : bouton « Partager » (« Partager cette page » / « شارك هذه الصفحة ») sur toutes les pages ${ko.join(", ")}`, ko.length === 0);
+  for (const p of [PAGES[0], PAGES[PAGES.length - 1]]) {
+    const wx = await page(p, { lang: "ar" }), ouverts = [], comptes = [];
+    wx.open = (...a) => { ouverts.push(a); return null; };
+    wx.goatcounter = { count: o => comptes.push(o) };
+    wx.document.querySelector("#entete button.partager").click();
+    await new Promise(ok => setTimeout(ok, 0));
+    const adresse = "https://ah6259.github.io/code-route-tunisie/" + p.replace("index.html", "");
+    check(`${p} : sans navigator.share, « Partager » ouvre wa.me avec l'adresse de la page (sans ?lang ni #) et compte le clic`, !wx.navigator.share && ouverts.length === 1
+      && ouverts[0][0].startsWith("https://wa.me/?text=") && decodeURIComponent(ouverts[0][0].slice(20)).endsWith(" " + adresse) && ouverts[0][1] === "_blank"
+      && comptes.length === 1 && comptes[0].path.startsWith("partage/") && comptes[0].event === true);
+  }
+}
+
 console.log(erreurs ? `\n${erreurs} PROBLÈME(S) sur ${total} vérifications` : `\nTOUT PASSE (${total} vérifications)`);
 process.exit(erreurs ? 1 : 0);
 
