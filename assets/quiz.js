@@ -352,7 +352,6 @@ function rendreExamen() {
         <li>${T("Une ou plusieurs bonnes réponses par question : la réponse compte seulement si elle est complète.", "إجابة صحيحة واحدة أو أكثر لكل سؤال: لا تُحتسب الإجابة إلا إذا كانت كاملة.")}</li>
         <li>${T("Pas de correction pendant l'examen : vous verrez vos erreurs expliquées à la fin.", "لا تصحيح أثناء الامتحان: سترى أخطاءك مع الشرح في النهاية.")}</li>
         <li>${T(`Réussite à partir de <b>${EXAMEN.seuil} bonnes réponses sur ${EXAMEN.nb}</b>.`, `النجاح ابتداءً من <b>${nb(EXAMEN.seuil)} إجابة صحيحة من ${nb(EXAMEN.nb)}</b>.`)}</li>
-        <li>${T("Un chronomètre affiche le temps passé. L'examen officiel n'impose pas de durée connue (les guides parlent d'environ une demi-heure).", "يعرض العدّاد الوقت المنقضي. لا يفرض الامتحان الرسمي مدة معروفة (تتحدث الأدلة عن نصف ساعة تقريبًا).")}</li>
       </ul>
       ${noteAcces}
       <div class="actions"><button class="btn large orange" type="button" id="commencer">${T("Nouvel examen au hasard", "امتحان جديد عشوائي")} ${ICONES.fleche}</button></div>

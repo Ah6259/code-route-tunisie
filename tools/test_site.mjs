@@ -621,7 +621,7 @@ async function passExamen() {
   check("fin de la série : 30/30, temps affiché, série et durée gardées", texte(d.getElementById("score")) === "30 / 30" && /Temps : 2 min 0[5-9] s/.test(texte(d.getElementById("duree"))) && dernier.serie === 3 && dernier.duree >= 125);
   clic(w, d.getElementById("choisir-serie"));
   check("retour au choix des séries : série 3 marquée faite (30/30)", d.querySelector('#series .serie[data-serie="3"]').classList.contains("faite") && texte(d.querySelector('#series .serie[data-serie="3"]')).includes("30/30"));
-  check("chronomètre : aucune durée officielle inventée (« n'impose pas de durée connue »)", /n'impose pas de durée connue/.test(texte(d.getElementById("quiz"))));
+  check("paragraphe « Un chronomètre affiche le temps passé… » retiré (demande d'Ahmed), chronomètre toujours présent pendant l'examen", !/Un chronomètre affiche le temps passé/.test(texte(d.getElementById("quiz"))));
   const dits = [];
   w.speechSynthesis = { cancel() {}, getVoices: () => [{ lang: "fr-FR" }], speak: u => dits.push(u) };
   w.SpeechSynthesisUtterance = function (x) { this.text = x; };
