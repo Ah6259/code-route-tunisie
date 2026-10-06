@@ -57,7 +57,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Détails et marche à suivre en cas d'alerte : README, « Plan de continuité ».
 
 ## Avant chaque publication / après chaque modification
-1. `node tools/test_site.mjs` (242 vérifications) puis `node tools/test_sw.mjs` (service worker) et `node tools/test_avis.mjs` (Votre avis). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
+1. `node tools/test_site.mjs` (255 vérifications) puis `node tools/test_sw.mjs` (service worker) et `node tools/test_avis.mjs` (Votre avis). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
 2. Changer le `?v=` des fichiers `assets/` dans **toutes** les pages (le test vérifie qu'il est le même partout).
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.
@@ -118,6 +118,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Accueil (05/10/2026, demande d'Ahmed) : raccourci « Entraînement » ajouté en tête des rubriques (6 au lieu de 5) ; les 3 badges « texte officiel / gratuit / français et arabe » retirés (inutiles, déjà dans le titre). Test mis à jour.
 - Rubriques de l'accueil (05/10/2026) : images en couleur `assets/illustrations/rub-<nom>.svg` (même style que les thèmes, fond pastel), à la place des icônes au trait.
 - **Carte permis (05/10/2026, décision d'Ahmed)** : le dessin SPÉCIMEN est remplacé (accueil et page Permis) par le **spécimen officiel du nouveau permis publié par l'ATTT** (données fictives « BEN FOULEN »), `assets/specimen/permis-specimen-attt.webp`, recadré et remis aux vraies proportions depuis l'image parue dans la presse le 21/02/2023. Crédit « image ATTT » affiché. **Pas de licence libre** : si l'ATTT ou le journal demande le retrait, remettre `assets/illustrations/permis-specimen.svg` (toujours utilisé dans l'image d'aperçu). Exception voulue par Ahmed à la règle « pas d'emblème de l'État » (le spécimen montre le drapeau).
+- Affichage (06/10/2026) : `[hidden]{display:none!important}` vérifié par le test (écrans de l'examen et du Pass) ; **pas de faux boutons** : CSS des anciens badges retiré, et le test vérifie sur toutes les pages qu'aucune carte avec icône n'est sans lien.
 - Images changées sans changer de nom : toujours ajouter `?v=` à leur adresse (sinon les téléphones gardent l'ancienne jusqu'à 10 min ou plus). Fait pour le spécimen du permis le 05/10/2026.
 
 ## Pass Examen (partie payante, 06/10/2026, accord écrit d'Ahmed)
