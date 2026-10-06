@@ -1,4 +1,4 @@
-/* Langue (français / arabe), en-tête (menu) et pied de page communs, bandeau de relecture, liens hors ligne,
+/* Langue (français / arabe), en-tête (menu + bouton doré « Pass Examen », voir pass.js) et pied de page communs, bandeau de relecture, liens hors ligne,
    crédits des photos, boutons « Signaler une erreur », petites fonctions partagées. */
 // Date, année et mode relecture : viennent UNIQUEMENT de assets/regles.js (REGLES_SITE), chargé avant ce fichier.
 const MAJ = REGLES_SITE.verifie_le, ANNEE = REGLES_SITE.annee, RELECTURE = REGLES_SITE.relecture === true;
@@ -41,7 +41,10 @@ const MENU_SITE = [
           <span class="logo-nom">${T("Code de la route Tunisie", "قانون الطرقات تونس")}
             <small>${T("Révision gratuite du permis", "مراجعة مجانية لرخصة السياقة")}</small></span>
         </a>
-        <button class="langue" type="button">${T("العربية", "Français")}</button>
+        <div class="entete-boutons">
+          <a class="entete-pass${typeof passActif === "function" && passActif() ? " actif" : ""}" href="${racine}pass/"><span class="long">${T("Pass Examen", "باقة الامتحان")}</span><span class="court">${T("Pass", "الباقة")}</span></a>
+          <button class="langue" type="button">${T("العربية", "Français")}</button>
+        </div>
       </div>
       <nav class="menu" aria-label="${T("Menu", "القائمة")}"><div class="wrap">${MENU_SITE.map(([h, fr, ar]) =>
         `<a href="${racine}${h}"${h === actuelle ? ' aria-current="page"' : ""}>${T(fr, ar)}</a>`).join("")}</div></nav>`;
@@ -55,9 +58,10 @@ const MENU_SITE = [
           <a href="${racine}entrainement/">${T("Entraînement par thème", "تدريب حسب المحور")}</a>
           <a href="${racine}entrainement/?erreurs=1">${T("Mes erreurs", "أخطائي")}</a>
           <a href="${racine}examen/">${T("Examen blanc", "امتحان تجريبي")}</a>
-          <a href="${racine}amendes/">${T("Amendes et points", "الخطايا والنقاط")}</a>
+          <a href="${racine}amendes/">${T("Amendes et sanctions", "الخطايا والعقوبات")}</a>
           <a href="${racine}permis/">${T("Passer le permis", "اجتياز رخصة السياقة")}</a>
           <a href="${racine}a-propos/">${T("À propos et sources", "من نحن والمصادر")}</a>
+          <a href="${racine}pass/">${T("Pass Examen", "باقة الامتحان")}</a>
           <a href="${racine}#avis">${T("Votre avis", "رأيك")}</a>
         </nav>
         <p>${T(`Sources : Code de la route (loi n° 99-71 du 26 juillet 1999) et ses décrets d'application, recueil officiel de l'IORT (édition 2012) publié sur transport.tn ; loi de finances 2025 (JORT n° 149). Texte vérifié le ${MAJ}.`,

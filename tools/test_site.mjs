@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 let erreurs = 0, total = 0;
 const check = (desc, cond) => { total++; console.log((cond ? "OK   " : "FAIL ") + desc); if (!cond) erreurs++; };
 const AR = /[؀-ۿ]/;
-const PAGES = ["index.html", "lecons/index.html", "panneaux/index.html", "entrainement/index.html", "examen/index.html", "amendes/index.html", "permis/index.html", "a-propos/index.html", "relecture/index.html"];
+const PAGES = ["index.html", "lecons/index.html", "panneaux/index.html", "entrainement/index.html", "examen/index.html", "amendes/index.html", "permis/index.html", "a-propos/index.html", "pass/index.html", "pass/conditions/index.html", "relecture/index.html"];
 const PAGES_PUBLIQUES = PAGES.filter(p => p !== "relecture/index.html");
 
 // ---- 1. Les questions ----------------------------------------------------------
@@ -56,7 +56,9 @@ if (sourceDispo) {
 check("au moins 3 questions publiées par thème (pour l'examen)", [1,2,3,4,5,6,7,8,9,10].every(t => QUESTIONS.filter(q => q.theme === t).length >= 3));
 
 // ---- 2. Pages chargées comme un navigateur ---------------------------------------
-async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false } = {}) {
+// Pass Examen actif dans le navigateur (code factice gardé sur l'appareil, date de fin lointaine)
+const PASS_TEST = JSON.stringify({ code: "ABCDEF23", fin: "2099-12-31", verifie: "2099-12-31" });
+async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false, pass = false } = {}) {
   const dossier = dirname(join(root, chemin));
   // (les scripts externes, comme GoatCounter, ne sont pas chargés)
   const html = lire(chemin).replace(/<script([^>]*) src="(?!https?:)([^"?]+)(\?[^"]*)?"([^>]*)><\/script>/g,
@@ -67,7 +69,8 @@ async function page(chemin, { lang = "fr", query = "", stockage = null, fichier 
   const dom = new JSDOM(html, {
     url: fichier ? `${pathToFileURL(join(root, chemin)).href}?lang=${lang}${query}` : `https://ah6259.github.io/code-route-tunisie/${chemin.replace("index.html", "")}?lang=${lang}${query}`,
     runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: vc,
-    beforeParse(w) { if (stockage) w.localStorage.setItem("crt-progression-v1", typeof stockage === "string" ? stockage : JSON.stringify(stockage)); }
+    beforeParse(w) { if (stockage) w.localStorage.setItem("crt-progression-v1", typeof stockage === "string" ? stockage : JSON.stringify(stockage));
+      if (pass) w.localStorage.setItem("crt-pass-v1", PASS_TEST); }
   });
   await new Promise(ok => dom.window.addEventListener("load", ok));
   dom.window.fautes = fautes;
@@ -152,13 +155,21 @@ check("examen : score gardé dans le navigateur", JSON.parse(w.localStorage.getI
 check("examen : lien WhatsApp de partage du score", d.getElementById("partage").href.startsWith("https://wa.me/?text=") && decodeURIComponent(d.getElementById("partage").href).includes("25/30"));
 clic(w, d.querySelector(".langue"));
 check("examen : changement de langue garde le résultat (affiché en arabe)", d.documentElement.lang === "ar" && texte(d.getElementById("score")) === "25 / 30" && AR.test(texte(d.getElementById("statut"))));
+check("examen gratuit terminé : carte « Vous avez utilisé votre examen gratuit du jour » + gros bouton doré vers pass/",
+  /امتحانك المجاني/.test(texte(d.getElementById("fin-gratuit"))) && d.querySelector("#fin-gratuit a.btn-pass-grand").getAttribute("href") === "../pass/");
+check("examen gratuit terminé : jour noté sur l'appareil", w.localStorage.getItem("crt-examen-gratuit-v1") === w.eval("aujourdhui()"));
 clic(w, d.getElementById("nouvel"));
+check("2e examen le même jour sans Pass : écran « examen gratuit du jour utilisé », pas de question", !!d.getElementById("examen-utilise") && !d.getElementById("valider") &&
+  d.querySelector("#examen-utilise a.btn-pass-grand").getAttribute("href") === "../pass/");
+w.localStorage.setItem("crt-pass-v1", PASS_TEST);              // avec le Pass : illimité
+w.eval("demarrerExamen(0)");
 for (let i = 0; i < 30; i++) {
   const q = ex.questions[i];
   (i < 23 ? q.bonnes : mauvaise(q)).forEach(n => clic(w, d.querySelector(`.choix-q[data-i="${n}"]`)));
   clic(w, d.getElementById("valider"));
 }
 check("examen : 23 justes -> 23/30 et échec affiché", texte(d.getElementById("score")) === "23 / 30" && d.querySelector(".score.echoue") !== null);
+check("examen avec Pass : pas de carte « examen gratuit utilisé »", !d.getElementById("fin-gratuit"));
 check("examen : aucune erreur JavaScript pendant l'examen", w.fautes.length === 0);
 
 // -- entraînement
@@ -232,7 +243,7 @@ check("à propos : méthode (pas de copie) et limites (amendes 2025)", texte(d.b
 check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verifie-le")) === REGLES_SITE.verifie_le);
 
 // ---- 3. Date unique, référencement, aperçu, licence, cache, robots GitHub ----------
-const fichiersCode = [...PAGES, "assets/page.js", "assets/quiz.js", "assets/pages.js", "assets/lecons.js", "assets/amendes.js", "assets/panneaux.js", "assets/protection.js"];
+const fichiersCode = [...PAGES, "assets/page.js", "assets/pass.js", "assets/quiz.js", "assets/pages.js", "assets/lecons.js", "assets/amendes.js", "assets/panneaux.js", "assets/protection.js"];
 const datesEnDur = fichiersCode.filter(f => /\b\d{2}\/\d{2}\/20\d{2}\b/.test(lire(f)));
 check(`aucune date jj/mm/aaaa écrite en dur hors de regles.js ${datesEnDur.join(" ")}`, datesEnDur.length === 0);
 check("regles.js : date au format jj/mm/aaaa et année cohérente", /^\d{2}\/\d{2}\/\d{4}$/.test(REGLES_SITE.verifie_le) && REGLES_SITE.verifie_le.endsWith(String(REGLES_SITE.annee)));
@@ -258,9 +269,9 @@ check("manifeste présent, id unique = chemin du site, start_url/scope ./, icôn
   man.id === "/code-route-tunisie/" && man.start_url === "./" && man.scope === "./" && man.display === "standalone" && !!man.name && !!man.short_name
   && ["192x192", "512x512"].every(t => man.icons?.some(i => i.sizes === t)) && man.icons?.some(i => i.purpose === "maskable")
   && man.icons.every(i => existsSync(join(root, i.src))));
-check("toutes les pages : lien vers le manifeste, icône iPhone et theme-color", PAGES.every(p => { const s = lire(p), r = p.includes("/") ? "../" : "";
+check("toutes les pages : lien vers le manifeste, icône iPhone et theme-color", PAGES.every(p => { const s = lire(p), r = "../".repeat(p.split("/").length - 1);
   return s.includes(`<link rel="manifest" href="${r}manifest.webmanifest">`) && s.includes(`<link rel="apple-touch-icon" href="${r}assets/icone-180.png">`) && s.includes('<meta name="theme-color"'); }));
-check("plan du site : 8 pages publiques (sans relecture/)", (lire("sitemap.xml").match(/<loc>https:\/\/ah6259\.github\.io\/code-route-tunisie\//g) || []).length === 8 && !lire("sitemap.xml").includes("relecture"));
+check(`plan du site : ${PAGES_PUBLIQUES.length} pages publiques (sans relecture/)`, (lire("sitemap.xml").match(/<loc>https:\/\/ah6259\.github\.io\/code-route-tunisie\//g) || []).length === PAGES_PUBLIQUES.length && !lire("sitemap.xml").includes("relecture"));
 check("robots.txt indique le plan du site", lire("robots.txt").includes("code-route-tunisie/sitemap.xml"));
 check("LICENSE tous droits réservés", lire("LICENSE").includes("Tous droits réservés"));
 check(".gitignore : node_modules et captures", /node_modules\//.test(lire(".gitignore")) && /captures\//.test(lire(".gitignore")));
@@ -270,6 +281,7 @@ const surv = existsSync(join(root, ".github/workflows/surveillance.yml")) ? lire
 check("robot surveillance.yml : mensuel, groupe de concurrence, issue + commit", /cron:\s*"\d+ \d+ \d+ \* \*"/.test(surv) && surv.includes("concurrency") && surv.includes("issues: write") && surv.includes("git commit"));
 
 await nouvellesRubriques();
+await passExamen();
 console.log(erreurs ? `\n${erreurs} PROBLÈME(S) sur ${total} vérifications` : `\nTOUT PASSE (${total} vérifications)`);
 process.exit(erreurs ? 1 : 0);
 
@@ -391,9 +403,9 @@ async function nouvellesRubriques() {
   check(`liens internes depuis le PC (file://) : « index.html » ajouté, fichier existant ${horsLigneMal.slice(0, 5)}`, horsLigneMal.length === 0);
 
   // -- « Mes erreurs »
-  ww = await page("entrainement/index.html", { query: "&erreurs=1", stockage: { q: { "T2-001": 0, "T3-001": 0, "T4-001": 1 }, examens: [] } }); dd = ww.document;
+  ww = await page("entrainement/index.html", { query: "&erreurs=1", stockage: { q: { "T2-001": 0, "T3-001": 0, "T4-001": 1 }, examens: [] }, pass: true }); dd = ww.document;
   check("« Mes erreurs » : rejoue seulement les questions ratées", ww.fautes.length === 0 && ww.eval("entrainement").liste.length === 2 && ["T2-001", "T3-001"].includes(dd.querySelector("#quiz section").dataset.id) && texte(dd.getElementById("titre-page")) === "Mes erreurs");
-  ww = await page("entrainement/index.html", { query: "&erreurs=1" }); dd = ww.document;
+  ww = await page("entrainement/index.html", { query: "&erreurs=1", pass: true }); dd = ww.document;
   check("« Mes erreurs » : message clair quand il n'y a rien à revoir", !!dd.getElementById("aucune-erreur"));
   ww = await page("index.html", { stockage: { q: { "T2-001": 0 }, examens: [] } }); dd = ww.document;
   check("accueil : 7 rubriques (entraînement en premier, …, permis, annuaire des auto-écoles) avec le nombre d'erreurs", dd.querySelectorAll("#rubriques .rubrique").length === 7 && dd.querySelector("#rubriques .rubrique:last-child").getAttribute("href").includes("auto-ecoles-tunisie") && dd.querySelector("#rubriques .rubrique").getAttribute("href") === "entrainement/" && texte(dd.getElementById("rubriques")).includes("1 question(s) à revoir"));
@@ -448,4 +460,164 @@ async function nouvellesRubriques() {
     return /(api[_-]?key|secret|password|mot de passe)\s*[:=]\s*["'][^"']{6,}/i.test(s) || /\b(ghp_|github_pat_|sk-|AIza)[A-Za-z0-9_]{10,}/.test(s) || /[\w.+-]+@(?!example\.)[\w-]+\.(com|tn|fr|net|org)\b/i.test(s);
   });
   check(`aucun secret ni adresse e-mail dans le site ${secrets.map(f => f.slice(root.length))}`, secrets.length === 0);
+}
+
+// ---- 5. Pass Examen (06/10/2026) : page, prix, paiement, conditions, code d'accès, 1 examen gratuit/jour, chrono, séries ----
+async function passExamen() {
+  const { webcrypto, pbkdf2Sync } = await import("crypto");
+  const pause = ms => new Promise(r => setTimeout(r, ms));
+  // -- dépôt public : aucune donnée personnelle, seulement l'empreinte et la date de fin
+  let pj = {}; try { pj = JSON.parse(lire("donnees/pass.json")); } catch (e) {}
+  const clesOk = Object.keys(pj).every(k => ["_lisez_moi", "maj", "sel", "tours", "codes"].includes(k));
+  check("donnees/pass.json : seulement sel, tours, date et liste {empreinte, fin} (aucun nom, aucun téléphone)",
+    clesOk && typeof pj.sel === "string" && pj.sel.length >= 16 && pj.tours >= 100000 && Array.isArray(pj.codes) &&
+    pj.codes.every(c => Object.keys(c).join() === "h,fin" && /^[0-9a-f]{64}$/.test(c.h) && /^\d{4}-\d{2}-\d{2}$/.test(c.fin)) &&
+    !/\b[2-9]\d{7}\b|\b[2-9]\d \d{3} \d{3}\b|nom|telephone|téléphone/i.test(JSON.stringify(pj.codes)));
+  check("dépôt public : aucun fichier de clients (clients.json, abonnes.json) ni dossier pass (prive)",
+    !["clients.json", "donnees/clients.json", "abonnes.json", "pass (prive)"].some(f => existsSync(join(root, f))));
+
+  // -- page pass/ : prix et avantages directs, paiement, formulaire, conditions
+  let w = await page("pass/index.html"), d = w.document;
+  const t = texte(d.getElementById("offre"));
+  check("pass/ : aucune erreur JavaScript", w.fautes.length === 0);
+  check("pass/ : prix 9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours visibles tout de suite", ["9 DT", "19 DT", "29 DT", "7 jours", "30 jours", "90 jours"].every(m => texte(d.getElementById("tarifs")).includes(m)));
+  check("pass/ : essai gratuit 2 jours, examens illimités, statistiques, erreurs, pas de renouvellement automatique",
+    ["2 jours d'essai gratuit", "Examens blancs illimités", "Statistiques par thème", "Révision de vos erreurs", "Pas de renouvellement automatique"].every(m => t.includes(m)));
+  check("pass/ : aucun prix « TTC » ni nom de société", !/TTC|SUARL|S\.U\.A\.R\.L/i.test(lire("pass/index.html") + lire("pass/conditions/index.html")));
+  const pay = d.getElementById("paiement");
+  check("pass/ : bouton « Paiement » (<details>) avec D17, IZI, Wafacash au 24 321 390, motif nom + téléphone", !!pay && pay.tagName === "DETAILS" && texte(pay.querySelector("summary")).startsWith("Paiement") &&
+    ["D17", "IZI", "Wafacash", "24 321 390", "votre nom et votre téléphone"].every(m => texte(pay).includes(m)));
+  const wa = d.getElementById("pass-preuve");
+  check("pass/ : bouton vert « Envoyer la preuve de paiement par WhatsApp » vers wa.me/21624321390, texte prérempli", !!wa && wa.classList.contains("btn-wa") &&
+    wa.href.startsWith("https://wa.me/21624321390?text=") && decodeURIComponent(wa.href).includes("Pass Examen") && texte(wa).includes("Envoyer la preuve de paiement par WhatsApp"));
+  const form = d.getElementById("pass-form");
+  check("pass/ : formulaire Formspree mwlpakqj (nom, téléphone, 4 formules, case conditions, piège)", form.getAttribute("action") === "https://formspree.io/f/mwlpakqj" &&
+    !!form.querySelector("[name=nom]") && !!form.querySelector("[name=telephone]") && form.querySelectorAll("input[name=formule]").length === 4 &&
+    !!form.querySelector("input[name=conditions][type=checkbox]") && !!form.querySelector("input[name=_gotcha]") && !!form.querySelector('a[href="conditions/"]'));
+  const appels = []; w.fetch = (u, o) => { appels.push({ u, o }); return Promise.resolve({ ok: true, status: 200 }); };
+  form.querySelector("[name=nom]").value = "Test Candidat"; form.querySelector("[name=telephone]").value = "12";
+  form.querySelector("[name=conditions]").checked = true;
+  form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(20);
+  check("pass/ : téléphone faux refusé, rien envoyé", appels.length === 0 && d.getElementById("pass-status").className === "err");
+  form.querySelector("[name=telephone]").value = "+216 98 765 432";
+  [...form.querySelectorAll("input[name=formule]")].find(r => r.value.startsWith("30")).checked = true;
+  form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(30);
+  const envoi = appels[0] ? Object.fromEntries(appels[0].o.body.entries()) : {};
+  check("pass/ : envoi Formspree (nom, téléphone 8 chiffres, formule, ligne « pour_activer »)", appels.length === 1 && appels[0].u === "https://formspree.io/f/mwlpakqj" &&
+    envoi.nom === "Test Candidat" && envoi.telephone === "98765432" && envoi.formule === "30 jours - 19 DT" && String(envoi.pour_activer).includes("action: paye") && String(envoi.pour_activer).includes("jours: 30"));
+  check("pass/ : après l'envoi, confirmation + paiement + « Vous recevrez votre code d'accès par WhatsApp »", form.hidden && !d.getElementById("apres-pass").hidden &&
+    !d.getElementById("apres-paye").hidden && d.getElementById("apres-essai").hidden && texte(d.getElementById("apres-paye")).includes("Vous recevrez votre code d'accès par WhatsApp") &&
+    decodeURIComponent(d.getElementById("pass-preuve-apres").href).includes("Test Candidat — 98765432"));
+  w = await page("pass/conditions/index.html"); d = w.document;
+  const tc = texte(d.querySelector(".conditions"));
+  check("conditions : vendeur « l'éditeur du site », prix, essai 2 jours, pas de renouvellement, aucune période payée remboursée, INPDP",
+    ["l'éditeur du site", "9 DT pour 7 jours", "19 DT pour 30 jours", "29 DT pour 90 jours", "2 jours d'essai gratuit", "Aucun renouvellement automatique", "Aucune période payée n'est remboursée", "INPDP"].every(m => tc.includes(m)));
+
+  // -- bouton doré sur toutes les pages, gros bouton sur l'accueil
+  const sansBouton = [];
+  for (const p of PAGES) { const wx = await page(p); const a = wx.document.querySelector("#entete a.entete-pass");
+    if (!a || !new URL(a.getAttribute("href"), wx.location.href).href.endsWith("/code-route-tunisie/pass/") || !texte(a).includes("Pass")) sansBouton.push(p); }
+  check(`bouton doré « Pass Examen » dans l'en-tête de chaque page ${sansBouton}`, sansBouton.length === 0);
+  w = await page("index.html"); d = w.document;
+  check("accueil : gros bouton doré Pass Examen en haut (bandeau) vers pass/", d.querySelector(".hero #cta-pass.btn-pass-grand")?.getAttribute("href") === "pass/");
+  w = await page("index.html", { pass: true }); d = w.document;
+  check("accueil avec Pass : bouton « Pass Examen actif » et coche dans l'en-tête", texte(d.getElementById("cta-pass")).includes("Pass Examen actif") && !!d.querySelector(".entete-pass.actif"));
+
+  // -- vérification d'un code dans le navigateur (empreinte PBKDF2-SHA-256 salée)
+  const SEL = "sel-de-test", TOURS = 1000;
+  const h = c => pbkdf2Sync(c, SEL, TOURS, 32, "sha256").toString("hex");
+  const LISTE = { maj: "2026-10-06", sel: SEL, tours: TOURS, codes: [{ h: h("ABCD2345"), fin: "2099-12-31" }, { h: h("EFGH6789"), fin: "2020-01-01" }] };
+  const avecReseau = (wx, liste, panne) => { Object.defineProperty(wx, "crypto", { value: webcrypto, configurable: true });
+    wx.fetch = () => panne ? Promise.reject(new TypeError("Failed to fetch")) : Promise.resolve({ ok: true, status: 200, json: async () => JSON.parse(JSON.stringify(liste)) }); };
+  w = await page("pass/index.html"); d = w.document; avecReseau(w, LISTE);
+  check("empreinte JS = empreinte Python du robot (même vecteur de test, 100 000 tours)",
+    await w.eval('empreinteCode("ABCD2345", "sel-de-test", 100000)') === "517bf9a9ea3ad38b3adcbeef5808d4efe420fbf10a2b7bd9179640f4d1c7c2dd");
+  const r = await w.eval('verifierCode("abcd-2345")');
+  check("code valide (tapé en minuscules avec un tiret) : accepté", r.etat === "ok" && r.fin === "2099-12-31");
+  check("code expiré : refusé « expire »", (await w.eval('verifierCode("EFGH6789")')).etat === "expire");
+  check("code faux : refusé « inconnu »", (await w.eval('verifierCode("ZZZZ2222")')).etat === "inconnu");
+  check("code mal formé (O, 0, I, 1 ou longueur) : refusé « forme »", (await w.eval('verifierCode("ABCD0O1I")')).etat === "forme" && (await w.eval('verifierCode("ABC")')).etat === "forme");
+  const cf = d.getElementById("code-form");
+  cf.querySelector("input[name=code]").value = "abcd 2345";
+  cf.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(200);
+  check("page pass/ : code accepté -> message, Pass gardé sur l'appareil, état « actif » affiché, en-tête coché",
+    d.getElementById("code-status").className === "ok" && JSON.parse(w.localStorage.getItem("crt-pass-v1")).fin === "2099-12-31" && w.eval("passActif()") &&
+    !d.getElementById("pass-etat").hidden && !!d.querySelector(".entete-pass.actif"));
+  cf.querySelector("input[name=code]").value = "ZZZZ2222";
+  cf.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(200);
+  check("page pass/ : code faux -> message d'erreur", d.getElementById("code-status").className === "err" && /non reconnu/.test(texte(d.getElementById("code-status"))));
+  avecReseau(w, LISTE, true);
+  check("pas de connexion : « reseau », rien n'est effacé", (await w.eval('verifierCode("ABCD2345")')).etat === "reseau" && w.eval("passActif()"));
+  w.localStorage.setItem("crt-pass-v1", JSON.stringify({ code: "ABCD2345", fin: "2099-12-31", verifie: "2000-01-01" }));
+  avecReseau(w, { ...LISTE, codes: [] }); await w.eval("reverifierPass()");
+  check("revérification : code arrêté (absent de pass.json) -> effacé de l'appareil, retour au gratuit", !w.localStorage.getItem("crt-pass-v1") && !w.eval("passActif()"));
+  w.localStorage.setItem("crt-pass-v1", JSON.stringify({ code: "ABCD2345", fin: "2020-01-01", verifie: "2020-01-01" }));
+  avecReseau(w, LISTE); await w.eval("reverifierPass()");
+  check("revérification : code expiré sur l'appareil mais prolongé -> nouvelle date de fin", JSON.parse(w.localStorage.getItem("crt-pass-v1") || "{}").fin === "2099-12-31");
+  w.localStorage.setItem("crt-pass-v1", JSON.stringify({ code: "EFGH6789", fin: "2020-01-01", verifie: "2020-01-01" }));
+  await w.eval("reverifierPass()");
+  check("revérification : code expiré -> nettoyé de l'appareil", !w.localStorage.getItem("crt-pass-v1"));
+  w = await page("index.html");
+  { let n = 0; w.fetch = () => { n++; return Promise.reject(new Error("x")); }; await w.eval("reverifierPass()");
+    check("aucun appel réseau au chargement d'une page sans code gardé", n === 0); }
+
+  // -- 1 examen gratuit par jour (compté sur l'appareil)
+  w = await page("examen/index.html"); d = w.document;
+  check("examen : « Examen gratuit du jour » annoncé, statistiques verrouillées", texte(d.getElementById("acces-examen")).includes("1 examen blanc gratuit par jour") && !!d.getElementById("stats-verrou") && !d.getElementById("stats"));
+  w.localStorage.setItem("crt-examen-gratuit-v1", "2000-01-01");
+  check("examen gratuit utilisé un AUTRE jour : de nouveau disponible", w.eval("accesExamen()") === "gratuit");
+  w.localStorage.setItem("crt-examen-gratuit-v1", w.eval("aujourdhui()"));
+  check("examen gratuit utilisé AUJOURD'HUI : bloqué", w.eval("accesExamen()") === "bloque");
+  w.eval("examen.etape = 'intro'; rendreExamen()");
+  check("examen bloqué : écran « Vous avez utilisé votre examen gratuit du jour » + bouton Pass + lien « J'ai déjà un code »",
+    texte(d.getElementById("examen-utilise")).includes("Vous avez utilisé votre examen gratuit du jour") && !!d.querySelector('#examen-utilise a[href="../pass/#code-acces"]') && !d.getElementById("commencer"));
+  w.localStorage.setItem("crt-pass-v1", PASS_TEST);
+  check("avec le Pass : illimité même si l'examen gratuit du jour est utilisé", w.eval("accesExamen()") === "pass");
+
+  // -- séries et nouvel examen au hasard
+  const serie = n => w.eval(`serieExamen(${n})`).map(q => q.id);
+  const s1 = serie(1), s1b = serie(1), s2 = serie(2);
+  check("séries : la série 1 est toujours la même (30 questions différentes, 3 par thème)", s1.join() === s1b.join() && new Set(s1).size === 30 &&
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].every(th => w.eval("serieExamen(1)").filter(q => q.theme === th).length === 3));
+  check("séries : 10 séries différentes les unes des autres", new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => serie(n).slice().sort().join())).size === 10 && s1.join() !== s2.join());
+  const parTh = {}; QUESTIONS.forEach(q => parTh[q.theme] = (parTh[q.theme] || 0) + 1);
+  const forcees = Object.values(parTh).reduce((s, n) => s + Math.max(0, 3 - (n - 3)), 0);
+  let eviteOk = true;
+  for (let k = 0; k < 50; k++) {
+    const a = w.eval("tirerExamen()"), ids = new Set(a.map(q => q.id));
+    w.__eviter = ids; const b = w.eval("tirerExamen(Math.random, QUESTIONS, window.__eviter)");
+    if (b.length !== 30 || new Set(b.map(q => q.id)).size !== 30 || b.filter(q => ids.has(q.id)).length > forcees) eviteOk = false;
+  }
+  check(`nouvel examen au hasard : 30 questions sans reprendre celles du dernier examen (sauf ${forcees} si un thème manque de questions)`, eviteOk);
+  w = await page("examen/index.html", { pass: true }); d = w.document;
+  check("examen avec Pass : statistiques par thème (10 thèmes) et 10 boutons de série", d.querySelectorAll("#stats-themes tr").length === 10 && d.querySelectorAll("#series .serie").length === 10);
+  clic(w, d.querySelector('#series .serie[data-serie="3"]'));
+  const ex = w.eval("examen");
+  check("série 3 choisie : les 30 questions de la série 3", ex.serie === 3 && ex.questions.map(q => q.id).join() === w.eval("serieExamen(3)").map(q => q.id).join());
+  ex.debut = Date.now() - 125000; w.eval("majChrono()");
+  check("chronomètre affiché pendant l'examen : 02:05 après 2 min 5 s", texte(d.getElementById("chrono")) === "02:05");
+  for (let i = 0; i < 30; i++) { ex.questions[i].bonnes.forEach(n => clic(w, d.querySelector(`.choix-q[data-i="${n}"]`))); clic(w, d.getElementById("valider")); }
+  const dernier = JSON.parse(w.localStorage.getItem("crt-progression-v1")).examens.at(-1);
+  check("fin de la série : 30/30, temps affiché, série et durée gardées", texte(d.getElementById("score")) === "30 / 30" && /Temps : 2 min 0[5-9] s/.test(texte(d.getElementById("duree"))) && dernier.serie === 3 && dernier.duree >= 125);
+  clic(w, d.getElementById("choisir-serie"));
+  check("retour au choix des séries : série 3 marquée faite (30/30)", d.querySelector('#series .serie[data-serie="3"]').classList.contains("faite") && texte(d.querySelector('#series .serie[data-serie="3"]')).includes("30/30"));
+  check("chronomètre : aucune durée officielle inventée (« n'impose pas de durée connue »)", /n'impose pas de durée connue/.test(texte(d.getElementById("quiz"))));
+  const dits = [];
+  w.speechSynthesis = { cancel() {}, getVoices: () => [{ lang: "fr-FR" }], speak: u => dits.push(u) };
+  w.SpeechSynthesisUtterance = function (x) { this.text = x; };
+  w.eval("demarrerExamen(0)");
+  clic(w, d.getElementById("ecouter"));
+  check("Pass : bouton « Écouter » lit la question et les réponses (voix du téléphone)", dits.length === 1 && dits[0].text.includes(w.eval("examen").questions[0].question_fr.slice(0, 20)) && dits[0].lang === "fr-FR");
+  w = await page("examen/index.html"); w.speechSynthesis = { cancel() {}, getVoices: () => [], speak() {} }; w.SpeechSynthesisUtterance = function () {};
+  w.eval("demarrerExamen(0)");
+  check("sans Pass : pas de bouton « Écouter »", !w.document.getElementById("ecouter"));
+  w = await page("entrainement/index.html", { query: "&erreurs=1", stockage: { q: { "T2-001": 0 }, examens: [] } });
+  check("« Mes erreurs » sans Pass : présentation du Pass (1 question à revoir)",
+    texte(w.document.getElementById("erreurs-pass")).includes("1 question(s)") && !!w.document.querySelector("#erreurs-pass a.btn-pass-grand"));
+  w = await page("pass/index.html", { lang: "ar" }); d = w.document;
+  check("pass/ en arabe : titre, prix et formulaire en arabe", AR.test(texte(d.querySelector("h1"))) && AR.test(texte(d.getElementById("tarifs"))) && AR.test(texte(d.querySelector("#pass-formules legend"))));
+
+  // -- permis à points : non appliqué en Tunisie (06/10/2026) -> aucune question publiée sur le nombre de points
+  const pointsPublies = QUESTIONS.filter(q => /\bpoints?\b/i.test(q.question_fr + " " + q.choix.map(c => c.fr).join(" ")) && !/rainures|4 points mesurés/.test(q.question_fr));
+  check(`permis à points (non appliqué) : aucune question publiée sur les points ${pointsPublies.map(q => q.id)}`, pointsPublies.length === 0);
 }

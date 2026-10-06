@@ -40,7 +40,7 @@ Adresse prévue : https://ah6259.github.io/code-route-tunisie/
 | `assets/photos.js`, `assets/photos/` | Photos Wikimedia Commons + crédits (auteur, licence, lien) |
 | `assets/pages.js` | Affichage propre à chaque page (aucun script dans les pages HTML : CSP) |
 | `assets/protection.js` | Anti-copie légère, source ajoutée au texte copié, anti-cadre |
-| `tools/test_site.mjs` | Test automatique (165 vérifications) |
+| `tools/test_site.mjs` | Test automatique (233 vérifications) |
 | `sw.js`, `tools/test_sw.mjs` | Service worker (réseau d'abord, installation sur le téléphone) et son test |
 | `assets/avis.js`, `tools/test_avis.mjs` | Section « Votre avis » (envoi Formspree) et son test (envoi simulé) |
 | `tools/surveiller_source.py` | Surveillance mensuelle du texte officiel (appelé par le robot) |
@@ -98,3 +98,26 @@ preuves (`../sources/`, `../preuves…/`) sont hors du dépôt : les garder sauv
 
 ## Nouveautés
 - 05/10/2026 : nouvelle icône ; une image pour chaque question ; taux d'alcool corrigé (0,3 g/l) ; lien vers le paiement officiel des amendes.
+
+## Pass Examen (partie payante, 06/10/2026)
+- Page : https://ah6259.github.io/code-route-tunisie/pass/ (+ `pass/conditions/`). Bouton doré « Pass Examen » en haut de chaque page.
+- **Gratuit** : leçons, panneaux, amendes, entraînement par thème, 1 examen blanc par jour (compté sur le téléphone).
+- **Pass** : examens blancs illimités, statistiques par thème, révision de « Mes erreurs », écoute des questions.
+  9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours ; 2 jours d'essai gratuit ; pas de renouvellement automatique.
+- Paiement D17 / IZI / Wafacash au 24 321 390 + preuve WhatsApp ; demande par le formulaire Formspree (`mwlpakqj`).
+- Activation **sans PC** : dépôt privé `Ah6259/code-route-pass`, bouton « pass » (essai, paye, arret, liste) dans l'application
+  GitHub ; il publie dans `donnees/pass.json` seulement l'empreinte de chaque code et sa date de fin. Mode d'emploi : README du
+  dépôt privé. Fichiers : `assets/pass.js`, `pass/`, `donnees/pass.json`. Test : `node tools/test_site.mjs` (partie 5).
+
+| Robot (dépôt privé) | Quand | Ce qu'il fait |
+|---|---|---|
+| `pass` | bouton | client essai / paiement / arrêt / liste, code + lien WhatsApp dans le résumé, publie les empreintes |
+| `pass` | chaque nuit 03h15 | retire du site les codes expirés |
+| `tests` | à chaque envoi | tests avec clients factices |
+
+## Examen blanc : chronomètre et séries (06/10/2026)
+- Chronomètre = temps écoulé (aucune durée officielle connue). « Nouvel examen au hasard » ou « Série 1 » à « Série 10 ».
+- Permis à points : pas appliqué en Tunisie → questions de points retirées, leçons 7 et 10 et page Amendes corrigées.
+
+## Nouveautés (suite)
+- 06/10/2026 : Pass Examen (payant, essai gratuit) ; chronomètre et 10 séries d'examen ; permis à points signalé comme non appliqué.

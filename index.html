@@ -27,26 +27,27 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261006d">
+<link rel="stylesheet" href="assets/style.css?v=20261006e">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"Combien de questions compte l'examen du code de la route en Tunisie ?","acceptedAnswer":{"@type":"Answer","text":"D'après nos recherches, l'examen théorique de l'ATTT compte 30 questions et il faut 24 bonnes réponses pour réussir. Ces chiffres sont à confirmer auprès de votre auto-école."}},
-{"@type":"Question","name":"Le site est-il gratuit ?","acceptedAnswer":{"@type":"Answer","text":"Oui. L'entraînement par thème et l'examen blanc sont gratuits, sans inscription et sans application à installer. La progression reste dans votre téléphone."}},
+{"@type":"Question","name":"Le site est-il gratuit ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Les leçons, les panneaux, les amendes, l'entraînement par thème et un examen blanc par jour sont gratuits, sans inscription et sans application à installer. La progression reste dans votre téléphone. Le Pass Examen (payant, dès 9 DT, 2 jours d'essai gratuit) ajoute les examens blancs illimités, les statistiques par thème et la révision de vos erreurs."}},
 {"@type":"Question","name":"D'où viennent les questions ?","acceptedAnswer":{"@type":"Answer","text":"Nous écrivons nos propres questions à partir du texte officiel : le Code de la route (loi n° 99-71 du 26 juillet 1999) et ses décrets d'application. Chaque correction cite l'article de loi utilisé. Aucune question n'est copiée d'une application ou d'une auto-école."}},
 {"@type":"Question","name":"Les questions sont-elles en arabe ?","acceptedAnswer":{"@type":"Answer","text":"Oui, chaque question, chaque réponse et chaque explication existe en français et en arabe. Un bouton en haut de la page change la langue."}},
 {"@type":"Question","name":"Combien coûte une amende du code de la route en Tunisie en 2025 ?","acceptedAnswer":{"@type":"Answer","text":"Depuis la loi de finances 2025 (article 49, JORT n° 149), les contraventions sont réparties en 3 catégories : 20, 40 et 60 dinars. Le décret qui classe chaque infraction n'a pas encore été trouvé : le montant de chaque infraction est en cours de vérification."}},
 {"@type":"Question","name":"Y a-t-il des leçons et les panneaux ?","acceptedAnswer":{"@type":"Answer","text":"Oui : 10 leçons courtes (une par thème) avec schémas et article de loi, et un catalogue des panneaux par famille avec leur sens en français et en arabe."}}
 ]}
 </script>
-<script src="assets/regles.js?v=20261006d"></script>
-<script src="assets/questions.js?v=20261006d"></script>
-<script src="assets/photos.js?v=20261006d"></script>
-<script src="assets/panneaux.js?v=20261006d"></script>
-<script src="assets/page.js?v=20261006d"></script>
-<script src="assets/protection.js?v=20261006d"></script>
-<script src="assets/quiz.js?v=20261006d"></script>
-<script src="assets/pages.js?v=20261006d"></script>
-<script src="assets/avis.js?v=20261006d"></script>
+<script src="assets/regles.js?v=20261006e"></script>
+<script src="assets/questions.js?v=20261006e"></script>
+<script src="assets/photos.js?v=20261006e"></script>
+<script src="assets/panneaux.js?v=20261006e"></script>
+<script src="assets/page.js?v=20261006e"></script>
+<script src="assets/pass.js?v=20261006e"></script>
+<script src="assets/protection.js?v=20261006e"></script>
+<script src="assets/quiz.js?v=20261006e"></script>
+<script src="assets/pages.js?v=20261006e"></script>
+<script src="assets/avis.js?v=20261006e"></script>
 </head>
 <body data-page="accueil">
 <header class="entete" id="entete"></header>
@@ -55,10 +56,11 @@
   <div class="wrap">
     <h1><span data-l="fr">Révisez le code de la route tunisien, gratuitement</span><span data-l="ar">راجع قانون الطرقات التونسي مجانًا</span></h1>
     <p class="intro"><span data-l="fr">Questions par thème avec correction expliquée et article de loi, puis examen blanc de 30 questions. En français et en arabe, sans inscription.</span><span data-l="ar">أسئلة حسب المحاور مع تصحيح مشروح والفصل القانوني، ثم امتحان تجريبي من 30 سؤالًا. بالعربية والفرنسية، دون تسجيل.</span></p>
+    <div id="cta-pass-zone"><a class="btn-pass-grand" id="cta-pass" href="pass/"><span><span data-l="fr">Pass Examen : examens blancs illimités</span><span data-l="ar">باقة الامتحان: امتحانات تجريبية بلا حدود</span></span></a></div>
     <span class="etiquette"><span data-l="fr">Texte de loi vérifié le</span><span data-l="ar">النص القانوني محيَّن في</span>&nbsp;<bdi data-maj></bdi></span>
     <div class="hero-visuel">
       <img class="hero-photo" src="assets/photos/accueil-route.webp" width="900" height="506" alt="Autoroute en Tunisie : panneaux bilingues vers Tunis et Hammamet">
-      <img class="hero-permis" src="assets/specimen/permis-specimen-attt.webp?v=20261006d" width="385" height="243" alt="Spécimen officiel du nouveau permis de conduire tunisien (ATTT), données fictives">
+      <img class="hero-permis" src="assets/specimen/permis-specimen-attt.webp?v=20261006e" width="385" height="243" alt="Spécimen officiel du nouveau permis de conduire tunisien (ATTT), données fictives">
     </div>
     <p class="credit credit-hero"><span id="credit-hero"></span> — <span data-l="fr">carte : spécimen officiel du nouveau permis, image ATTT</span><span data-l="ar">البطاقة: نموذج رسمي للرخصة الجديدة، صورة الوكالة الفنية للنقل البري</span></p>
   </div>
@@ -70,7 +72,7 @@
       <span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>
       <div class="appel-corps">
         <h2><span data-l="fr">Prêt pour l'examen ?</span><span data-l="ar">هل أنت جاهز للامتحان؟</span></h2>
-        <p><span data-l="fr">30 questions sur les 10 thèmes, score et revue des erreurs à la fin.</span><span data-l="ar">30 سؤالًا من المحاور العشرة، النتيجة ومراجعة الأخطاء في النهاية.</span></p>
+        <p><span data-l="fr">30 questions sur les 10 thèmes, chronomètre, score et revue des erreurs. 1 examen gratuit par jour.</span><span data-l="ar">30 سؤالًا من المحاور العشرة، عدّاد للوقت، النتيجة ومراجعة الأخطاء. امتحان مجاني واحد كل يوم.</span></p>
       </div>
     </div>
     <a class="btn large orange" href="examen/" id="cta-examen"><span data-l="fr">Examen blanc (30 questions)</span><span data-l="ar">امتحان تجريبي (30 سؤالًا)</span>
@@ -115,7 +117,7 @@
     <details><summary><span data-l="fr">Combien de questions à l'examen du code en Tunisie ?</span><span data-l="ar">كم عدد أسئلة امتحان قانون الطرقات في تونس؟</span></summary>
       <p><span data-l="fr">D'après nos recherches, 30 questions, et il faut 24 bonnes réponses pour réussir. Ces chiffres sont à confirmer auprès de votre auto-école.</span><span data-l="ar">حسب بحثنا، 30 سؤالًا ويجب الحصول على 24 إجابة صحيحة للنجاح. هذه الأرقام يجب التأكد منها لدى مدرسة تعليم السياقة.</span></p></details>
     <details><summary><span data-l="fr">Le site est-il gratuit ?</span><span data-l="ar">هل الموقع مجاني؟</span></summary>
-      <p><span data-l="fr">Oui : entraînement et examen blanc gratuits, sans inscription et sans application à installer.</span><span data-l="ar">نعم: التدريب والامتحان التجريبي مجانيان، دون تسجيل ودون تطبيق.</span></p></details>
+      <p><span data-l="fr">Oui : leçons, panneaux, amendes, entraînement par thème et un examen blanc par jour sont gratuits, sans inscription et sans application à installer. Le <a href="pass/">Pass Examen</a> (dès 9 DT, 2 jours d'essai gratuit) ajoute les examens blancs illimités, les statistiques par thème et la révision de vos erreurs.</span><span data-l="ar">نعم: الدروس والعلامات والخطايا والتدريب حسب المحور وامتحان تجريبي واحد كل يوم مجانية، دون تسجيل ودون تطبيق. وتضيف <a href="pass/">باقة الامتحان</a> (ابتداءً من 9 د، مع تجربة مجانية ليومين) امتحانات تجريبية بلا حدود وإحصائيات حسب المحور ومراجعة أخطائك.</span></p></details>
     <details><summary><span data-l="fr">D'où viennent les questions ?</span><span data-l="ar">من أين تأتي الأسئلة؟</span></summary>
       <p><span data-l="fr">Nous écrivons nos propres questions à partir du Code de la route (loi n° 99-71) et de ses décrets. Chaque correction cite l'article utilisé. Rien n'est copié d'une application ou d'une auto-école.</span><span data-l="ar">نكتب أسئلتنا بأنفسنا انطلاقًا من مجلة الطرقات (القانون عدد 99-71) وأوامرها التطبيقية. كل تصحيح يذكر الفصل المعتمد. لا شيء منسوخ من تطبيق أو مدرسة سياقة.</span></p></details>
     <details><summary><span data-l="fr">Les questions sont-elles en arabe ?</span><span data-l="ar">هل الأسئلة بالعربية؟</span></summary>

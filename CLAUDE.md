@@ -57,7 +57,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Détails et marche à suivre en cas d'alerte : README, « Plan de continuité ».
 
 ## Avant chaque publication / après chaque modification
-1. `node tools/test_site.mjs` (170 vérifications) puis `node tools/test_sw.mjs` (service worker) et `node tools/test_avis.mjs` (Votre avis). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
+1. `node tools/test_site.mjs` (233 vérifications) puis `node tools/test_sw.mjs` (service worker) et `node tools/test_avis.mjs` (Votre avis). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
 2. Changer le `?v=` des fichiers `assets/` dans **toutes** les pages (le test vérifie qu'il est le même partout).
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.
@@ -106,7 +106,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 
 ## Mise à jour du 05/10/2026 (soir)
 - **Icône (famille commune des 5 sites)** : un seul symbole en aplats 2-3 tons, accent doré `#F2B33D`, sans texte ni brillance (règle d'Ahmed : jamais d'effet « image IA » ni de clip-art). Ce site : **route en S avec tirets dorés**. Source = `assets/logo.svg` ; PNG 192/512 = dessin arrondi, maskable 512 et iPhone 180 = même dessin sur carré plein, symbole à 78 %. Générateur (hors dépôt) : `_claude code project/icones des sites - generateur.py`. Changer l'icône → renouveler `CACHE_VERSION` de `sw.js`.
-- **« Gratuit » mis en avant** (titres Google, descriptions, aperçus de partage, manifeste), seulement là où c'est vrai. La future partie payante n'est jamais annoncée à l'avance (décision d'Ahmed).
+- **« Gratuit » mis en avant** (titres Google, descriptions, aperçus de partage, manifeste), seulement là où c'est vrai. Depuis le 06/10/2026 la partie payante (Pass Examen) est visible partout (règles communes § 11).
 - **Aperçus WhatsApp** : tous les sites sont réglés pareil (1200 × 630, JPEG léger). WhatsApp sur PC fait de petites vignettes : envoyer les liens depuis le téléphone (ou transférer un message préparé sur le téléphone).
 - **Règle d'Ahmed : tout tourne sur internet (GitHub), sans son PC ni son intervention, « même s'il meurt ».**
 - Page Amendes : lien vers le site officiel du ministère des Finances (consulter et payer ses amendes : CIN, carte de séjour, matricule fiscal, immatriculation ; reçu, SMS, centre d'appel 81 100 700).
@@ -116,3 +116,40 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Rubriques de l'accueil (05/10/2026) : images en couleur `assets/illustrations/rub-<nom>.svg` (même style que les thèmes, fond pastel), à la place des icônes au trait.
 - **Carte permis (05/10/2026, décision d'Ahmed)** : le dessin SPÉCIMEN est remplacé (accueil et page Permis) par le **spécimen officiel du nouveau permis publié par l'ATTT** (données fictives « BEN FOULEN »), `assets/specimen/permis-specimen-attt.webp`, recadré et remis aux vraies proportions depuis l'image parue dans la presse le 21/02/2023. Crédit « image ATTT » affiché. **Pas de licence libre** : si l'ATTT ou le journal demande le retrait, remettre `assets/illustrations/permis-specimen.svg` (toujours utilisé dans l'image d'aperçu). Exception voulue par Ahmed à la règle « pas d'emblème de l'État » (le spécimen montre le drapeau).
 - Images changées sans changer de nom : toujours ajouter `?v=` à leur adresse (sinon les téléphones gardent l'ancienne jusqu'à 10 min ou plus). Fait pour le spécimen du permis le 05/10/2026.
+
+## Pass Examen (partie payante, 06/10/2026, accord écrit d'Ahmed)
+- **Gratuit pour toujours** : leçons, panneaux, amendes, entraînement par thème, **1 examen blanc par jour** (compté sur
+  l'appareil : `localStorage` `crt-examen-gratuit-v1` = jour du dernier examen gratuit TERMINÉ ; stockage impossible = permis).
+- **Pass Examen** : examens blancs illimités, statistiques par thème (page examen, `#stats`), « Mes erreurs »
+  (`entrainement/?erreurs=1`, réservé au Pass depuis le 06/10/2026), bouton « Écouter » (synthèse vocale du téléphone :
+  promis seulement « selon votre téléphone »). **9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours, essai gratuit 2 jours**
+  (une fois par téléphone), pas de renouvellement automatique, aucune période payée remboursée, vendeur = « l'éditeur du site »
+  (JAMAIS le nom de la société), prix non annoncés TTC.
+- Pages : `pass/` (prix et avantages, bouton « Paiement » <details> D17/IZI/Wafacash 24 321 390, motif nom + téléphone,
+  bouton vert WhatsApp, « J'ai un code » `#code-acces`, formulaire Formspree `mwlpakqj`), `pass/conditions/`.
+  Bouton doré « Pass Examen » dans l'en-tête (page.js, classe `entete-pass`, `.actif` = coché), gros bouton doré dans le
+  bandeau de l'accueil (`#cta-pass-zone`), carte `#fin-gratuit` à la fin d'un examen gratuit, écran `#examen-utilise`.
+- Code : `assets/pass.js` (chargé par TOUTES les pages juste après page.js). Code d'accès = 8 caractères sans O/0/I/1.
+  `donnees/pass.json` (public) = `sel`, `tours` (100 000), `codes: [{h, fin}]` : h = PBKDF2-SHA-256(code, sel) ; fin = dernier
+  jour inclus. AUCUNE donnée personnelle (le test le vérifie). Le navigateur calcule l'empreinte (crypto.subtle), garde le code
+  (`crt-pass-v1`), revérifie au plus 1 fois par jour (code arrêté/expiré = effacé ; pas de réseau = gardé jusqu'à la fin).
+  Rien n'est demandé au réseau si aucun code n'est gardé. sw.js : `.json` = réseau d'abord.
+- **Activation** : dépôt PRIVÉ `Ah6259/code-route-pass` (dossier local `../pass (prive)/`), bouton « pass » dans l'application
+  GitHub (essai / paye 7-30-90 / arret / liste) + nettoyage chaque nuit. Il écrit ici `donnees/pass.json` avec la clé de
+  déploiement « robot-pass » (secret `CLE_SITE` du dépôt privé ; secours : `JETON_SITE`). Voir son README.
+- **Limite honnête** : un code peut être partagé entre plusieurs téléphones (acceptable pour ce prix ; `arret` s'il est publié).
+  Le Pass est gardé dans le navigateur : navigateur vidé = retaper le code. GitHub Pages met jusqu'à 10 min à publier un code.
+
+## Examen blanc (06/10/2026) : chrono, séries, permis à points
+- **Durée** : aucune durée officielle trouvée (décret 2000-142 muet ; un guide parle d'« environ une demi-heure »). Donc
+  chronomètre = **temps écoulé** (`#chrono`), avec la phrase « L'examen officiel n'impose pas de durée connue ». Pas de compte
+  à rebours tant qu'une durée officielle n'est pas trouvée. 30 questions / 24 : toujours « à confirmer ».
+- **Plusieurs examens** : « Nouvel examen au hasard » (3 par thème, en évitant les questions des 2 derniers examens ;
+  `ids` gardés pour les 3 derniers) + « Série 1 » à « Série 10 » (tirage fixe `serieExamen(n)`, `NB_SERIES` dans quiz.js ;
+  les séries changent si on ajoute des questions). Répartition officielle par thème : inconnue (nous : 3 par thème).
+- **Permis à points** : écrit dans le Code (art. 78) et le décret 2000-144 (25 points) mais **pas appliqué** ; nouveau projet
+  annoncé depuis 2021 (25 points, 18 débutants), pas adopté. 6 questions de points dépubliées (`a_verifier: true` : T7-011,
+  T10-001 à T10-005), T9-009 et T10-012 corrigées, leçons 7 et 10 et page Amendes réécrites. Sauvegarde :
+  `../questions/questions-v1.sauvegarde-2026-10-06.json`. Détails : `../verification des questions 2026-10-05.md` (ajout du 06/10).
+  **117 questions publiées**. Un test bloque toute question publiée sur les points.
+- Captures Edge 500 px : la CSP interdit `eval` → les actions de capture appellent les fonctions globales directement.

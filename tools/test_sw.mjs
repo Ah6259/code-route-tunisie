@@ -125,7 +125,7 @@ try {
   check("hors connexion sans copie : page « Hors connexion » FR + AR (503)", r.statut === 503 && /Hors connexion/.test(r.corps) && /الإنترنت/.test(r.corps));
 
   // données : réseau d'abord, même avec ?v=
-  for (const f of ["data/prix.json?v=1", "donnees/liste.json", "data/votes.js", "assets/x.json?v=2"]) {
+  for (const f of ["data/prix.json?v=1", "donnees/liste.json", "donnees/pass.json", "data/votes.js", "assets/x.json?v=2"]) {
     b = navigateur(); await b.garde(nomCache, f, "ANCIEN"); b.reseau = async () => b.rep("NOUVEAU", "application/json");
     r = await b.demande(f);
     check(`données ${f} : réseau d'abord`, r.corps === "NOUVEAU");

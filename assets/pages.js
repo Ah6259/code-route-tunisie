@@ -12,13 +12,18 @@ function pageAccueil() {
     ["entrainement/", "entrainement", T("Entraînement", "التدريب"), T("Questions par thème, correction immédiate", "أسئلة حسب المحور مع تصحيح فوري")],
     ["lecons/", "lecons", T("Leçons", "الدروس"), T("10 cours courts avec schémas", "10 دروس قصيرة مع رسوم")],
     ["panneaux/", "panneaux", T("Panneaux", "العلامات"), T(`${PANNEAUX_NB} panneaux expliqués`, `${iso(String(PANNEAUX_NB))} علامة مشروحة`)],
-    ["amendes/", "amendes", T("Amendes et points", "الخطايا والنقاط"), T("Barème 2025 et délits", "سلّم 2025 والجنح")],
-    ["entrainement/?erreurs=1", "erreurs", T("Mes erreurs", "أخطائي"), nbErr ? T(`${nbErr} question(s) à revoir`, `${iso(String(nbErr))} سؤال للمراجعة`) : T("Rien à revoir pour l'instant", "لا شيء للمراجعة الآن")],
+    ["amendes/", "amendes", T("Amendes et sanctions", "الخطايا والعقوبات"), T("Barème 2025 et délits", "سلّم 2025 والجنح")],
+    ["entrainement/?erreurs=1", "erreurs", T("Mes erreurs", "أخطائي") + (passActif() ? "" : ` <span class="mini-pass">${T("Pass", "الباقة")}</span>`), nbErr ? T(`${nbErr} question(s) à revoir`, `${iso(String(nbErr))} سؤال للمراجعة`) : T("Rien à revoir pour l'instant", "لا شيء للمراجعة الآن")],
     ["permis/", "permis", T("Passer le permis", "اجتياز الرخصة"), T("Dossier, épreuves, âge", "الملف، الاختبارات، السن")],
     ["https://ah6259.github.io/auto-ecoles-tunisie/", "auto-ecole", T("Trouver une auto-école", "ابحث عن مدرسة سياقة"), T("Près de chez vous, par gouvernorat (annuaire gratuit)", "قريبة منك، حسب الولاية (دليل مجاني)")]
   ].map(([h, i, t, s]) => `<a class="rubrique" href="${h}"><span class="ic ill"><img src="${racineP()}assets/illustrations/rub-${i}.svg" alt="" width="46" height="46"></span><span><b>${t}</b><small>${s}</small></span></a>`).join("");
   const cr = document.getElementById("credit-hero");
   if (cr) cr.innerHTML = htmlCreditSeul("accueil-route");
+  // gros bouton doré « Pass Examen » (en haut de l'accueil)
+  const cta = document.getElementById("cta-pass-zone");
+  if (cta) cta.innerHTML = passActif()
+    ? `<a class="btn-pass-grand actif" id="cta-pass" href="examen/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span>${T("Pass Examen actif", "باقة الامتحان مفعّلة")}<small>${T(`Examens blancs illimités jusqu'au ${dateLisible(finPass())} inclus`, `امتحانات تجريبية بلا حدود إلى غاية ${iso(dateLisible(finPass()))}`)}</small></span></a>`
+    : htmlBoutonPass("cta-pass", "Pass Examen : examens blancs illimités", "باقة الامتحان: امتحانات تجريبية بلا حدود");
 }
 // Crédit seul (pour les photos de fond : bandeau)
 function htmlCreditSeul(id) {
@@ -108,6 +113,15 @@ function pagePermis() {
   document.getElementById("credit-cles").innerHTML = htmlCreditSeul("cles");
 }
 
+/* ---------------- Pass Examen (page pass/) ---------------- */
+function pagePass() {
+  const etat = document.getElementById("pass-etat");
+  if (!etat) return;
+  etat.hidden = !passActif();
+  etat.innerHTML = passActif() ? `<b>✓ ${T(`Votre Pass Examen est actif sur ce téléphone jusqu'au ${dateLisible(finPass())} inclus.`, `باقة الامتحان مفعّلة على هذا الهاتف إلى غاية ${iso(dateLisible(finPass()))}.`)}</b>
+    <div class="actions"><a class="btn" href="../examen/">${T("Passer un examen blanc", "اجتياز امتحان تجريبي")}</a><a class="btn second" href="../examen/#stats">${T("Mes statistiques", "إحصائياتي")}</a></div>` : "";
+}
+
 /* ---------------- relecture (moniteur) ---------------- */
 const CLE_RELECTURE = "crt-relecture-v1";
 function lireRelecture() { try { return JSON.parse(localStorage.getItem(CLE_RELECTURE) || "{}") || {}; } catch (e) { return {}; } }
@@ -161,5 +175,15 @@ document.addEventListener("langue", () => {
   else if (p === "permis") pagePermis();
   else if (p === "relecture") pageRelecture();
   else if (p === "examen") rendreExamen();
+  else if (p === "pass") pagePass();
   else if (p === "entrainement") { if (entrainementLance) rendreEntrainement(); else { entrainementLance = true; lancerEntrainement(); } }
+});
+
+// Pass Examen activé, prolongé ou arrêté (pass.js) : on met à jour ce qui en dépend, sans jamais couper un examen en cours
+document.addEventListener("pass", () => {
+  const p = document.body.dataset.page;
+  if (p === "accueil") pageAccueil();
+  else if (p === "pass") pagePass();
+  else if (p === "examen" && examen.etape === "intro") rendreExamen();
+  else if (p === "entrainement" && /erreurs/.test(String(entrainement.theme))) lancerEntrainement();
 });

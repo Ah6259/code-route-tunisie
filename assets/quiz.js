@@ -33,12 +33,14 @@ function estJuste(q, choisis) {
   const s = new Set(choisis);
   return s.size === q.bonnes.length && q.bonnes.every(b => s.has(b));
 }
-// 30 questions sans doublon : 3 par thème, complété au hasard si un thème en manque
-function tirerExamen(rng = Math.random, liste = QUESTIONS) {
+// 30 questions sans doublon : 3 par thème, complété au hasard si un thème en manque.
+// « eviter » (facultatif) : questions déjà vues aux derniers examens, prises en dernier seulement si besoin.
+function tirerExamen(rng = Math.random, liste = QUESTIONS, eviter = null) {
+  const ordre = t => { const m = melanger(t, rng); return eviter && eviter.size ? m.filter(q => !eviter.has(q.id)).concat(m.filter(q => eviter.has(q.id))) : m; };
   let tirage = [];
   for (const t of Object.keys(THEMES))
-    tirage.push(...melanger(liste.filter(q => q.theme === +t), rng).slice(0, EXAMEN.parTheme));
-  const reste = melanger(liste.filter(q => !tirage.includes(q)), rng);
+    tirage.push(...ordre(liste.filter(q => q.theme === +t)).slice(0, EXAMEN.parTheme));
+  const reste = ordre(liste.filter(q => !tirage.includes(q)));
   tirage.push(...reste.slice(0, Math.max(0, EXAMEN.nb - tirage.length)));
   return melanger(tirage.slice(0, EXAMEN.nb), rng);
 }
@@ -124,6 +126,8 @@ function questionsRatees() { const p = lireProgression(); return QUESTIONS.filte
 function lancerEntrainement() {
   const params = new URLSearchParams(location.search);
   if (params.get("erreurs")) {
+    // « Mes erreurs » (révision des questions ratées) fait partie du Pass Examen
+    if (!passActif()) { Object.assign(entrainement, { theme: "erreurs-pass", liste: [], i: 0 }); rendreEntrainement(); return; }
     Object.assign(entrainement, { theme: "erreurs", liste: melanger(questionsRatees()), i: 0, choisis: [], corrige: false, bons: 0 });
     rendreEntrainement(); return;
   }
@@ -139,6 +143,17 @@ function rendreEntrainement() {
     titre.textContent = T("Entraînement par thème", "التدريب حسب المحور");
     zone.innerHTML = `<div class="themes" id="choix-themes"></div>`;
     afficherThemes("choix-themes", "../");
+    return;
+  }
+  if (e.theme === "erreurs-pass") {
+    titre.textContent = T("Mes erreurs", "أخطائي");
+    const n = questionsRatees().length;
+    zone.innerHTML = `<section class="carte offre-mini" id="erreurs-pass">
+      <h2>${T("Révisez vos erreurs avec le Pass Examen", "راجع أخطاءك مع باقة الامتحان")}</h2>
+      <p>${n ? T(`Vous avez <b>${n} question(s)</b> ratée(s) à revoir.`, `لديك <b>${nb(n)}</b> سؤال للمراجعة.`) : T("Les questions que vous ratez apparaîtront ici.", "الأسئلة التي تخطئ فيها ستظهر هنا.")}
+        ${T("La révision de vos erreurs, les examens blancs illimités et les statistiques par thème font partie du Pass Examen.", "مراجعة الأخطاء والامتحانات التجريبية بلا حدود والإحصائيات حسب المحور جزء من باقة الامتحان.")}</p>
+      ${htmlBoutonPass("cta-pass-erreurs", "Pass Examen", "باقة الامتحان")}
+      <p class="petit">${T("L'entraînement par thème reste gratuit :", "التدريب حسب المحور يبقى مجانيًا:")} <a href="./">${T("s'entraîner par thème", "التدريب حسب المحور")}</a></p></section>`;
     return;
   }
   const serieErreurs = e.theme === "erreurs";
@@ -178,10 +193,12 @@ function rendreEntrainement() {
     ${htmlProgres(e.i, e.liste.length, serieErreurs ? nomTheme(q.theme) : `${nb(e.bons)} ✓`)}
     <p class="question">${esc(txt(q, "question"))}</p>
     ${htmlSchema(q)}
+    ${htmlEcouter()}
     <p class="consigne">${CONSIGNE()}</p>
     ${htmlChoix(q, e.choisis, e.corrige)}
     ${bas}
     ${htmlSignalerQ(q)}</section>`;
+  brancherEcouter(q);
   zone.querySelectorAll(".choix-q:not([disabled])").forEach(b => b.onclick = () => {
     const i = +b.dataset.i;
     e.choisis = e.choisis.includes(i) ? e.choisis.filter(x => x !== i) : [...e.choisis, i].sort();
@@ -201,14 +218,117 @@ function rendreEntrainement() {
 }
 
 /* ---------- examen blanc ---------- */
-const examen = { etape: "intro", questions: [], reponses: [], i: 0, choisis: [], resultat: null };
-function demarrerExamen() {
-  Object.assign(examen, { etape: "question", questions: tirerExamen(), reponses: [], i: 0, choisis: [], resultat: null });
+/* Plusieurs examens (demande d'Ahmed, octobre 2026) :
+   - « Nouvel examen au hasard » : 30 questions (3 par thème), en évitant d'abord les questions des derniers examens ;
+   - « Série 1 » à « Série 10 » : examens fixes (mêmes 30 questions pour tout le monde, tant que les questions ne changent pas).
+   Chronomètre : temps écoulé (l'examen officiel n'impose pas de durée connue : rien n'est présenté comme officiel).
+   Gratuit : 1 examen blanc par jour (au hasard ou série) ; illimité avec le Pass Examen (pass.js). */
+const NB_SERIES = 10;
+// générateur pseudo-aléatoire fixe (même suite pour un même numéro) : sert aux séries
+function rngFixe(graine) {
+  let a = graine >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function serieExamen(n) { return tirerExamen(rngFixe(n * 7919 + 17)); }
+// questions des 2 derniers examens terminés (à éviter dans un nouvel examen au hasard)
+function questionsRecentes() {
+  const ex = lireProgression().examens.slice(-2);
+  return new Set(ex.flatMap(e => Array.isArray(e.ids) ? e.ids : []));
+}
+function seriesFaites() {
+  const r = {};
+  lireProgression().examens.forEach(e => { if (e.serie) r[e.serie] = Math.max(r[e.serie] || 0, e.score); });
+  return r;
+}
+
+const examen = { etape: "intro", questions: [], reponses: [], i: 0, choisis: [], resultat: null, gratuit: false, serie: 0, debut: 0, duree: 0 };
+let minuterie = null;
+function demarrerExamen(serie) {
+  const acces = accesExamen();          // pass.js : "pass", "gratuit" (1 par jour) ou "bloque"
+  if (acces === "bloque") { examen.etape = "intro"; rendreExamen(); window.scrollTo && window.scrollTo(0, 0); return; }
+  serie = +serie || 0;
+  const questions = serie ? serieExamen(serie) : tirerExamen(Math.random, QUESTIONS, questionsRecentes());
+  Object.assign(examen, { etape: "question", questions, reponses: [], i: 0, choisis: [], resultat: null, gratuit: acces === "gratuit", serie, debut: Date.now(), duree: 0 });
+  lancerChrono();
   rendreExamen();
+}
+
+/* ---------- chronomètre (temps écoulé) ---------- */
+function mmss(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+function majChrono() {
+  const el = document.getElementById("chrono");
+  if (el && examen.etape === "question") el.textContent = nb(mmss(Date.now() - examen.debut));
+}
+function lancerChrono() {
+  arreterChrono();
+  try { minuterie = setInterval(majChrono, 1000); } catch (e) {}
+}
+function arreterChrono() { if (minuterie) { clearInterval(minuterie); minuterie = null; } }
+function dureeLisible(ms) {
+  const s = Math.round(ms / 1000), m = Math.floor(s / 60), r = s % 60;
+  return T(`${m} min ${String(r).padStart(2, "0")} s`, `${iso(m)} دق ${iso(String(r).padStart(2, "0"))} ث`);
+}
+
+/* ---------- statistiques par thème (Pass Examen) ---------- */
+function statistiques() {
+  const p = lireProgression();
+  const themes = Object.keys(THEMES).map(t => {
+    const qs = questionsDuTheme(t), vues = qs.filter(q => p.q[q.id] === 0 || p.q[q.id] === 1), justes = qs.filter(q => p.q[q.id] === 1).length;
+    return { t: +t, total: qs.length, vues: vues.length, justes, pc: vues.length ? Math.round(justes / vues.length * 100) : null };
+  });
+  const ex = p.examens;
+  const moyenne = ex.length ? Math.round(ex.reduce((s, e) => s + e.score, 0) / ex.length * 10) / 10 : null;
+  const meilleur = ex.length ? Math.max(...ex.map(e => e.score)) : null;
+  const faibles = themes.filter(x => x.vues >= 3).sort((a, b) => a.pc - b.pc);
+  return { themes, examens: ex.length, reussis: ex.filter(e => e.score >= EXAMEN.seuil).length, moyenne, meilleur,
+    faible: faibles.length && faibles[0].pc < 100 ? faibles[0] : null };
+}
+function htmlStatistiques() {
+  const s = statistiques();
+  return `<section class="carte stats" id="stats">
+    <h2>${T("Vos statistiques par thème", "إحصائياتك حسب المحور")}</h2>
+    <p class="doux">${s.examens ? T(`${s.examens} examen(s) blanc(s) · ${s.reussis} réussi(s) · moyenne ${s.moyenne} / ${EXAMEN.nb} · meilleur ${s.meilleur} / ${EXAMEN.nb}`,
+      `${nb(s.examens)} امتحان · ${nb(s.reussis)} ناجح · المعدل ${frac(s.moyenne, EXAMEN.nb)} · الأفضل ${frac(s.meilleur, EXAMEN.nb)}`) : T("Aucun examen blanc terminé pour l'instant.", "لم تُنهِ أي امتحان تجريبي بعد.")}</p>
+    <table id="stats-themes">${s.themes.map(x => `<tr data-theme="${x.t}"><td>${nomTheme(x.t)}<div class="jauge"><span style="width:${x.pc || 0}%"></span></div>
+      <small class="doux">${T(`${x.vues} / ${x.total} questions vues`, `${frac(x.vues, x.total)} سؤالًا تمت رؤيتها`)}</small></td>
+      <td>${x.pc === null ? "—" : nb(x.pc + " %")}</td></tr>`).join("")}</table>
+    ${s.faible ? `<p class="stats-conseil" id="stats-conseil">${T("À travailler en priorité :", "للمراجعة أولًا:")} <a href="../lecons/?theme=${s.faible.t}">${nomTheme(s.faible.t)}</a> (${nb(s.faible.pc + " %")})</p>` : ""}
+    <div class="actions"><a class="btn second" href="../entrainement/?erreurs=1">${T("Réviser mes erreurs", "مراجعة أخطائي")}</a></div>
+  </section>`;
+}
+// Écran « examen gratuit du jour déjà utilisé »
+function htmlExamenUtilise() {
+  return `<section class="carte offre-mini" id="examen-utilise">
+    <h2>${T("Vous avez utilisé votre examen gratuit du jour", "لقد استعملت امتحانك المجاني لهذا اليوم")}</h2>
+    <p>${T("Un nouvel examen blanc gratuit vous attend demain. Pour en passer autant que vous voulez dès maintenant, prenez le Pass Examen.",
+      "ينتظرك امتحان تجريبي مجاني جديد غدًا. لاجتياز ما تشاء من الامتحانات من الآن، اختر باقة الامتحان.")}</p>
+    ${htmlBoutonPass("cta-pass-examen", "Pass Examen : examens blancs illimités", "باقة الامتحان: امتحانات تجريبية بلا حدود")}
+    <p class="petit"><a href="../pass/#code-acces">${T("J'ai déjà un code d'accès", "لدي رمز دخول")}</a> · <a href="../entrainement/">${T("L'entraînement par thème reste gratuit", "التدريب حسب المحور يبقى مجانيًا")}</a></p>
+  </section>`;
+}
+function htmlSeries() {
+  const faites = seriesFaites();
+  return `<h3 class="series-titre">${T("Ou choisissez une série", "أو اختر سلسلة")}</h3>
+    <div class="series" id="series">${Array.from({ length: NB_SERIES }, (_, k) => k + 1).map(n =>
+      `<button type="button" class="serie${faites[n] !== undefined ? " faite" : ""}" data-serie="${n}">${T("Série", "سلسلة")} ${nb(n)}${faites[n] !== undefined ? `<small>${frac(faites[n], EXAMEN.nb, "/")}</small>` : ""}</button>`).join("")}</div>`;
 }
 function rendreExamen() {
   const x = examen, zone = document.getElementById("quiz");
   if (x.etape === "intro") {
+    const acces = accesExamen();
+    if (acces === "bloque") { zone.innerHTML = htmlExamenUtilise(); return; }
+    const noteAcces = acces === "pass"
+      ? `<p class="pass-ok" id="acces-examen">✓ ${T(`Pass Examen actif jusqu'au ${dateLisible(finPass())} inclus : examens blancs illimités.`, `باقة الامتحان مفعّلة إلى غاية ${iso(dateLisible(finPass()))}: امتحانات تجريبية بلا حدود.`)}</p>`
+      : `<p class="avert" id="acces-examen">${T("<b>Examen gratuit du jour</b> : 1 examen blanc gratuit par jour sur ce téléphone. Illimité avec le", "<b>امتحان اليوم المجاني</b>: امتحان تجريبي مجاني واحد كل يوم على هذا الهاتف. بلا حدود مع")} <a href="../pass/">${T("Pass Examen", "باقة الامتحان")}</a>.</p>`;
     zone.innerHTML = `<section class="carte">
       <h2>${T("Comment se passe l'examen blanc ?", "كيف يجري الامتحان التجريبي؟")}</h2>
       <ul class="liste">
@@ -216,25 +336,35 @@ function rendreExamen() {
         <li>${T("Une ou plusieurs bonnes réponses par question : la réponse compte seulement si elle est complète.", "إجابة صحيحة واحدة أو أكثر لكل سؤال: لا تُحتسب الإجابة إلا إذا كانت كاملة.")}</li>
         <li>${T("Pas de correction pendant l'examen : vous verrez vos erreurs expliquées à la fin.", "لا تصحيح أثناء الامتحان: سترى أخطاءك مع الشرح في النهاية.")}</li>
         <li>${T(`Réussite à partir de <b>${EXAMEN.seuil} bonnes réponses sur ${EXAMEN.nb}</b>.`, `النجاح ابتداءً من <b>${nb(EXAMEN.seuil)} إجابة صحيحة من ${nb(EXAMEN.nb)}</b>.`)}</li>
+        <li>${T("Un chronomètre affiche le temps passé. L'examen officiel n'impose pas de durée connue (les guides parlent d'environ une demi-heure).", "يعرض العدّاد الوقت المنقضي. لا يفرض الامتحان الرسمي مدة معروفة (تتحدث الأدلة عن نصف ساعة تقريبًا).")}</li>
       </ul>
-      <p class="avert">${T("Chiffres à confirmer : 30 questions et 24 bonnes réponses sont les chiffres trouvés dans nos recherches sur l'examen de l'ATTT. Demandez confirmation à votre auto-école.",
-        "أرقام يجب التأكد منها: 30 سؤالًا و24 إجابة صحيحة هي الأرقام التي وجدناها في بحثنا حول امتحان الوكالة الفنية للنقل البري. اسأل مدرسة تعليم السياقة للتأكد.")}</p>
-      <div class="actions"><button class="btn large orange" type="button" id="commencer">${T("Commencer l'examen", "ابدأ الامتحان")} ${ICONES.fleche}</button></div>
-    </section>`;
-    document.getElementById("commencer").onclick = demarrerExamen;
+      <p class="avert">${T("Chiffres à confirmer : 30 questions et 24 bonnes réponses sont les chiffres trouvés dans nos recherches sur l'examen de l'ATTT. La répartition officielle des questions par thème n'est pas publiée : nous en tirons 3 par thème. Demandez confirmation à votre auto-école.",
+        "أرقام يجب التأكد منها: 30 سؤالًا و24 إجابة صحيحة هي الأرقام التي وجدناها في بحثنا حول امتحان الوكالة الفنية للنقل البري. التوزيع الرسمي للأسئلة حسب المحاور غير منشور: نختار 3 أسئلة من كل محور. اسأل مدرسة تعليم السياقة للتأكد.")}</p>
+      ${noteAcces}
+      <div class="actions"><button class="btn large orange" type="button" id="commencer">${T("Nouvel examen au hasard", "امتحان جديد عشوائي")} ${ICONES.fleche}</button></div>
+      ${htmlSeries()}
+    </section>
+    ${acces === "pass" ? htmlStatistiques() : `<section class="carte stats-verrou" id="stats-verrou"><h2>${T("Vos statistiques par thème", "إحصائياتك حسب المحور")}</h2>
+      <p class="doux">${T("Vos points faibles thème par thème, votre moyenne et la révision de vos erreurs : avec le", "نقاط ضعفك محورًا بمحور، معدلك ومراجعة أخطائك: مع")} <a href="../pass/">${T("Pass Examen", "باقة الامتحان")}</a>.</p></section>`}`;
+    document.getElementById("commencer").onclick = () => demarrerExamen(0);
+    zone.querySelectorAll("#series .serie").forEach(b => b.onclick = () => demarrerExamen(b.dataset.serie));
     return;
   }
   if (x.etape === "question") {
     const q = x.questions[x.i];
+    const nomSerie = x.serie ? `${T("Série", "سلسلة")} ${nb(x.serie)} · ` : "";
     zone.innerHTML = `<section class="carte protege" data-id="${q.id}">
-      ${htmlProgres(x.i, x.questions.length, nomTheme(q.theme))}
+      <div class="chrono-ligne"><span class="doux">${nomSerie}${nomTheme(q.theme)}</span><span class="chrono" aria-label="${T("Temps écoulé", "الوقت المنقضي")}">⏱ <b id="chrono">${nb(mmss(Date.now() - x.debut))}</b></span></div>
+      ${htmlProgres(x.i, x.questions.length, "")}
       <p class="question">${esc(txt(q, "question"))}</p>
     ${htmlSchema(q)}
+      ${htmlEcouter()}
       <p class="consigne">${CONSIGNE()}</p>
       ${htmlChoix(q, x.choisis, false)}
       <div class="actions"><button class="btn large" type="button" id="valider"${x.choisis.length ? "" : " disabled"}>${x.i + 1 < x.questions.length ? T("Valider et continuer", "تأكيد ومواصلة") : T("Terminer l'examen", "إنهاء الامتحان")} ${ICONES.fleche}</button></div>
       ${htmlSignalerQ(q)}
     </section>`;
+    brancherEcouter(q);
     zone.querySelectorAll(".choix-q").forEach(b => b.onclick = () => {
       const i = +b.dataset.i;
       x.choisis = x.choisis.includes(i) ? x.choisis.filter(v => v !== i) : [...x.choisis, i].sort();
@@ -253,15 +383,22 @@ function rendreExamen() {
   const r = x.resultat;
   const canon = document.querySelector('link[rel="canonical"]');
   zone.innerHTML = `<section class="carte score ${r.reussi ? "reussi" : "echoue"}">
-      <div class="doux">${T("Votre score", "نتيجتك")}</div>
+      <div class="doux">${x.serie ? `${T("Série", "سلسلة")} ${nb(x.serie)} · ` : ""}${T("Votre score", "نتيجتك")}</div>
       <div class="grand" id="score" dir="ltr">${r.score}<small> / ${r.total}</small></div>
       <span class="statut ${r.reussi ? "ok" : "ko"}" id="statut">${r.reussi ? T("Réussi", "ناجح") : T("Pas encore : continuez à réviser", "ليس بعد: واصل المراجعة")}</span>
+      <p class="doux" id="duree">⏱ ${T("Temps", "الوقت")} : ${dureeLisible(x.duree)}</p>
       <p class="avert">${T(`Seuil de réussite : ${EXAMEN.seuil}/${EXAMEN.nb} (chiffres à confirmer auprès d'une auto-école).`, `عتبة النجاح: ${iso(EXAMEN.seuil + "/" + EXAMEN.nb)} (أرقام يجب التأكد منها لدى مدرسة تعليم السياقة).`)}</p>
       <div class="actions">
-        <button class="btn" type="button" id="nouvel">${T("Nouvel examen blanc", "امتحان تجريبي جديد")}</button>
+        <button class="btn" type="button" id="nouvel">${T("Nouvel examen au hasard", "امتحان جديد عشوائي")}</button>
         <a class="partage" target="_blank" rel="noopener" id="partage" href="${lienWhatsApp(T(`J'ai eu ${r.score}/${r.total} à l'examen blanc du code de la route tunisien. Essaie toi aussi, c'est gratuit :`, `تحصلت على ${r.score}/${r.total} في الامتحان التجريبي لقانون الطرقات التونسي. جرّب أنت أيضًا، مجانًا:`), canon && canon.href)}">${ICONE_WHATSAPP}${T("Partager", "شارك")}</a>
       </div>
+      <div class="actions"><button class="btn second" type="button" id="choisir-serie">${T("Choisir une série", "اختيار سلسلة")}</button></div>
     </section>
+    ${x.gratuit && !passActif() ? `<section class="carte offre-mini" id="fin-gratuit">
+      <h2>${T("Vous avez utilisé votre examen gratuit du jour", "لقد استعملت امتحانك المجاني لهذا اليوم")}</h2>
+      <p>${T("Prochain examen gratuit : demain. Avec le Pass Examen : examens blancs illimités, statistiques par thème et révision de vos erreurs.", "الامتحان المجاني القادم: غدًا. مع باقة الامتحان: امتحانات تجريبية بلا حدود، إحصائيات حسب المحور ومراجعة أخطائك.")}</p>
+      ${htmlBoutonPass("cta-pass-fin", "Passer au Pass Examen", "اختر باقة الامتحان")}
+    </section>` : ""}
     <section class="carte">
       <h2>${T("Résultat par thème", "النتيجة حسب المحور")}</h2>
       <table id="par-theme">${Object.keys(r.parTheme).sort((a, b) => a - b).map(t =>
@@ -278,16 +415,27 @@ function rendreExamen() {
       ${htmlExplication(er.q)}
       ${htmlSignalerQ(er.q)}
     </section>`).join("")}</div>`;
-  document.getElementById("nouvel").onclick = demarrerExamen;
+  document.getElementById("nouvel").onclick = () => demarrerExamen(0);
+  document.getElementById("choisir-serie").onclick = () => { x.etape = "intro"; rendreExamen(); window.scrollTo && window.scrollTo(0, 0); };
 }
 function terminerExamen() {
   const x = examen;
+  arreterChrono();
+  x.duree = Date.now() - x.debut;
   x.resultat = noter(x.questions, x.reponses);
   x.etape = "fin";
+  if (x.gratuit) marquerExamenGratuit();      // 1 examen blanc gratuit par jour (compté sur l'appareil)
   const p = lireProgression();
   x.questions.forEach((q, i) => p.q[q.id] = estJuste(q, x.reponses[i] || []) ? 1 : 0);
-  p.examens.push({ date: new Date().toISOString().slice(0, 10), score: x.resultat.score, total: x.resultat.total });
+  const e = { date: new Date().toISOString().slice(0, 10), score: x.resultat.score, total: x.resultat.total, duree: Math.round(x.duree / 1000), ids: x.questions.map(q => q.id) };
+  if (x.serie) e.serie = x.serie;
+  p.examens.push(e);
   p.examens = p.examens.slice(-20);
-  ecrireProgression(p);
+  ecrirePropre(p);
   rendreExamen();
+}
+// on ne garde la liste des questions que pour les 3 derniers examens (le stockage du téléphone reste léger)
+function ecrirePropre(p) {
+  p.examens.forEach((e, i) => { if (i < p.examens.length - 3) delete e.ids; });
+  ecrireProgression(p);
 }

@@ -59,3 +59,17 @@ Guide réutilisable pour créer un autre site du même genre. Une ligne par éta
 - Une image par question : `node tools/construire_schemas.mjs` puis `node tools/construire_questions.mjs` (règle : l'image montre la situation, jamais la réponse ; le test bloque une question sans image).
 - Vérification des réponses auprès d'un site tunisien de code, de la presse et de l'ISST : alcool 0,3 g/l corrigé partout ; rapport privé dans le dossier parent.
 - Icône route en S (famille commune) ; « gratuit » dans les titres ; lien officiel de paiement des amendes.
+
+## 06/10/2026 — Partie payante « Pass Examen » (modèle : Alertes Pro d'Appels d'offres)
+1. Règles communes § 11 : gratuit + payant, bouton doré, page de prix directe, bouton « Paiement », preuve WhatsApp, Formspree.
+2. Site statique sans serveur → **code d'accès** : le dépôt public ne contient que l'empreinte PBKDF2-SHA-256 salée du code
+   (+ date de fin) ; le navigateur recalcule l'empreinte (crypto.subtle) et garde le code sur l'appareil.
+3. Dépôt PRIVÉ `code-route-pass` : bouton GitHub « pass » (essai/paye/arret/liste) depuis le téléphone, code + lien WhatsApp
+   dans le résumé, nettoyage nocturne ; écriture dans le dépôt du site par une **clé de déploiement** (secret `CLE_SITE`),
+   créée par `ssh-keygen` + `gh repo deploy-key add --allow-write` + `gh secret set` (la clé secrète n'est jamais affichée).
+4. 1 examen gratuit par jour compté dans `localStorage` ; écran « Vous avez utilisé votre examen gratuit du jour ».
+5. Tests jsdom : code valide / expiré / faux / mal formé, revérification, limite quotidienne, formulaire, prix, conditions,
+   aucune donnée personnelle ; même vecteur d'empreinte testé en Python (dépôt privé) et en JS (site). Sabotages détectés.
+6. Captures Edge 500 px FR + AR (la CSP interdit `eval` : les actions de capture appellent les fonctions directement).
+7. Même jour : chronomètre (temps écoulé, aucune durée officielle), 10 séries + examen au hasard qui évite les questions
+   déjà vues ; permis à points vérifié (non appliqué) → questions dépubliées, leçons et page Amendes corrigées.

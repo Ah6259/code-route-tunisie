@@ -128,8 +128,8 @@ var LECONS = [
    intro_ar: "الكحول والأدوية والتعب والهاتف تُضعف ردّة الفعل. والقانون يعاقب عليها بشدة.",
    blocs: [
     { t_fr: "L'alcool", t_ar: "الكحول",
-      fr: "À partir de 0,3 g d'alcool par litre de sang (0 g/l pour les conducteurs stagiaires, les poids lourds, le transport de personnes et les moniteurs), on est « sous l'empire d'un état alcoolique ». C'est un délit : jusqu'à 6 mois de prison et/ou une amende de 200 à 500 DT, retrait du permis (6 mois au plus la première fois), et 4 points après jugement définitif. Refuser le dépistage est puni de la même façon. L'agent peut retirer le permis sur-le-champ.",
-      ar: "ابتداءً من 0,3 غ من الكحول في اللتر من الدم (0 غ/ل للسائقين المتربصين وسائقي الوزن الثقيل ونقل الأشخاص والمدربين)، يكون السائق «تحت تأثير حالة كحولية». وهي جنحة: سجن إلى 6 أشهر و/أو خطية من 200 إلى 500 د، وسحب الرخصة (6 أشهر على الأكثر في المرة الأولى) و4 نقاط بعد حكم بات. ورفض الفحص يُعاقب بنفس الطريقة. ويمكن للعون سحب الرخصة فورًا." },
+      fr: "À partir de 0,3 g d'alcool par litre de sang (0 g/l pour les conducteurs stagiaires, les poids lourds, le transport de personnes et les moniteurs), on est « sous l'empire d'un état alcoolique ». C'est un délit : jusqu'à 6 mois de prison et/ou une amende de 200 à 500 DT, retrait du permis (6 mois au plus la première fois). Refuser le dépistage est puni de la même façon. L'agent peut retirer le permis sur-le-champ.",
+      ar: "ابتداءً من 0,3 غ من الكحول في اللتر من الدم (0 غ/ل للسائقين المتربصين وسائقي الوزن الثقيل ونقل الأشخاص والمدربين)، يكون السائق «تحت تأثير حالة كحولية». وهي جنحة: سجن إلى 6 أشهر و/أو خطية من 200 إلى 500 د، وسحب الرخصة (6 أشهر على الأكثر في المرة الأولى). ورفض الفحص يُعاقب بنفس الطريقة. ويمكن للعون سحب الرخصة فورًا." },
     { t_fr: "Fatigue et médicaments", t_ar: "التعب والأدوية",
       fr: "Il faut s'abstenir de conduire si on est fatigué ou si on a pris des tranquillisants ou des produits qui diminuent les aptitudes. Des signes évidents de fatigue entraînent l'immobilisation du véhicule. Pour les poids lourds : pause d'au moins 45 minutes après 4 h 30 de conduite.",
       ar: "يجب الامتناع عن السياقة عند التعب أو بعد تناول مهدئات أو مواد تُضعف القدرات. وعلامات التعب الواضحة تؤدي إلى إيقاف العربة. وبالنسبة إلى الشاحنات الثقيلة: راحة لا تقل عن 45 دقيقة بعد 4 ساعات و30 دقيقة من السياقة." },
@@ -183,13 +183,13 @@ var LECONS = [
     { fr: "Constat à l'amiable pour les dégâts matériels.", ar: "محضر بالتراضي للأضرار المادية." } ],
    sources: "Code de la route, art. 60, 86 et 91 ; décret n° 2000-151, art. 42, 43, 48 et 63" },
 
- { theme: 10, photo: "lecon-10", schema: "lecon-points.svg",
-   intro_fr: "Le Code distingue les contraventions (amende fixe), les délits (jugés par le tribunal) et les crimes. Le permis a aussi un capital de points.",
-   intro_ar: "تميّز المجلة بين المخالفات (خطية محددة) والجنح (يحكم فيها القضاء) والجنايات. وللرخصة أيضًا رصيد من النقاط.",
+ { theme: 10, photo: "lecon-10", schema: "q-amende-15-jours.svg",
+   intro_fr: "Le Code distingue les contraventions (amende fixe), les délits (jugés par le tribunal) et les crimes. Le permis peut être retiré par le juge ou par l'agent.",
+   intro_ar: "تميّز المجلة بين المخالفات (خطية محددة) والجنح (يحكم فيها القضاء) والجنايات. ويمكن سحب الرخصة من قبل القاضي أو العون.",
    blocs: [
-    { t_fr: "Le permis à points", t_ar: "الرخصة بالنقاط",
-      fr: "Chaque permis a 25 points. Ils ne sont retirés qu'après un jugement définitif : 4 points pour un excès de vitesse de 40 km/h ou plus, l'alcool, la conduite sans la bonne catégorie, le sens interdit ou demi-tour sur autoroute ; 6 ou 10 points pour les accidents graves et la fuite. Sans nouvelle infraction pendant 2 ans, les points reviennent. Un stage de 3 jours rend 4 points (si on en a perdu au moins 5). Plus de points : nouveau permis seulement après 3 mois.",
-      ar: "لكل رخصة 25 نقطة. ولا تُسحب إلا بعد حكم بات: 4 نقاط لتجاوز السرعة بـ 40 كم/س أو أكثر، والكحول، والسياقة دون الصنف المطلوب، والسير عكس الاتجاه أو الدوران على الطريق السيارة؛ و6 أو 10 نقاط للحوادث الخطيرة والفرار. وإذا لم تُرتكب مخالفة جديدة خلال سنتين تعود النقاط. ودورة تكوينية بـ 3 أيام تُرجع 4 نقاط (لمن فقد 5 على الأقل). وعند نفاد النقاط: رخصة جديدة بعد 3 أشهر على الأقل." },
+    { t_fr: "Le permis à points : prévu, mais pas appliqué", t_ar: "الرخصة بالنقاط: منصوص عليها لكنها غير مطبّقة",
+      fr: "Le Code de la route de 1999 et le décret 2000-144 prévoient un capital de 25 points, mais ce système n'est pas appliqué en Tunisie. Depuis 2021, le ministère du Transport annonce un nouveau projet de permis à points (25 points, 18 pour les débutants), qui n'est pas encore adopté. Aujourd'hui, la sanction est le retrait du permis (alcool, sens interdit sur autoroute, délit de fuite…), décidé par le juge ou retenu sur-le-champ par l'agent.",
+      ar: "تنص مجلة الطرقات لسنة 1999 والأمر عدد 2000-144 على رصيد بـ 25 نقطة، لكن هذا النظام غير مطبّق في تونس. ومنذ 2021 تعلن وزارة النقل عن مشروع جديد للرخصة بالنقاط (25 نقطة، و18 للمبتدئين) لم تتم المصادقة عليه بعد. والعقوبة اليوم هي سحب الرخصة (الكحول، السير عكس الاتجاه على الطريق السيارة، الفرار…) بقرار من القاضي أو فورًا من قبل العون." },
     { t_fr: "Les amendes", t_ar: "الخطايا",
       fr: "Depuis la loi de finances 2025, les contraventions sont réparties en 3 catégories : 20, 40 et 60 DT. Le décret qui range chaque infraction dans ces catégories n'a pas encore été trouvé : voir la page Amendes. Une amende non payée dans les 15 jours est doublée ; après un mois, le permis est considéré comme suspendu jusqu'au paiement.",
       ar: "منذ قانون المالية لسنة 2025، تنقسم المخالفات إلى 3 أصناف: 20 و40 و60 د. ولم نعثر بعد على الأمر الذي يصنّف كل مخالفة: انظر صفحة الخطايا. والخطية غير المدفوعة في أجل 15 يومًا تُضاعف، وبعد شهر تُعتبر الرخصة معلّقة إلى حين الدفع." },
@@ -197,10 +197,10 @@ var LECONS = [
       fr: "Excès de vitesse de 50 km/h ou plus : 120 à 240 DT. Dépassement interdit : jusqu'à 1 mois de prison et/ou 120 à 200 DT. Conduite sans permis : jusqu'à 6 mois et/ou 200 à 500 DT. Âge minimum pour le permis B : 18 ans.",
       ar: "تجاوز السرعة بـ 50 كم/س أو أكثر: من 120 إلى 240 د. التجاوز الممنوع: سجن إلى شهر و/أو من 120 إلى 200 د. السياقة دون رخصة: إلى 6 أشهر و/أو من 200 إلى 500 د. السن الدنيا لرخصة الصنف B: 18 سنة." } ],
    retenir: [
-    { fr: "25 points au départ.", ar: "25 نقطة في البداية." },
-    { fr: "Points rendus après 2 ans sans infraction.", ar: "تعود النقاط بعد سنتين دون مخالفة." },
+    { fr: "Permis à points : pas appliqué en Tunisie (projet de loi).", ar: "الرخصة بالنقاط: غير مطبّقة في تونس (مشروع قانون)." },
+    { fr: "Alcool, fuite, sens interdit sur autoroute : retrait du permis.", ar: "الكحول، الفرار، عكس الاتجاه على الطريق السيارة: سحب الرخصة." },
     { fr: "Amende impayée 15 jours = doublée.", ar: "خطية غير مدفوعة 15 يومًا = مضاعفة." },
     { fr: "Contraventions 2025 : 20, 40 ou 60 DT.", ar: "مخالفات 2025: 20 أو 40 أو 60 د." } ],
-   sources: "Code de la route, art. 78, 83, 86, 87 et 114 ; loi n° 2024-48 (loi de finances 2025), art. 49 (JORT n° 149) ; décret n° 2000-144, art. 2, 3, 11, 12, 21 et 24 ; décret n° 2000-142, art. 10" }
+   sources: "Code de la route, art. 78, 83, 86, 87 et 114 ; loi n° 2024-48 (loi de finances 2025), art. 49 (JORT n° 149) ; décret n° 2000-144 (permis à points, non appliqué) ; décret n° 2000-142, art. 10 ; La Presse (projet de permis à points annoncé en 2021)" }
 ];
 if (typeof module !== "undefined") module.exports = { LECONS };
