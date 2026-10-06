@@ -354,8 +354,6 @@ function rendreExamen() {
         <li>${T(`Réussite à partir de <b>${EXAMEN.seuil} bonnes réponses sur ${EXAMEN.nb}</b>.`, `النجاح ابتداءً من <b>${nb(EXAMEN.seuil)} إجابة صحيحة من ${nb(EXAMEN.nb)}</b>.`)}</li>
         <li>${T("Un chronomètre affiche le temps passé. L'examen officiel n'impose pas de durée connue (les guides parlent d'environ une demi-heure).", "يعرض العدّاد الوقت المنقضي. لا يفرض الامتحان الرسمي مدة معروفة (تتحدث الأدلة عن نصف ساعة تقريبًا).")}</li>
       </ul>
-      <p class="avert">${T("Chiffres à confirmer : 30 questions et 24 bonnes réponses sont les chiffres trouvés dans nos recherches sur l'examen de l'ATTT. La répartition officielle des questions par thème n'est pas publiée : nous en tirons 3 par thème. Demandez confirmation à votre auto-école.",
-        "أرقام يجب التأكد منها: 30 سؤالًا و24 إجابة صحيحة هي الأرقام التي وجدناها في بحثنا حول امتحان الوكالة الفنية للنقل البري. التوزيع الرسمي للأسئلة حسب المحاور غير منشور: نختار 3 أسئلة من كل محور. اسأل مدرسة تعليم السياقة للتأكد.")}</p>
       ${noteAcces}
       <div class="actions"><button class="btn large orange" type="button" id="commencer">${T("Nouvel examen au hasard", "امتحان جديد عشوائي")} ${ICONES.fleche}</button></div>
       ${htmlSeries()}
@@ -403,7 +401,7 @@ function rendreExamen() {
       <div class="grand" id="score" dir="ltr">${r.score}<small> / ${r.total}</small></div>
       <span class="statut ${r.reussi ? "ok" : "ko"}" id="statut">${r.reussi ? T("Réussi", "ناجح") : T("Pas encore : continuez à réviser", "ليس بعد: واصل المراجعة")}</span>
       <p class="doux" id="duree">⏱ ${T("Temps", "الوقت")} : ${dureeLisible(x.duree)}</p>
-      <p class="avert">${T(`Seuil de réussite : ${EXAMEN.seuil}/${EXAMEN.nb} (chiffres à confirmer auprès d'une auto-école).`, `عتبة النجاح: ${iso(EXAMEN.seuil + "/" + EXAMEN.nb)} (أرقام يجب التأكد منها لدى مدرسة تعليم السياقة).`)}</p>
+      <p class="avert">${T(`Seuil de réussite : ${EXAMEN.seuil}/${EXAMEN.nb}.`, `عتبة النجاح: ${iso(EXAMEN.seuil + "/" + EXAMEN.nb)}.`)}</p>
       <div class="actions">
         <button class="btn" type="button" id="nouvel">${T("Nouvel examen au hasard", "امتحان جديد عشوائي")}</button>
         <a class="partage" target="_blank" rel="noopener" id="partage" href="${lienWhatsApp(T(`J'ai eu ${r.score}/${r.total} à l'examen blanc du code de la route tunisien. Essaie toi aussi, c'est gratuit :`, `تحصلت على ${r.score}/${r.total} في الامتحان التجريبي لقانون الطرقات التونسي. جرّب أنت أيضًا، مجانًا:`), canon && canon.href)}">${ICONE_WHATSAPP}${T("Partager", "شارك")}</a>

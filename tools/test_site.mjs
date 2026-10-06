@@ -133,7 +133,7 @@ check("score : 23 justes = 23/30, pas réussi", r.score === 23 && !r.reussi);
 check("score : total par thème = 30", Object.values(r.parTheme).reduce((s, x) => s + x.total, 0) === 30);
 
 // -- examen dans la page : 25 justes, 5 fausses
-check("examen : écran d'accueil avec « chiffres à confirmer »", texte(d.getElementById("quiz")).includes("Chiffres à confirmer"));
+check("examen : plus de paragraphe « chiffres à confirmer » (demande d'Ahmed)", !/hiffres à confirmer/.test(texte(d.getElementById("quiz"))));
 clic(w, d.getElementById("commencer"));
 const ex = w.eval("examen");
 check("examen : bouton Valider bloqué tant que rien n'est coché", d.getElementById("valider").disabled);
@@ -148,7 +148,7 @@ for (let i = 0; i < 30; i++) {
 check("examen : 30 questions différentes affichées", vus.size === 30);
 check("examen : score affiché 25 / 30", texte(d.getElementById("score")) === "25 / 30");
 check("examen : « Réussi » affiché", texte(d.getElementById("statut")) === "Réussi");
-check("examen : seuil avec « chiffres à confirmer »", texte(d.getElementById("quiz")).includes("chiffres à confirmer"));
+check("examen : seuil de réussite affiché", texte(d.getElementById("quiz")).includes("Seuil de réussite"));
 check("examen : revue des 5 erreurs, avec explication et source", d.querySelectorAll("#erreurs .erreur").length === 5 &&
   [...d.querySelectorAll("#erreurs .erreur")].every(e => e.querySelector(".explication") && texte(e.querySelector(".source")).startsWith("Source :")));
 check("examen : bonne réponse montrée en vert dans la revue", d.querySelectorAll("#erreurs .choix-q.bonne").length >= 5);
