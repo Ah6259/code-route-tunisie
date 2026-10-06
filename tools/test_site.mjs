@@ -88,7 +88,7 @@ const somme = [...d.querySelectorAll("#themes .nb")].reduce((s, e) => s + parseI
 check(`accueil : nombre de questions par thème (total ${somme} = ${QUESTIONS.length})`, somme === QUESTIONS.length);
 check("accueil : bouton « Examen blanc (30 questions) »", texte(d.getElementById("cta-examen")).includes("Examen blanc (30 questions)") && d.getElementById("cta-examen").getAttribute("href") === "examen/");
 check("accueil : pas de badges inutiles (retirés le 05/10/2026 à la demande d'Ahmed)", !d.querySelector(".confiance, .badge-c"));
-check("accueil : avertissement « relecture par un moniteur »", texte(d.querySelector(".relecture")).includes("relecture par un moniteur"));
+check("accueil : plus aucun message « en cours de relecture par un moniteur » (demande d'Ahmed)", !/relecture par un moniteur/.test(texte(d.body)));
 check("accueil : pas d'historique sans examen passé", d.getElementById("historique").hidden);
 check("accueil : la date « vérifié le » vient de REGLES_SITE", texte(d.querySelector("[data-maj]")) === REGLES_SITE.verifie_le);
 check("accueil : pied de page avec la date et l'année de REGLES_SITE", texte(d.getElementById("pied")).includes(REGLES_SITE.verifie_le) && texte(d.getElementById("pied")).includes(`© ${REGLES_SITE.annee}`));
