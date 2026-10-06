@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 let erreurs = 0, total = 0;
 const check = (desc, cond) => { total++; console.log((cond ? "OK   " : "FAIL ") + desc); if (!cond) erreurs++; };
 const AR = /[؀-ۿ]/;
-const PAGES = ["index.html", "lecons/index.html", "panneaux/index.html", "entrainement/index.html", "examen/index.html", "amendes/index.html", "permis/index.html", "a-propos/index.html", "pass/index.html", "pass/conditions/index.html", "relecture/index.html"];
+const PAGES = ["index.html", "lecons/index.html", "panneaux/index.html", "entrainement/index.html", "examen/index.html", "amendes/index.html", "permis/index.html", "a-propos/index.html", "pass/index.html", "pass/conditions/index.html", "video/index.html", "relecture/index.html"];
 const PAGES_PUBLIQUES = PAGES.filter(p => p !== "relecture/index.html");
 
 // ---- 1. Les questions ----------------------------------------------------------
@@ -277,7 +277,7 @@ check("regles.js : date au format jj/mm/aaaa et année cohérente", /^\d{2}\/\d{
 for (const p of PAGES) {
   const s = lire(p);
   check(`${p} : titre, description, canonical`, /<title>.{20,}<\/title>/.test(s) && /name="description" content=".{50,}"/.test(s) && s.includes('rel="canonical" href="https://ah6259.github.io/code-route-tunisie/'));
-  check(`${p} : image d'aperçu og-image-v4.jpg et icône`, s.includes('property="og:image" content="https://ah6259.github.io/code-route-tunisie/assets/og-image-v4.jpg"') && !s.includes("og-image-v1") && s.includes('rel="icon"'));
+  check(`${p} : image d'aperçu og-image-v4.jpg (page vidéo : apercu-video.jpg) et icône`, s.includes('property="og:image" content="https://ah6259.github.io/code-route-tunisie/' + (p === "video/index.html" ? "assets/video/apercu-video.jpg" : "assets/og-image-v4.jpg") + '"') && !s.includes("og-image-v1") && s.includes('rel="icon"'));
   check(`${p} : même version ?v= pour tous les fichiers`, new Set(s.match(/\?v=\d+\w/g)).size === 1);
   check(`${p} : regles.js chargé en premier`, s.indexOf("assets/regles.js") > 0 && s.indexOf("assets/regles.js") < s.indexOf("assets/page.js"));
   const ww = await page(p);
@@ -342,9 +342,11 @@ async function boutonPartager() {
     wx.goatcounter = { count: o => comptes.push(o) };
     wx.document.querySelector("#entete button.partager").click();
     await new Promise(ok => setTimeout(ok, 0));
-    const adresse = "https://ah6259.github.io/code-route-tunisie/" + p.replace("index.html", "");
-    check(`${p} : sans navigator.share, « Partager » ouvre wa.me avec l'adresse de la page (sans ?lang ni #) et compte le clic`, !wx.navigator.share && ouverts.length === 1
-      && ouverts[0][0].startsWith("https://wa.me/?text=") && decodeURIComponent(ouverts[0][0].slice(20)).endsWith(" " + adresse) && ouverts[0][1] === "_blank"
+    // partage par lien (demande d'Ahmed) : la page vidéo du site + l'adresse du site, dans la langue de la page
+    const adresse = "https://ah6259.github.io/code-route-tunisie/video/?lang=ar";
+    check(`${p} : sans navigator.share, « Partager » ouvre wa.me avec la page vidéo + l'adresse du site et compte le clic`, !wx.navigator.share && ouverts.length === 1
+      && ouverts[0][0].startsWith("https://wa.me/?text=") && decodeURIComponent(ouverts[0][0].slice(20)).endsWith(" " + adresse)
+      && decodeURIComponent(ouverts[0][0]).includes("https://ah6259.github.io/code-route-tunisie/?lang=ar") && ouverts[0][1] === "_blank"
       && comptes.length === 1 && comptes[0].path.startsWith("partage/") && comptes[0].event === true);
   }
 }

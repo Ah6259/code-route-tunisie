@@ -1,0 +1,35 @@
+{
+ "site": "https://ah6259.github.io/code-route-tunisie/",
+ "logo": "assets/logo.svg",
+ "defaut": "fr",
+ "modele": "a-propos/index.html",
+ "nom": {
+  "fr": "Code de la route Tunisie",
+  "ar": "قانون الطرقات تونس"
+ },
+ "partager": {
+  "fr": "Partager la vidéo",
+  "ar": "شارك الفيديو"
+ },
+ "pages": [
+  {
+   "chemin": "video/",
+   "video": "presentation",
+   "couverture": "couverture.jpg",
+   "apercu": "apercu-video.jpg",
+   "site": "",
+   "titre": {
+    "fr": "Vidéo de présentation",
+    "ar": "الفيديو التقديمي"
+   },
+   "description": {
+    "fr": "Vidéo de présentation : révisez le code de la route tunisien gratuitement, leçons, questions corrigées et examen blanc, en français et en arabe.",
+    "ar": "فيديو تقديمي: راجع قانون الطرقات التونسي مجانًا، دروس وأسئلة مع الإصلاح وامتحان تجريبي، بالعربية والفرنسية."
+   },
+   "bouton": {
+    "fr": "Ouvrir le site",
+    "ar": "افتح الموقع"
+   }
+  }
+ ]
+}
