@@ -229,8 +229,33 @@ w = await page("entrainement/index.html", { query: "&theme=2" }); d = w.document
     if (im.length !== 1 || im[0].getAttribute("src") !== "../assets/illustrations/" + e.liste[i].image) toutes = false; }
   check("entraînement : chaque question du thème affiche une seule image, la sienne", toutes); }
 w = await page("examen/index.html"); d = w.document;
-check("examen : photo dans le bandeau et son crédit (auteur, licence, Wikimedia)", d.querySelector(".hero img.hero-photo[src='../assets/photos/lecons-route.webp']") &&
-  /Wikimedia Commons/.test(d.getElementById("credit-hero").textContent) && d.querySelector("#credit-hero a[rel~='license']"));
+// 06/10/2026 (demande d'Ahmed) : le bandeau montre l'écran de l'examen officiel et le boîtier à 3 boutons (dessin maison)
+{ const im = d.querySelector(".hero figure#ecran-examen img.hero-ill"), svg = lire("assets/illustrations/examen-ecran.svg");
+  const doc = new w.DOMParser().parseFromString(svg, "image/svg+xml");
+  check("examen : dessin de l'écran d'examen + boîtier affiché dans le bandeau (SVG valide, ?v=)", !!im && /^\.\.\/assets\/illustrations\/examen-ecran\.svg\?v=\d+\w$/.test(im.getAttribute("src")) && im.alt.length > 20 &&
+    !doc.querySelector("parsererror") && doc.documentElement.nodeName === "svg" && doc.documentElement.getAttribute("viewBox") === "0 0 840 360");
+  check("examen : le dessin montre les 3 boutons rouge, orange, vert (mêmes couleurs que les réponses)", ["#C2382B", "#F28C28", "#14804A"].every(c => (svg.match(new RegExp(`<circle[^>]*fill="${c}"`, "g")) || []).length === 1));
+  check("examen : dessin sans emblème ni logo officiel, sans photo ni texte (pas d'ATTT, République, drapeau, croissant, étoile, <text>, <image>)",
+    !/attt|r[ée]publique|tunisi|الجمهورية|التونسية|تونس|الوكالة|armoirie|drapeau|flag|croissant|crescent|[ée]toile|star|<text|<image|xlink:href|\.(png|jpe?g|webp)/i.test(svg));
+  check("examen : légende FR + AR sous le dessin (rouge A, orange B, vert C)", texte(d.querySelector("#ecran-examen figcaption [data-l='fr']")) === "À l'examen officiel, vous répondez sur un écran avec un boîtier à 3 boutons : rouge (A), orange (B), vert (C)." &&
+    /أحمر \(أ\).*برتقالي \(ب\).*أخضر \(ج\)/.test(texte(d.querySelector("#ecran-examen figcaption [data-l='ar']"))));
+  check("examen : plus de photo dans le bandeau (donc plus de crédit à afficher)", !d.querySelector(".hero img[src*='assets/photos/']") && !d.getElementById("credit-hero"));
+  const off = texte(d.getElementById("examen-officiel"));
+  check("examen : encadré « Comment se passe l'examen officiel » (écran, boîtier rouge/orange/vert, 30 questions, demi-heure selon les guides, durée non publiée)",
+    ["Comment se passe l'examen officiel", "écran d'ordinateur", "rouge = A", "orange = B", "vert = C", "30 questions", "demi-heure selon les guides", "durée officielle n'est pas publiée"].every(m => off.includes(m)));
+  w.eval("demarrerExamen(0)");
+  const btn = [...d.querySelectorAll("#quiz .choix-liste.boitier .choix-q")], css = lire("assets/style.css");
+  check("examen : réponses aux couleurs du boîtier (A rouge, B orange, C vert), lettre visible", btn.length >= 2 && ["bouton-rouge", "bouton-orange", "bouton-vert"].slice(0, Math.min(3, btn.length)).every((c, i) => btn[i].classList.contains(c) && texte(btn[i].querySelector(".lettre")) === "ABC"[i]) &&
+    [".bouton-rouge{--c:#C2382B}", ".bouton-orange{--c:#F28C28}", ".bouton-vert{--c:#14804A}", ".bouton-orange .lettre{color:#0E2238}"].every(r => css.includes(r)));
+  const QD = w.eval("QUESTIONS").find(q => q.choix.length > 3);
+  if (QD) { w.eval("examen").questions[0] = QD; w.eval("rendreExamen()");
+    check("examen : une 4e réponse (D) reste neutre (le boîtier n'a que 3 boutons)", !/bouton-/.test(d.querySelector('#quiz .choix-q[data-i="3"]').className)); }
+  w.eval("examen.etape = 'intro'; rendreExamen()"); }
+{ const wa = await page("examen/index.html", { lang: "ar" }); wa.eval("demarrerExamen(0)");
+  const b = [...wa.document.querySelectorAll("#quiz .choix-liste.boitier .choix-q")];
+  check("examen en arabe : mêmes couleurs, lettres أ ب ج", b[0].classList.contains("bouton-rouge") && b[1].classList.contains("bouton-orange") && texte(b[0].querySelector(".lettre")) === "أ" && texte(b[1].querySelector(".lettre")) === "ب");
+  const we = await page("entrainement/index.html", { query: "&theme=2" });
+  check("entraînement : couleurs habituelles (pas de boîtier : rouge et vert y veulent dire faux et juste)", !we.document.querySelector("#quiz .boitier, #quiz .bouton-rouge")); }
 w = await page("index.html"); d = w.document;
 check("accueil : vraie photo + carte permis SPÉCIMEN dans le bandeau, et 10 illustrations de thèmes", d.querySelector(".hero img.hero-photo[src='assets/photos/accueil-route.webp']") && d.querySelector(".hero img.hero-permis[src^='assets/specimen/permis-specimen-attt.webp']") && d.querySelectorAll("#themes .ill img").length === 10 &&
   [...d.querySelectorAll("#themes .ill img")].every((im, i) => im.getAttribute("src") === `assets/illustrations/theme-${i + 1}.svg`));

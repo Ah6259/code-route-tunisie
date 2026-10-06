@@ -140,6 +140,19 @@ html[lang="ar"] .question{line-height:1.8}
 .choix-q.fausse .lettre{background:var(--ko);border-color:var(--ko);color:#fff}
 .choix-q .marque{display:block;font-size:12.5px;font-weight:800;margin-top:3px}
 .choix-q.bonne .marque{color:var(--ok)} .choix-q.fausse .marque{color:var(--ko)}
+/* examen blanc : couleurs du boîtier officiel (A rouge, B orange, C vert), mêmes teintes en mode clair et sombre.
+   Lettre blanche sur rouge (5,4:1) et sur vert (5,0:1), lettre foncée sur orange (6,6:1). Une 4e réponse (D) reste neutre. */
+.boitier .choix-q{--c:var(--ligne);border-inline-start:7px solid var(--c)}
+.boitier .choix-q .lettre{width:32px;height:32px;font-size:16px;border:0;background:var(--c);color:#fff}
+.boitier .choix-q.bouton-rouge{--c:#C2382B} .boitier .choix-q.bouton-orange{--c:#F28C28} .boitier .choix-q.bouton-vert{--c:#14804A}
+.boitier .choix-q.bouton-orange .lettre{color:#0E2238}
+.boitier .choix-q:not([class*="bouton-"]) .lettre{background:var(--carte);color:var(--doux);border:1.5px solid var(--ligne)}
+.boitier .choix-q:not([class*="bouton-"]).on{--c:var(--p)}
+.boitier .choix-q:hover{border-color:var(--c)}
+.boitier .choix-q.on{border-color:var(--c);box-shadow:inset 0 0 0 1.5px var(--c);background:var(--carte)}
+.boitier .choix-q.on .lettre{background:var(--c);color:#fff}
+.boitier .choix-q.bouton-orange.on .lettre{color:#0E2238}
+.boitier .choix-q.on .txt::after{content:" ✓";font-weight:800}
 .verdict{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;margin:16px 0 8px}
 .verdict.ok{color:var(--ok)} .verdict.ko{color:var(--ko)}
 .verdict svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
@@ -227,6 +240,9 @@ html[lang="fr"] [data-l="fr"],html[lang="ar"] [data-l="ar"]{display:revert}
 .hero-photo{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .hero-visuel.court .hero-photo{aspect-ratio:21/9}
 .hero-visuel.court + .credit{margin-top:8px}
+/* page examen : dessin de l'écran d'examen et du boîtier à 3 boutons, avec sa légende */
+.hero-ill{background:#E5EEF8}
+.legende-hero{font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.92);margin:10px 2px 0}
 .hero-permis,.carte-permis{border-radius:10px;height:auto}
 .hero-permis{position:absolute;width:42%;max-width:250px;height:auto;inset-inline-end:-6px;bottom:-26px;transform:rotate(-6deg);filter:drop-shadow(0 10px 14px rgba(0,0,0,.35))}
 html[dir="rtl"] .hero-permis{transform:rotate(6deg)}

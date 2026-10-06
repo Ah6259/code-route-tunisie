@@ -21,6 +21,9 @@ const ICONES = {
   fleche: '<svg class="sens" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
 };
 const LETTRES = { fr: ["A", "B", "C", "D", "E"], ar: ["أ", "ب", "ج", "د", "هـ"] };
+// Boîtier de l'examen officiel (selon les guides) : 3 boutons, rouge = A, orange = B, vert = C.
+// Utilisé seulement pendant l'examen blanc (à l'entraînement, rouge et vert veulent dire « faux » et « juste »).
+const BOITIER = ["bouton-rouge", "bouton-orange", "bouton-vert"];
 
 /* ---------- logique pure (testée par tools/test_site.mjs) ---------- */
 function melanger(t, rng = Math.random) {
@@ -60,10 +63,10 @@ function lettre(i) { return LETTRES[document.documentElement.lang === "ar" ? "ar
 function frac(a, b, sep = " / ") { return nb(a + sep + b); }
 
 /* ---------- morceaux d'affichage communs ---------- */
-function htmlChoix(q, choisis, corrige) {
-  return `<div class="choix-liste">` + q.choix.map((c, i) => {
+function htmlChoix(q, choisis, corrige, boitier = false) {
+  return `<div class="choix-liste${boitier ? " boitier" : ""}">` + q.choix.map((c, i) => {
     const on = choisis.includes(i), bonne = q.bonnes.includes(i);
-    let cl = on ? " on" : "", marque = "";
+    let cl = (boitier && BOITIER[i] ? " " + BOITIER[i] : "") + (on ? " on" : ""), marque = "";
     if (corrige) {
       cl = bonne ? " bonne" : on ? " fausse" : "";
       if (bonne && !on) marque = `<span class="marque">${T("Bonne réponse", "الإجابة الصحيحة")}</span>`;
@@ -305,6 +308,18 @@ function htmlStatistiques() {
     <div class="actions"><a class="btn second" href="../entrainement/?erreurs=1">${T("Réviser mes erreurs", "مراجعة أخطائي")}</a></div>
   </section>`;
 }
+// Comment se passe l'examen officiel (source : guides du permis, pas un texte officiel : on le dit, sans inventer de détail)
+function htmlExamenOfficiel() {
+  return `<section class="carte" id="examen-officiel">
+    <h2>${T("Comment se passe l'examen officiel", "كيف يجري الامتحان الرسمي")}</h2>
+    <ul class="liste">
+      <li>${T("Sur un <b>écran d'ordinateur</b> : pour chaque question, une photo de la situation, la question et 2 ou 3 réponses.", "على <b>شاشة حاسوب</b>: لكل سؤال صورة للوضعية، والسؤال، وإجابتان أو ثلاث.")}</li>
+      <li>${T("Vous répondez avec un <b>boîtier à 3 boutons</b> : <b>rouge = A</b>, <b>orange = B</b>, <b>vert = C</b>. Dans notre examen blanc, les réponses ont les mêmes couleurs, pour vous habituer.", "تجيب بواسطة <b>جهاز صغير بثلاثة أزرار</b>: <b>الأحمر = أ</b>، <b>البرتقالي = ب</b>، <b>الأخضر = ج</b>. في امتحاننا التجريبي، للإجابات نفس الألوان لتتعوّد عليها.")}</li>
+      <li>${T(`Environ ${EXAMEN.nb} questions, en à peu près une demi-heure selon les guides. La durée officielle n'est pas publiée.`, `حوالي ${nb(EXAMEN.nb)} سؤالًا، في نحو نصف ساعة حسب الأدلة. المدة الرسمية غير منشورة.`)}</li>
+    </ul>
+    <p class="petit doux">${T("Selon les guides du permis, pas selon un texte officiel de l'ATTT : demandez confirmation à votre auto-école.", "حسب أدلة رخصة السياقة، لا حسب نص رسمي للوكالة الفنية للنقل البري: اسأل مدرسة تعليم السياقة للتأكد.")}</p>
+  </section>`;
+}
 // Écran « examen gratuit du jour déjà utilisé »
 function htmlExamenUtilise() {
   return `<section class="carte offre-mini" id="examen-utilise">
@@ -344,6 +359,7 @@ function rendreExamen() {
       <div class="actions"><button class="btn large orange" type="button" id="commencer">${T("Nouvel examen au hasard", "امتحان جديد عشوائي")} ${ICONES.fleche}</button></div>
       ${htmlSeries()}
     </section>
+    ${htmlExamenOfficiel()}
     ${acces === "pass" ? htmlStatistiques() : `<section class="carte stats-verrou" id="stats-verrou"><h2>${T("Vos statistiques par thème", "إحصائياتك حسب المحور")}</h2>
       <p class="doux">${T("Vos points faibles thème par thème, votre moyenne et la révision de vos erreurs : avec le", "نقاط ضعفك محورًا بمحور، معدلك ومراجعة أخطائك: مع")} <a href="../pass/">${T("Pass Examen", "باقة الامتحان")}</a>.</p></section>`}`;
     document.getElementById("commencer").onclick = () => demarrerExamen(0);
@@ -360,7 +376,7 @@ function rendreExamen() {
     ${htmlSchema(q)}
       ${htmlEcouter()}
       <p class="consigne">${CONSIGNE()}</p>
-      ${htmlChoix(q, x.choisis, false)}
+      ${htmlChoix(q, x.choisis, false, true)}
       <div class="actions"><button class="btn large" type="button" id="valider"${x.choisis.length ? "" : " disabled"}>${x.i + 1 < x.questions.length ? T("Valider et continuer", "تأكيد ومواصلة") : T("Terminer l'examen", "إنهاء الامتحان")} ${ICONES.fleche}</button></div>
       ${htmlSignalerQ(q)}
     </section>`;

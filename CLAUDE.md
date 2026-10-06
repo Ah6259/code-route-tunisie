@@ -57,7 +57,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - Détails et marche à suivre en cas d'alerte : README, « Plan de continuité ».
 
 ## Avant chaque publication / après chaque modification
-1. `node tools/test_site.mjs` (233 vérifications) puis `node tools/test_sw.mjs` (service worker) et `node tools/test_avis.mjs` (Votre avis). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
+1. `node tools/test_site.mjs` (242 vérifications) puis `node tools/test_sw.mjs` (service worker) et `node tools/test_avis.mjs` (Votre avis). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
 2. Changer le `?v=` des fichiers `assets/` dans **toutes** les pages (le test vérifie qu'il est le même partout).
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.
@@ -102,7 +102,10 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   champ `image` dans `../questions/questions-v1.json` ; ensuite `node tools/construire_questions.mjs`, changer le `?v=` des pages.
 - **Un schéma montre la situation, jamais la réponse** (pas de chiffre de vitesse, distance, points ; pas d'objet qui trahit
   la réponse). Nouvelle question = nouveau schéma dans `S` + ligne dans `ASSOC`.
-- Page Examen : photo du bandeau `lecons-route` avec crédit (`#credit-hero[data-photo]`, rempli par pages.js).
+- Page Examen (06/10/2026) : bandeau = dessin maison `assets/illustrations/examen-ecran.svg` (écran + boîtier 3 boutons, sans texte ni emblème) + légende FR/AR ;
+  encadré `#examen-officiel` (écran, boîtier, ~30 questions, ~demi-heure « selon les guides », source non officielle). Pendant l'examen
+  blanc seulement, réponses aux couleurs du boîtier : `.boitier` + `bouton-rouge/orange/vert` (A/B/C, D neutre) ; l'entraînement garde
+  ses couleurs (rouge/vert = faux/juste à la correction).
 
 ## Mise à jour du 05/10/2026 (soir)
 - **Icône (famille commune des 5 sites)** : un seul symbole en aplats 2-3 tons, accent doré `#F2B33D`, sans texte ni brillance (règle d'Ahmed : jamais d'effet « image IA » ni de clip-art). Ce site : **route en S avec tirets dorés**. Source = `assets/logo.svg` ; PNG 192/512 = dessin arrondi, maskable 512 et iPhone 180 = même dessin sur carré plein, symbole à 78 %. Générateur (hors dépôt) : `_claude code project/icones des sites - generateur.py`. Changer l'icône → renouveler `CACHE_VERSION` de `sw.js`.

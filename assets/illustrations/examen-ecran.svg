@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 360" role="img" aria-label="Écran d'examen et boîtier à 3 boutons rouge, orange, vert">
+<!-- Illustration maison (style plat du site) : l'écran de l'examen théorique et le boîtier à 3 boutons.
+     Aucun texte, aucun logo ni emblème : seulement la scène. Les traits gris remplacent le texte de la question. -->
+<rect width="840" height="360" rx="16" fill="#E5EEF8"/>
+<path d="M0 252H840V344a16 16 0 0 1-16 16H16A16 16 0 0 1 0 344z" fill="#C9D6E4"/>
+<!-- écran -->
+<rect x="402" y="236" width="36" height="24" fill="#6B7886"/>
+<rect x="362" y="256" width="116" height="12" rx="6" fill="#4A5868"/>
+<rect x="232" y="14" width="376" height="226" rx="14" fill="#1C2A3A"/>
+<rect x="246" y="28" width="348" height="198" rx="6" fill="#FFFFFF"/>
+<rect x="246" y="28" width="348" height="16" rx="6" fill="#DFE6EE"/>
+<rect x="246" y="38" width="348" height="6" fill="#DFE6EE"/>
+<rect x="256" y="33" width="44" height="6" rx="3" fill="#8A96A3"/>
+<rect x="548" y="33" width="36" height="6" rx="3" fill="#8A96A3"/>
+<!-- photo de la situation : un carrefour vu de dessus -->
+<g transform="translate(256 52) scale(.5)">
+  <rect width="320" height="200" rx="14" fill="#E9F0E6"/>
+  <path d="M120 0h80v60h120v80H200v60h-80v-60H0V60h120z" fill="#6B7886"/>
+  <g fill="#fff"><rect x="158" y="8" width="4" height="16" rx="2"/><rect x="158" y="34" width="4" height="16" rx="2"/><rect x="158" y="150" width="4" height="16" rx="2"/><rect x="158" y="176" width="4" height="16" rx="2"/><rect x="10" y="98" width="16" height="4" rx="2"/><rect x="40" y="98" width="16" height="4" rx="2"/><rect x="80" y="98" width="16" height="4" rx="2"/><rect x="224" y="98" width="16" height="4" rx="2"/><rect x="258" y="98" width="16" height="4" rx="2"/><rect x="292" y="98" width="16" height="4" rx="2"/></g>
+  <g transform="translate(180 168)"><rect x="-11" y="-19" width="22" height="38" rx="6" fill="#1F5FA8"/><rect x="-8" y="-11" width="16" height="8" rx="2" fill="#CFE0F5"/><rect x="-8" y="8" width="16" height="5" rx="2" fill="#CFE0F5"/></g>
+  <g transform="translate(244 80) rotate(-90)"><rect x="-11" y="-19" width="22" height="38" rx="6" fill="#E8731A"/><rect x="-8" y="-11" width="16" height="8" rx="2" fill="#FDE3CC"/><rect x="-8" y="8" width="16" height="5" rx="2" fill="#FDE3CC"/></g>
+</g>
+<!-- la question (traits gris = texte) -->
+<rect x="428" y="60" width="152" height="9" rx="4.5" fill="#0E2238"/>
+<rect x="428" y="78" width="128" height="9" rx="4.5" fill="#0E2238"/>
+<rect x="428" y="96" width="140" height="9" rx="4.5" fill="#0E2238"/>
+<rect x="428" y="120" width="96" height="7" rx="3.5" fill="#B9C2CC"/>
+<!-- les 3 réponses, chacune avec la couleur de son bouton -->
+<rect x="256" y="160" width="328" height="18" rx="5" fill="#F3F6FA" stroke="#DFE6EE" stroke-width="1.5"/>
+<rect x="256" y="160" width="18" height="18" rx="5" fill="#C2382B"/>
+<rect x="284" y="166" width="170" height="6" rx="3" fill="#8A96A3"/>
+<rect x="256" y="183" width="328" height="18" rx="5" fill="#F3F6FA" stroke="#DFE6EE" stroke-width="1.5"/>
+<rect x="256" y="183" width="18" height="18" rx="5" fill="#F28C28"/>
+<rect x="284" y="189" width="210" height="6" rx="3" fill="#8A96A3"/>
+<rect x="256" y="206" width="328" height="18" rx="5" fill="#F3F6FA" stroke="#DFE6EE" stroke-width="1.5"/>
+<rect x="256" y="206" width="18" height="18" rx="5" fill="#14804A"/>
+<rect x="284" y="212" width="140" height="6" rx="3" fill="#8A96A3"/>
+<!-- le boîtier à 3 boutons, devant l'écran -->
+<rect x="306" y="272" width="228" height="70" rx="20" fill="#1C2A3A"/>
+<rect x="306" y="268" width="228" height="66" rx="20" fill="#3A4654"/>
+<circle cx="360" cy="305" r="22" fill="#8E2219"/><circle cx="360" cy="301" r="22" fill="#C2382B"/>
+<circle cx="420" cy="305" r="22" fill="#B8601A"/><circle cx="420" cy="301" r="22" fill="#F28C28"/>
+<circle cx="480" cy="305" r="22" fill="#0B5A33"/><circle cx="480" cy="301" r="22" fill="#14804A"/>
+</svg>
