@@ -344,7 +344,18 @@ function rendreExamen() {
     const noteAcces = acces === "pass"
       ? `<p class="pass-ok" id="acces-examen">✓ ${T(`Pass Examen actif jusqu'au ${dateLisible(finPass())} inclus : examens blancs illimités.`, `باقة الامتحان مفعّلة إلى غاية ${iso(dateLisible(finPass()))}: امتحانات تجريبية بلا حدود.`)}</p>`
       : `<p class="avert" id="acces-examen">${T("<b>Examen gratuit du jour</b> : 1 examen blanc gratuit par jour sur ce téléphone. Illimité avec le", "<b>امتحان اليوم المجاني</b>: امتحان تجريبي مجاني واحد كل يوم على هذا الهاتف. بلا حدود مع")} <a href="../pass/">${T("Pass Examen", "باقة الامتحان")}</a>.</p>`;
-    zone.innerHTML = `<section class="carte">
+    // Pass Examen visible DÈS L'ARRIVÉE sur la page Examen (demande d'Ahmed), pas seulement après l'examen gratuit
+    const offrePass = acces === "pass" ? "" : `<section class="carte offre-mini" id="offre-pass-examen">
+      <h2>${T("Pass Examen : examens blancs illimités", "باقة الامتحان: امتحانات تجريبية بلا حدود")}</h2>
+      <ul class="liste">
+        <li>${T("Autant d'examens blancs que vous voulez, au hasard ou par série", "ما تشاء من الامتحانات التجريبية، عشوائيًا أو حسب السلسلة")}</li>
+        <li>${T("Vos statistiques par thème et la révision de vos erreurs", "إحصائياتك حسب المحور ومراجعة أخطائك")}</li>
+        <li>${T("Dès 9 DT pour 7 jours · 2 jours d'essai gratuit · sans renouvellement automatique", "ابتداءً من 9 د.ت لمدة 7 أيام · يومان تجربة مجانية · دون تجديد آلي")}</li>
+      </ul>
+      ${htmlBoutonPass("cta-pass-intro", "Voir le Pass Examen", "اكتشف باقة الامتحان")}
+      <p class="petit"><a href="../pass/#code-acces">${T("J'ai déjà un code d'accès", "لدي رمز دخول")}</a> · ${T("1 examen blanc reste gratuit chaque jour.", "يبقى امتحان تجريبي واحد مجانيًا كل يوم.")}</p>
+    </section>`;
+    zone.innerHTML = offrePass + `<section class="carte">
       <h2>${T("Comment se passe l'examen blanc ?", "كيف يجري الامتحان التجريبي؟")}</h2>
       <ul class="liste">
         <li>${T(`<b>${EXAMEN.nb} questions</b> tirées au hasard, ${EXAMEN.parTheme} dans chacun des 10 thèmes.`, `<b>${nb(EXAMEN.nb)} سؤالًا</b> مختارة عشوائيًا، ${nb(EXAMEN.parTheme)} من كل محور من المحاور العشرة.`)}</li>

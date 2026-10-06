@@ -104,6 +104,7 @@ check("accueil en arabe : date isolée et identique", texte(d.querySelector("[da
 // -- logique de l'examen
 w = await page("examen/index.html"); d = w.document;
 check("examen : aucune erreur JavaScript", w.fautes.length === 0);
+check("examen : encart Pass Examen visible DÈS L'ARRIVÉE, avant de commencer (prix, essai, lien vers pass/, « J'ai déjà un code »)", (() => { const o = d.getElementById("offre-pass-examen"), q = d.getElementById("quiz"); return !!o && q.firstElementChild === o && /Dès 9 DT/.test(o.textContent) && /essai gratuit/.test(o.textContent) && !!o.querySelector('a[href="../pass/"]') && !!o.querySelector('a[href="../pass/#code-acces"]'); })());
 const tirerExamen = w.eval("tirerExamen"), noter = w.eval("noter"), estJuste = w.eval("estJuste"), EX = w.eval("EXAMEN");
 check("examen : 30 questions, réussite à 24", EX.nb === 30 && EX.seuil === 24);
 const exclues = new Set(toutes.filter(q => q.a_verifier).map(q => q.id).concat(QUESTIONS_INFO.exclues));
@@ -633,6 +634,7 @@ async function passExamen() {
   }
   check(`nouvel examen au hasard : 30 questions sans reprendre celles du dernier examen (sauf ${forcees} si un thème manque de questions)`, eviteOk);
   w = await page("examen/index.html", { pass: true }); d = w.document;
+  check("examen avec Pass : pas d'encart de vente", !d.getElementById("offre-pass-examen"));
   check("examen avec Pass : statistiques par thème (10 thèmes) et 10 boutons de série", d.querySelectorAll("#stats-themes tr").length === 10 && d.querySelectorAll("#series .serie").length === 10);
   clic(w, d.querySelector('#series .serie[data-serie="3"]'));
   const ex = w.eval("examen");
