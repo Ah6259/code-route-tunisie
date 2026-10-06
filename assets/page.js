@@ -9,6 +9,7 @@ const MENU_SITE = [
   ["panneaux/", "Panneaux", "العلامات"],
   ["entrainement/", "Entraînement", "التدريب"],
   ["examen/", "Examen", "الامتحان"],
+  ["https://ah6259.github.io/auto-ecoles-tunisie/", "Auto-écoles", "مدارس السياقة", "assets/illustrations/rub-auto-ecole.svg"],  // notre annuaire (demande d'Ahmed)
   ["amendes/", "Amendes", "الخطايا"],
   ["a-propos/", "À propos", "من نحن"]
 ];
@@ -46,8 +47,9 @@ const MENU_SITE = [
           <button class="langue" type="button">${T("العربية", "Français")}</button>
         </div>
       </div>
-      <nav class="menu" aria-label="${T("Menu", "القائمة")}"><div class="wrap">${MENU_SITE.map(([h, fr, ar]) =>
-        `<a href="${racine}${h}"${h === actuelle ? ' aria-current="page"' : ""}>${T(fr, ar)}</a>`).join("")}</div></nav>`;
+      <nav class="menu" aria-label="${T("Menu", "القائمة")}"><div class="wrap">${MENU_SITE.map(([h, fr, ar, ico]) => /^https:/.test(h)
+        ? `<a class="menu-annuaire" href="${h}" data-lien="annuaire-auto-ecoles">${ico ? `<img src="${racine}${ico}" alt="" width="20" height="20">` : ""}${T(fr, ar)}</a>`
+        : `<a href="${racine}${h}"${h === actuelle ? ' aria-current="page"' : ""}>${T(fr, ar)}</a>`).join("")}</div></nav>`;
     const p = document.getElementById("pied");
     if (p) p.innerHTML = `
       <div class="wrap">
