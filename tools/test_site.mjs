@@ -523,6 +523,30 @@ async function nouvellesRubriques() {
   check(`pas de traduction automatique : translate="no" sur <html> (gardé après le JS) et meta google notranslate sur toutes les pages ${malTrad.slice(0, 6)}`, malTrad.length === 0);
   const prot = lire("assets/protection.js");
   check("anti-copie : images protégées, texte copié suivi de la source, anti-cadre", prot.includes("contextmenu") && prot.includes("Source : ") && prot.includes("window.top !== window.self") && lire("assets/style.css").includes("user-select:none"));
+  // ---- protection renforcée (07/10/2026, demande d'Ahmed : fiches, examens et images = notre propriété) ----
+  const css = lire("assets/style.css");
+  check("filigrane « © Code de la route Tunisie » par-dessus les cartes protégées, les photos et l'image d'accueil (sans gêner les clics)",
+    /\.protege::after,figure\.photo::after,\.hero-visuel::after\{[^}]*pointer-events:none[^}]*background-image:url\("data:image\/svg\+xml,[^"]*%C2%A9 Code de la route Tunisie/.test(css));
+  check("impression / « Enregistrer en PDF » : page blanche « Contenu protégé »", /@media print\{\s*body \*\{visibility:hidden!important\}\s*body::before\{content:"Contenu protégé/.test(css));
+  { const wp = await page("lecons/index.html", { query: "&theme=1" }), h = wp.document.documentElement;
+    wp.dispatchEvent(new wp.Event("blur"));
+    const floute = h.classList.contains("cache-capture");
+    wp.dispatchEvent(new wp.Event("focus"));
+    const net = !h.classList.contains("cache-capture");
+    wp.document.dispatchEvent(new wp.KeyboardEvent("keyup", { key: "PrintScreen" }));
+    check("capture sur ordinateur : la page se floute quand elle perd la main ou à « Impr. écran », redevient nette au retour",
+      floute && net && h.classList.contains("cache-capture") && /html\.cache-capture main[^{]*\{filter:blur\(18px\)/.test(css));
+    // copie dans une leçon : le presse-papiers ne reçoit que la mention, jamais notre texte
+    const bloc = wp.document.querySelector(".protege .bloc, .protege p");
+    const r = wp.document.createRange(); r.selectNodeContents(bloc); wp.getSelection().removeAllRanges(); wp.getSelection().addRange(r);
+    let mis = null; const ev = new wp.Event("copy", { bubbles: true, cancelable: true });
+    ev.clipboardData = { setData: (t, v) => { mis = v; } };
+    bloc.dispatchEvent(ev);
+    check("copie BLOQUÉE dans les fiches : le presse-papiers ne reçoit que « Contenu protégé — © … Source », pas le texte",
+      ev.defaultPrevented && /^Contenu protégé — © Code de la route Tunisie, tous droits réservés\. Source : /.test(mis || "") && !mis.includes(bloc.textContent.trim().slice(0, 30))); }
+  { const brut = lire("assets/questions.js");
+    check("questions BROUILLÉES dans le fichier publié (aucune question ni explication en clair), remises en ordre par le navigateur",
+      QUESTIONS.length > 100 && QUESTIONS.every(q => !brut.includes(q.question_fr) && !brut.includes(q.question_ar) && !brut.includes(q.explication_fr)) && /© Code de la route Tunisie, tous droits réservés/.test(brut)); }
   const tous = []; (function parcourir(dir) { for (const f of readdirSync(dir)) { if (["node_modules", "captures", ".git"].includes(f)) continue; const c = join(dir, f); statSync(c).isDirectory() ? parcourir(c) : tous.push(c); } })(root);
   const secrets = tous.filter(f => /\.(js|mjs|html|md|yml|py|txt|json|sh)$/.test(f) && f !== fileURLToPath(import.meta.url)).filter(f => {
     const s = readFileSync(f, "utf8");

@@ -36,6 +36,14 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - **Sécurité** (consigne commune) : robots.txt (Google oui, robots d'IA non, `/relecture/` non), meta `noai, noimageai`,
   CSP en meta (aucun script dans les pages : tout est dans `assets/pages.js`), `assets/protection.js` (anti-copie, source
   ajoutée au texte copié, anti-cadre).
+- **Protection renforcée (07/10/2026, Ahmed : « fiches, examens, images = notre propriété »)** : filigrane SVG
+  « © Code de la route Tunisie · ah6259.github.io » sur `.protege`, `figure.photo`, `.hero-visuel` ; copie BLOQUÉE dans
+  le contenu protégé (presse-papiers = mention seule) ; flou (`html.cache-capture`) quand la fenêtre perd la main ou à
+  « Impr. écran » (+ presse-papiers vidé) ; impression = page blanche « Contenu protégé » ; `assets/questions.js` BROUILLÉ
+  (XOR + base64, décodé au chargement, par construire_questions.mjs). Limite dite à Ahmed : la capture d'un téléphone ne
+  peut pas être bloquée par un site (le filigrane la signe). Preuve d'auteur : `node tools/preuve_auteur.mjs` → empreintes
+  SHA-256 + COPIE de `../questions/` dans le dépôt PRIVÉ code-route-pass (`preuves-auteur/`) — à relancer et pousser après
+  chaque ajout de contenu (le dossier questions/ n'est sinon que sur le PC).
 
 ## Questions
 - Source : `../questions/questions-v1.json` (126 questions, hors du dossier `site/`). Format dans `../questions/LISEZ-MOI.md`.

@@ -23,10 +23,21 @@ const gardees = toutes.filter(q => !q.a_verifier).map(q => ({
 }));
 const exclues = toutes.filter(q => q.a_verifier).map(q => q.id);
 
+// Questions BROUILLÉES dans le fichier publié (07/10/2026, demande d'Ahmed : nos examens sont notre propriété) :
+// un robot qui aspire le site ne lit pas les questions en clair ; le navigateur les remet en ordre au chargement.
+// (Protection dissuasive : un programmeur décidé peut toujours les décoder — la preuve d'auteur est dans le dépôt privé.)
+const CLE = "CRT-tn-©-2026-propriete";
+const octets = Buffer.from(JSON.stringify(gardees), "utf8"), cle = Buffer.from(CLE, "latin1");
+for (let i = 0; i < octets.length; i++) octets[i] ^= cle[i % cle.length];
 const js = `/* Questions du site — fichier FABRIQUÉ par tools/construire_questions.mjs, ne pas modifier à la main.
-   Source : questions/questions-v1.json (${toutes.length} questions, ${exclues.length} « à vérifier » non publiées). */
+   Source : questions/questions-v1.json (${toutes.length} questions, ${exclues.length} « à vérifier » non publiées).
+   © Code de la route Tunisie, tous droits réservés : questions rédigées par nous, reproduction interdite. */
 var QUESTIONS_INFO = ${JSON.stringify({ total_fichier: toutes.length, publiees: gardees.length, exclues })};
-var QUESTIONS = ${JSON.stringify(gardees, null, 0).replace(/\},\{"id"/g, '},\n{"id"')};
+var QUESTIONS = (function (d, k) {
+  var b = atob(d), s = "";
+  for (var i = 0; i < b.length; i++) s += String.fromCharCode(b.charCodeAt(i) ^ k.charCodeAt(i % k.length));
+  return JSON.parse(decodeURIComponent(escape(s)));
+})("${octets.toString("base64")}", ${JSON.stringify(CLE)});
 if (typeof module !== "undefined") module.exports = { QUESTIONS, QUESTIONS_INFO };
 `;
 writeFileSync(join(root, "assets", "questions.js"), js, "utf8");
