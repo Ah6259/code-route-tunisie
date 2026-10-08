@@ -579,7 +579,8 @@ async function passExamen() {
   check("pass/ : aucun prix « TTC » ni nom de société", !/TTC|SUARL|S\.U\.A\.R\.L/i.test(lire("pass/index.html") + lire("pass/conditions/index.html")));
   const pay = d.getElementById("paiement");
   check("pass/ : bouton « Paiement » (<details>) avec D17 et IZI (liens vers les applications officielles) au 24 321 390, mode d'emploi, plus de Wafacash, motif nom + téléphone", !!pay && pay.tagName === "DETAILS" && texte(pay.querySelector("summary")).startsWith("Paiement") &&
-    ["D17", "IZI", "Transfert rapide", "24 321 390", "votre nom et votre téléphone"].every(m => texte(pay).includes(m)) && !/Wafacash/i.test(pay.outerHTML) && ["tn.mobipost", "tn.izi.consumer", "id1475640303", "id1603653941"].every(u => pay.querySelector(`a.appli[href*="${u}"]`)));
+    ["D17", "IZI", "Transfert rapide", "24 321 390", "votre nom et votre téléphone"].every(m => texte(pay).includes(m)) && !/Wafacash/i.test(pay.outerHTML) && ["tn.mobipost", "tn.izi.consumer", "id1475640303", "id1603653941"].every(u => pay.querySelector(`a[href*="${u}"]`)));
+  check("paiement simple et rassurant (règle commune du 08/10/2026) : 3 étapes numérotées, phrase de confiance, description de l'offre cachée quand « Paiement » est ouvert", /<ol class="paie-etapes">/.test(lire("pass/index.html")) && /class="paie-confiance"/.test(lire("pass/index.html")) && /class="avantages[^"]*masque-si-paiement/.test(lire("pass/index.html")) && lire("assets/style.css").includes(":has(> details.paiement[open]) > .masque-si-paiement{display:none}"));
   const wa = d.getElementById("pass-preuve");
   check("pass/ : bouton vert « Envoyer la preuve de paiement par WhatsApp » vers wa.me/21624321390, texte prérempli", !!wa && wa.classList.contains("btn-wa") &&
     wa.href.startsWith("https://wa.me/21624321390?text=") && decodeURIComponent(wa.href).includes("Pass Examen") && texte(wa).includes("Envoyer la preuve de paiement par WhatsApp"));
