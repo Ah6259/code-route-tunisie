@@ -137,7 +137,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   promis seulement « selon votre téléphone »). **9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours, essai gratuit 2 jours**
   (une fois par téléphone), pas de renouvellement automatique, aucune période payée remboursée, vendeur = « l'éditeur du site »
   (JAMAIS le nom de la société), prix non annoncés TTC.
-- Pages : `pass/` (prix et avantages, bouton « Paiement » <details> D17/IZI/Wafacash 24 321 390, motif nom + téléphone,
+- Pages : `pass/` (prix et avantages, bouton « Paiement » <details> D17/IZI 24 321 390, motif nom + téléphone,
   bouton vert WhatsApp, « J'ai un code » `#code-acces`, formulaire Formspree `mwlpakqj`), `pass/conditions/`.
   Bouton doré « Pass Examen » dans l'en-tête (page.js, classe `entete-pass`, `.actif` = coché), gros bouton doré dans le
   bandeau de l'accueil (`#cta-pass-zone`), carte `#fin-gratuit` à la fin d'un examen gratuit, écran `#examen-utilise`.

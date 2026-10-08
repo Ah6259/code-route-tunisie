@@ -104,7 +104,7 @@ preuves (`../sources/`, `../preuves…/`) sont hors du dépôt : les garder sauv
 - **Gratuit** : leçons, panneaux, amendes, entraînement par thème, 1 examen blanc par jour (compté sur le téléphone).
 - **Pass** : examens blancs illimités, statistiques par thème, révision de « Mes erreurs », écoute des questions.
   9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours ; 2 jours d'essai gratuit ; pas de renouvellement automatique.
-- Paiement D17 / IZI / Wafacash au 24 321 390 + preuve WhatsApp ; demande par le formulaire Formspree (`mwlpakqj`).
+- Paiement D17 / IZI au 24 321 390 + preuve WhatsApp ; demande par le formulaire Formspree (`mwlpakqj`).
 - Activation **sans PC** : dépôt privé `Ah6259/code-route-pass`, bouton « pass » (essai, paye, arret, liste) dans l'application
   GitHub ; il publie dans `donnees/pass.json` seulement l'empreinte de chaque code et sa date de fin. Mode d'emploi : README du
   dépôt privé. Fichiers : `assets/pass.js`, `pass/`, `donnees/pass.json`. Test : `node tools/test_site.mjs` (partie 5).
