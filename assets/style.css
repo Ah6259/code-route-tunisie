@@ -487,3 +487,6 @@ html.cache-capture body::before{content:"Contenu protégé — © Code de la rou
   body::before{content:"Contenu protégé — © Code de la route Tunisie, tous droits réservés. Impression désactivée.";visibility:visible!important;
     position:fixed;top:40%;left:0;right:0;text-align:center;font-size:18pt;font-weight:700;color:#000}
 }
+
+/* liens vers les applications de paiement (D17, IZI), 08/10/2026 */
+.paie a.appli{color:var(--p);font-weight:800;text-decoration:underline;text-underline-offset:2px}
