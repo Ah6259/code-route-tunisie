@@ -68,6 +68,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A assets/regles.js '*.html'
           git commit -m "Surveillance du texte officiel (${{ steps.surv.outputs.date }}) : ${{ steps.surv.outputs.etat }}" || echo "rien à enregistrer"
+          git pull -q --rebase --autostash
           git push
 
       - name: Prévenir si le robot lui-même a échoué
