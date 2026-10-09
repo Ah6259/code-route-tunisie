@@ -10,6 +10,7 @@ const MENU_SITE = [
   ["entrainement/", "Entraînement", "التدريب"],
   ["examen/", "Examen", "الامتحان"],
   ["https://ah6259.github.io/auto-ecoles-tunisie/", "Auto-écoles", "مدارس السياقة", "assets/illustrations/rub-auto-ecole.svg"],  // notre annuaire (demande d'Ahmed)
+  ["https://ah6259.github.io/ma-voiture-tunisie/", "Ma voiture", "مواعيد سيارتك", "assets/illustrations/rub-ma-voiture.svg"],  // notre site Ma voiture (octobre 2026 : liens dans les deux sens)
   ["amendes/", "Amendes", "الخطايا"],
   ["a-propos/", "À propos", "من نحن"]
 ];

@@ -457,7 +457,7 @@ async function nouvellesRubriques() {
     for (const lang of ["fr", "ar"]) {
       const wx = await page(p, { lang }), dx = wx.document;
       const menu = [...dx.querySelectorAll("nav.menu a")].map(a => a.getAttribute("href").replace(/^(\.\.\/)+/, ""));
-      if (menu.join() !== "lecons/,panneaux/,entrainement/,examen/,https://ah6259.github.io/auto-ecoles-tunisie/,amendes/,a-propos/") menuMal.push(p);
+      if (menu.join() !== "lecons/,panneaux/,entrainement/,examen/,https://ah6259.github.io/auto-ecoles-tunisie/,https://ah6259.github.io/ma-voiture-tunisie/,amendes/,a-propos/") menuMal.push(p);
       dx.querySelectorAll("a[href]").forEach(a => { const f = versFichier(wx.location.href, a.getAttribute("href")); if (f !== null && !existsSync(join(root, f))) casses.push(`${p} -> ${a.getAttribute("href")}`); });
     }
     const wf = await page(p, { fichier: true }), df = wf.document;
@@ -467,7 +467,7 @@ async function nouvellesRubriques() {
       if (u.pathname.endsWith("/") || !existsSync(f)) horsLigneMal.push(`${p} -> ${h}`);
     });
   }
-  check(`menu présent sur toutes les pages (Leçons, Panneaux, Entraînement, Examen, Auto-écoles [notre annuaire], Amendes, À propos) ${menuMal}`, menuMal.length === 0);
+  check(`menu présent sur toutes les pages (Leçons, Panneaux, Entraînement, Examen, Auto-écoles [notre annuaire], Ma voiture [notre site], Amendes, À propos) ${menuMal}`, menuMal.length === 0);
   check(`liens internes : chaque lien mène à un fichier existant ${casses.slice(0, 5)}`, casses.length === 0);
   check(`liens internes depuis le PC (file://) : « index.html » ajouté, fichier existant ${horsLigneMal.slice(0, 5)}`, horsLigneMal.length === 0);
 
