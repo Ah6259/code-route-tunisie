@@ -11,8 +11,8 @@ var REGLES_SITE = {
   // « Signaler une erreur » (WhatsApp) restent sur les questions et les leçons.
   relecture: false,
   annee: 2026,
-  verifie_le: "05/10/2026",
-  derniere_surveillance: "05/10/2026",
+  verifie_le: "09/10/2026",
+  derniere_surveillance: "09/10/2026",
   source: {
     url: "https://www.transport.tn/uploads/Loi/Route.pdf",
     taille: 2778492,
