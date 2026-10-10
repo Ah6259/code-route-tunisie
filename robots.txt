@@ -82,4 +82,4 @@ User-agent: *
 Allow: /
 Disallow: /relecture/
 
-Sitemap: https://ah6259.github.io/code-route-tunisie/sitemap.xml
+Sitemap: https://code.clicvia.com/sitemap.xml

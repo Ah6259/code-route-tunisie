@@ -67,7 +67,7 @@ async function page(chemin, { lang = "fr", query = "", stockage = null, fichier 
   const vc = new VirtualConsole();
   vc.on("jsdomError", e => { if (!/Not implemented/.test(e.message)) fautes.push(e.message); });
   const dom = new JSDOM(html, {
-    url: fichier ? `${pathToFileURL(join(root, chemin)).href}?lang=${lang}${query}` : `https://ah6259.github.io/code-route-tunisie/${chemin.replace("index.html", "")}?lang=${lang}${query}`,
+    url: fichier ? `${pathToFileURL(join(root, chemin)).href}?lang=${lang}${query}` : `https://code.clicvia.com/${chemin.replace("index.html", "")}?lang=${lang}${query}`,
     runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: vc,
     beforeParse(w) { if (stockage) w.localStorage.setItem("crt-progression-v1", typeof stockage === "string" ? stockage : JSON.stringify(stockage));
       if (pass) w.localStorage.setItem("crt-pass-v1", PASS_TEST);
@@ -276,8 +276,8 @@ check(`aucune date jj/mm/aaaa écrite en dur hors de regles.js ${datesEnDur.join
 check("regles.js : date au format jj/mm/aaaa et année cohérente", /^\d{2}\/\d{2}\/\d{4}$/.test(REGLES_SITE.verifie_le) && REGLES_SITE.verifie_le.endsWith(String(REGLES_SITE.annee)));
 for (const p of PAGES) {
   const s = lire(p);
-  check(`${p} : titre, description, canonical`, /<title>.{20,}<\/title>/.test(s) && /name="description" content=".{50,}"/.test(s) && s.includes('rel="canonical" href="https://ah6259.github.io/code-route-tunisie/'));
-  check(`${p} : image d'aperçu og-image-v4.jpg (page vidéo : apercu-video.jpg) et icône`, s.includes('property="og:image" content="https://ah6259.github.io/code-route-tunisie/' + (p === "video/index.html" ? "assets/video/apercu-video.jpg" : "assets/og-image-v4.jpg") + '"') && !s.includes("og-image-v1") && s.includes('rel="icon"'));
+  check(`${p} : titre, description, canonical`, /<title>.{20,}<\/title>/.test(s) && /name="description" content=".{50,}"/.test(s) && s.includes('rel="canonical" href="https://code.clicvia.com/'));
+  check(`${p} : image d'aperçu og-image-v4.jpg (page vidéo : apercu-video.jpg) et icône`, s.includes('property="og:image" content="https://code.clicvia.com/' + (p === "video/index.html" ? "assets/video/apercu-video.jpg" : "assets/og-image-v4.jpg") + '"') && !s.includes("og-image-v1") && s.includes('rel="icon"'));
   check(`${p} : même version ?v= pour tous les fichiers`, new Set(s.match(/\?v=\d+\w/g)).size === 1);
   check(`${p} : regles.js chargé en premier`, s.indexOf("assets/regles.js") > 0 && s.indexOf("assets/regles.js") < s.indexOf("assets/page.js"));
   const ww = await page(p);
@@ -293,13 +293,13 @@ check(`image d'aperçu JPEG < 250 Ko (sinon WhatsApp n'affiche qu'une petite vig
 // manifeste : id UNIQUE = chemin du site (sinon Chrome croit le site « déjà installé » : tous les sites partagent ah6259.github.io)
 let man = {}; try { man = JSON.parse(lire("manifest.webmanifest")); } catch (e) {}
 check("manifeste présent, id unique = chemin du site, start_url/scope ./, icônes 192, 512 et maskable existantes",
-  man.id === "/code-route-tunisie/" && man.start_url === "./" && man.scope === "./" && man.display === "standalone" && !!man.name && !!man.short_name
+  man.id === "/" && man.start_url === "./" && man.scope === "./" && man.display === "standalone" && !!man.name && !!man.short_name
   && ["192x192", "512x512"].every(t => man.icons?.some(i => i.sizes === t)) && man.icons?.some(i => i.purpose === "maskable")
   && man.icons.every(i => existsSync(join(root, i.src))));
 check("toutes les pages : lien vers le manifeste, icône iPhone et theme-color", PAGES.every(p => { const s = lire(p), r = "../".repeat(p.split("/").length - 1);
   return s.includes(`<link rel="manifest" href="${r}manifest.webmanifest">`) && s.includes(`<link rel="apple-touch-icon" href="${r}assets/icone-180.png">`) && s.includes('<meta name="theme-color"'); }));
-check(`plan du site : ${PAGES_PUBLIQUES.length} pages publiques (sans relecture/)`, (lire("sitemap.xml").match(/<loc>https:\/\/ah6259\.github\.io\/code-route-tunisie\//g) || []).length === PAGES_PUBLIQUES.length && !lire("sitemap.xml").includes("relecture"));
-check("robots.txt indique le plan du site", lire("robots.txt").includes("code-route-tunisie/sitemap.xml"));
+check(`plan du site : ${PAGES_PUBLIQUES.length} pages publiques (sans relecture/)`, (lire("sitemap.xml").match(/<loc>https:\/\/code\.clicvia\.com\//g) || []).length === PAGES_PUBLIQUES.length && !lire("sitemap.xml").includes("relecture"));
+check("robots.txt indique le plan du site", lire("robots.txt").includes("code.clicvia.com/sitemap.xml"));
 check("LICENSE tous droits réservés", lire("LICENSE").includes("Tous droits réservés"));
 check(".gitignore : node_modules et captures", /node_modules\//.test(lire(".gitignore")) && /captures\//.test(lire(".gitignore")));
 const tests = existsSync(join(root, ".github/workflows/tests.yml")) ? lire(".github/workflows/tests.yml") : "";
@@ -343,10 +343,10 @@ async function boutonPartager() {
     wx.document.querySelector("#entete button.partager").click();
     await new Promise(ok => setTimeout(ok, 0));
     // partage par lien (demande d'Ahmed) : la page vidéo du site + l'adresse du site, dans la langue de la page
-    const adresse = "https://ah6259.github.io/code-route-tunisie/video/?lang=ar";
+    const adresse = "https://code.clicvia.com/video/?lang=ar";
     check(`${p} : sans navigator.share, « Partager » ouvre wa.me avec la page vidéo + l'adresse du site et compte le clic`, !wx.navigator.share && ouverts.length === 1
       && ouverts[0][0].startsWith("https://wa.me/?text=") && decodeURIComponent(ouverts[0][0].slice(20)).endsWith(" " + adresse)
-      && decodeURIComponent(ouverts[0][0]).includes("https://ah6259.github.io/code-route-tunisie/?lang=ar") && ouverts[0][1] === "_blank"
+      && decodeURIComponent(ouverts[0][0]).includes("https://code.clicvia.com/?lang=ar") && ouverts[0][1] === "_blank"
       && comptes.length === 1 && comptes[0].path.startsWith("partage/") && comptes[0].event === true);
   }
 }
@@ -447,8 +447,8 @@ async function nouvellesRubriques() {
   // -- menu présent partout, liens internes vers des fichiers existants (en ligne ET depuis le PC en file://)
   const versFichier = (base, href) => {
     const u = new URL(href, base);
-    if (u.protocol !== "https:" || !u.href.startsWith("https://ah6259.github.io/code-route-tunisie/")) return null;
-    let chemin = decodeURIComponent(u.pathname).replace("/code-route-tunisie/", "");
+    if (u.protocol !== "https:" || !u.href.startsWith("https://code.clicvia.com/")) return null;
+    let chemin = decodeURIComponent(u.pathname).replace(/^\//, "");
     if (chemin === "" || chemin.endsWith("/")) chemin += "index.html";
     return chemin;
   };
@@ -615,7 +615,7 @@ async function passExamen() {
     const avant = (await page(p)).document.querySelector("#entete a.entete-pass");
     if (!!avant !== /^pass\//.test(p)) mauvais.push(p);
     const wa = await page(p, { examenFait: true }); const apres = wa.document.querySelector("#entete a.entete-pass");
-    if (!apres || !new URL(apres.getAttribute("href"), wa.location.href).href.endsWith("/code-route-tunisie/pass/")) mauvaisApres.push(p);
+    if (!apres || !new URL(apres.getAttribute("href"), wa.location.href).href.endsWith("/pass/")) mauvaisApres.push(p);
     if (!(await page(p, { pass: true })).document.querySelector("#entete a.entete-pass.actif")) mauvaisPass.push(p);
   }
   check(`examen gratuit pas encore fait : bouton Pass seulement sur les pages Pass ${mauvais}`, mauvais.length === 0);

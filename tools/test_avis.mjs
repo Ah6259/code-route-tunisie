@@ -10,7 +10,7 @@ import { dirname, join } from "path";
 
 // ---- Réglages propres à ce site ------------------------------------------------
 const SITE = "Code de la route Tunisie";                                         // valeur du champ caché « site »
-const BASE = "https://ah6259.github.io/code-route-tunisie/";            // adresse de l'accueil en ligne
+const BASE = "https://code.clicvia.com/";            // adresse de l'accueil en ligne
 const IGNORER = ["node_modules", ".git", "tools", "captures", "preuves conditions d'utilisation"];
 // --------------------------------------------------------------------------------
 const FORMSPREE = "https://formspree.io/f/mwlpakqj";

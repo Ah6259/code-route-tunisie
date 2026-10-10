@@ -1,7 +1,7 @@
 # Code de la route Tunisie
 
 Site gratuit pour réviser l'examen théorique du permis de conduire en Tunisie (ATTT), en français et en arabe.
-Adresse prévue : https://ah6259.github.io/code-route-tunisie/
+Adresse prévue : https://code.clicvia.com/
 
 > **Pas encore publié** : les questions doivent d'abord être relues par un moniteur d'auto-école.
 
@@ -100,7 +100,7 @@ preuves (`../sources/`, `../preuves…/`) sont hors du dépôt : les garder sauv
 - 05/10/2026 : nouvelle icône ; une image pour chaque question ; taux d'alcool corrigé (0,3 g/l) ; lien vers le paiement officiel des amendes.
 
 ## Pass Examen (partie payante, 06/10/2026)
-- Page : https://ah6259.github.io/code-route-tunisie/pass/ (+ `pass/conditions/`). Bouton doré « Pass Examen » en haut de chaque page.
+- Page : https://code.clicvia.com/pass/ (+ `pass/conditions/`). Bouton doré « Pass Examen » en haut de chaque page.
 - **Gratuit** : leçons, panneaux, amendes, entraînement par thème, 1 examen blanc par jour (compté sur le téléphone).
 - **Pass** : examens blancs illimités, statistiques par thème, révision de « Mes erreurs », écoute des questions.
   9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours ; 2 jours d'essai gratuit ; pas de renouvellement automatique.
