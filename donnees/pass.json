@@ -1,7 +1,12 @@
 {
  "_lisez_moi": "Pass Examen : SEULEMENT l empreinte PBKDF2-SHA-256 salee de chaque code et sa date de fin (dernier jour inclus). Aucune donnee personnelle. Fichier ecrit par le robot du depot prive code-route-pass.",
- "maj": "2026-10-06",
+ "maj": "2026-10-11",
  "sel": "c941c0d357091b04b7199d19c45e238d",
  "tours": 100000,
- "codes": []
+ "codes": [
+  {
+   "h": "281640394d48e21c1ee794e77a235c6ce70320692dfe5b2ad476c417c7f589b1",
+   "fin": "2027-10-11"
+  }
+ ]
 }
