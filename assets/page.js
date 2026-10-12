@@ -9,8 +9,8 @@ const MENU_SITE = [
   ["panneaux/", "Panneaux", "العلامات"],
   ["entrainement/", "Entraînement", "التدريب"],
   ["examen/", "Examen", "الامتحان"],
-  ["https://ah6259.github.io/auto-ecoles-tunisie/", "Auto-écoles", "مدارس السياقة", "assets/illustrations/rub-auto-ecole.svg"],  // notre annuaire (demande d'Ahmed)
-  ["https://ah6259.github.io/ma-voiture-tunisie/", "Ma voiture", "مواعيد سيارتك", "assets/illustrations/rub-ma-voiture.svg"],  // notre site Ma voiture (octobre 2026 : liens dans les deux sens)
+  ["https://auto-ecoles.clicvia.com/", "Auto-écoles", "مدارس السياقة", "assets/illustrations/rub-auto-ecole.svg"],  // notre annuaire (demande d'Ahmed)
+  ["https://voiture.clicvia.com/", "Ma voiture", "مواعيد سيارتك", "assets/illustrations/rub-ma-voiture.svg"],  // notre site Ma voiture (octobre 2026 : liens dans les deux sens)
   ["amendes/", "Amendes", "الخطايا"],
   ["a-propos/", "À propos", "من نحن"]
 ];
@@ -69,6 +69,7 @@ const MENU_SITE = [
           <a href="${racine}a-propos/">${T("À propos et sources", "من نحن والمصادر")}</a>
           <a href="${racine}pass/">${T("Pass Examen", "باقة الامتحان")}</a>
           <a href="${racine}#avis">${T("Votre avis", "رأيك")}</a>
+        <a href="https://clicvia.com/" rel="noopener" target="_blank">${T("Tous nos services", "كل خدماتنا")}</a>
         </nav>
         <p>${T(`Sources : Code de la route (loi n° 99-71 du 26 juillet 1999) et ses décrets d'application, recueil officiel de l'IORT (édition 2012) publié sur transport.tn ; loi de finances 2025 (JORT n° 149). Texte vérifié le ${MAJ}.`,
                `المصادر: مجلة الطرقات (القانون عدد ${iso("99-71")} المؤرخ في 26 جويلية 1999) ونصوصها التطبيقية، المجموعة الرسمية للمطبعة الرسمية (طبعة 2012) المنشورة على ${iso("transport.tn")}؛ قانون المالية لسنة 2025 (الرائد الرسمي عدد 149). تم التثبت من النص في ${iso(MAJ)}.`)}</p>

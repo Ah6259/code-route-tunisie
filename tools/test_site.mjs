@@ -457,7 +457,7 @@ async function nouvellesRubriques() {
     for (const lang of ["fr", "ar"]) {
       const wx = await page(p, { lang }), dx = wx.document;
       const menu = [...dx.querySelectorAll("nav.menu a")].map(a => a.getAttribute("href").replace(/^(\.\.\/)+/, ""));
-      if (menu.join() !== "lecons/,panneaux/,entrainement/,examen/,https://ah6259.github.io/auto-ecoles-tunisie/,https://ah6259.github.io/ma-voiture-tunisie/,amendes/,a-propos/") menuMal.push(p);
+      if (menu.join() !== "lecons/,panneaux/,entrainement/,examen/,https://auto-ecoles.clicvia.com/,https://voiture.clicvia.com/,amendes/,a-propos/") menuMal.push(p);
       dx.querySelectorAll("a[href]").forEach(a => { const f = versFichier(wx.location.href, a.getAttribute("href")); if (f !== null && !existsSync(join(root, f))) casses.push(`${p} -> ${a.getAttribute("href")}`); });
     }
     const wf = await page(p, { fichier: true }), df = wf.document;
@@ -477,7 +477,7 @@ async function nouvellesRubriques() {
   ww = await page("entrainement/index.html", { query: "&erreurs=1", pass: true }); dd = ww.document;
   check("« Mes erreurs » : message clair quand il n'y a rien à revoir", !!dd.getElementById("aucune-erreur"));
   ww = await page("index.html", { stockage: { q: { "T2-001": 0 }, examens: [] } }); dd = ww.document;
-  check("accueil : 7 rubriques (entraînement en premier, …, permis, annuaire des auto-écoles) avec le nombre d'erreurs", dd.querySelectorAll("#rubriques .rubrique").length === 7 && dd.querySelector("#rubriques .rubrique:last-child").getAttribute("href").includes("auto-ecoles-tunisie") && dd.querySelector("#rubriques .rubrique").getAttribute("href") === "entrainement/" && texte(dd.getElementById("rubriques")).includes("1 question(s) à revoir"));
+  check("accueil : 7 rubriques (entraînement en premier, …, permis, annuaire des auto-écoles) avec le nombre d'erreurs", dd.querySelectorAll("#rubriques .rubrique").length === 7 && dd.querySelector("#rubriques .rubrique:last-child").getAttribute("href").includes("auto-ecoles.clicvia.com") && dd.querySelector("#rubriques .rubrique").getAttribute("href") === "entrainement/" && texte(dd.getElementById("rubriques")).includes("1 question(s) à revoir"));
 
   // -- « Signaler une erreur » (WhatsApp) sur les questions
   ww = await page("entrainement/index.html", { query: "&theme=5" }); dd = ww.document;
@@ -516,7 +516,7 @@ async function nouvellesRubriques() {
     if (!/<html translate="no"[ >]/.test(s) || !/<meta charset="utf-8">\s*<meta name="google" content="notranslate">/.test(s)) malTrad.push(p);
     const wx = await page(p);
     if (wx.document.documentElement.getAttribute("translate") !== "no") malTrad.push(p + " (retiré par le JS)");
-    wx.document.querySelectorAll('a[href^="http"]').forEach(a => { if (!a.href.startsWith("https://ah6259.github.io/") && !/noopener/.test(a.rel)) malSecu.push(p + " noopener " + a.href.slice(0, 40)); });
+    wx.document.querySelectorAll('a[href^="http"]').forEach(a => { if (!/^https:\/\/([a-z-]+\.)?clicvia\.com\//.test(a.href) && !/noopener/.test(a.rel)) malSecu.push(p + " noopener " + a.href.slice(0, 40)); });
   }
   check(`sécurité : chaque page a noai, CSP, referrer, anti-copie, aucun script dans la page, liens externes noopener ; noindex seulement sur relecture/ ${malSecu.slice(0, 6)}`, malSecu.length === 0);
   check(`statistiques GoatCounter (sans cookies) sur les pages publiques avec CSP compatible, absentes de relecture/ ${malGc.slice(0, 6)}`, malGc.length === 0);
