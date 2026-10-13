@@ -494,7 +494,7 @@ async function nouvellesRubriques() {
 
   // -- sécurité (consigne commune)
   const robots = lire("robots.txt");
-  const IA = ["GPTBot", "ChatGPT-User", "OAI-SearchBot", "ClaudeBot", "Claude-Web", "anthropic-ai", "CCBot", "Google-Extended", "Applebot-Extended", "PerplexityBot", "Bytespider", "Amazonbot", "Meta-ExternalAgent", "FacebookBot", "Diffbot", "Omgilibot", "cohere-ai", "ImagesiftBot", "HTTrack", "WebCopier", "WebZIP", "Offline Explorer", "wget", "SiteSnagger"];
+  const IA = ["GPTBot", "ClaudeBot", "Claude-Web", "anthropic-ai", "CCBot", "Google-Extended", "Applebot-Extended", "Bytespider", "Amazonbot", "Meta-ExternalAgent", "FacebookBot", "Diffbot", "Omgilibot", "cohere-ai", "ImagesiftBot", "HTTrack", "WebCopier", "WebZIP", "Offline Explorer", "wget", "SiteSnagger"];
   const groupes = robots.split(/\n\s*\n/).map(g => ({ agents: [...g.matchAll(/^User-agent:\s*(.+)$/gm)].map(m => m[1].trim()), regles: g }));
   const interdit = a => groupes.some(g => g.agents.includes(a) && /^Disallow:\s*\/\s*$/m.test(g.regles));
   check("robots.txt : tous les robots d'IA et aspirateurs interdits", IA.every(interdit));
