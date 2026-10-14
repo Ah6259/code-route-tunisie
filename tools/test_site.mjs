@@ -586,8 +586,8 @@ async function passExamen() {
   check("pass/ : bouton vert « Envoyer la preuve de paiement par WhatsApp » vers wa.me/21624321390, texte prérempli", !!wa && wa.classList.contains("btn-wa") &&
     wa.href.startsWith("https://wa.me/21624321390?text=") && decodeURIComponent(wa.href).includes("Pass Examen") && texte(wa).includes("Envoyer la preuve de paiement par WhatsApp"));
   const form = d.getElementById("pass-form");
-  check("pass/ : formulaire Formspree mwlpakqj (nom, téléphone, 4 formules, case conditions, piège)", form.getAttribute("action") === "https://formspree.io/f/mwlpakqj" &&
-    !!form.querySelector("[name=nom]") && !!form.querySelector("[name=telephone]") && form.querySelectorAll("input[name=formule]").length === 4 &&
+  check("pass/ : formulaire Formspree mwlpakqj (nom, téléphone, 3 formules payantes, case conditions, piège)", form.getAttribute("action") === "https://formspree.io/f/mwlpakqj" &&
+    !!form.querySelector("[name=nom]") && !!form.querySelector("[name=telephone]") && form.querySelectorAll("input[name=formule]").length === 3 &&
     !!form.querySelector("input[name=conditions][type=checkbox]") && !!form.querySelector("input[name=_gotcha]") && !!form.querySelector('a[href="conditions/"]'));
   const appels = []; w.fetch = (u, o) => { appels.push({ u, o }); return Promise.resolve({ ok: true, status: 200 }); };
   form.querySelector("[name=nom]").value = "Test Candidat"; form.querySelector("[name=telephone]").value = "12";
@@ -603,6 +603,16 @@ async function passExamen() {
   check("pass/ : après l'envoi, confirmation + paiement + « Vous recevrez votre code d'accès par WhatsApp »", form.hidden && !d.getElementById("apres-pass").hidden &&
     !d.getElementById("apres-paye").hidden && d.getElementById("apres-essai").hidden && texte(d.getElementById("apres-paye")).includes("Vous recevrez votre code d'accès par WhatsApp") &&
     decodeURIComponent(d.getElementById("pass-preuve-apres").href).includes("Test Candidat — 98765432"));
+  // 14/10/2026 (règle commune § 15) : essai gratuit IMMÉDIAT, sans formulaire ni code « sous 24 heures »
+  w = await page("pass/index.html"); d = w.document;
+  check("pass/ : essai immédiat proposé en premier (bouton « Commencer mes 2 jours gratuits »), plus d'essai dans le formulaire ni d'attente de 24 heures pour l'essai",
+    !!d.getElementById("essai-go") && d.querySelector('a.btn-pro[href="#essai-immediat"]') && ![...d.querySelectorAll("input[name=formule]")].some(r => /essai/.test(r.value))
+    && !w.passActif());
+  d.getElementById("essai-go").click(); await pause(20);
+  check("pass/ : un clic -> Pass actif TOUT DE SUITE sur ce téléphone (2 jours), lien vers l'examen blanc", w.passActif() && w.essaiActif()
+    && /essai est actif/.test(texte(d.getElementById("essai-statut"))) && !!d.querySelector('#essai-statut a[href="../examen/"]') && d.getElementById("essai-go").hidden);
+  w.commencerEssai();
+  check("pass/ : l'essai ne se relance pas (une fois par téléphone)", w.commencerEssai() === false && w.finEssai() === w.plusJours(w.aujourdhui(), 1));
   w = await page("pass/conditions/index.html"); d = w.document;
   const tc = texte(d.querySelector(".conditions"));
   check("conditions : vendeur « l'éditeur du site », prix, essai 2 jours, pas de renouvellement, aucune période payée remboursée, INPDP",

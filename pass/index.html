@@ -30,7 +30,7 @@
 <link rel="stylesheet" href="../assets/style.css?v=20261012a">
 <script src="../assets/regles.js?v=20261012a"></script>
 <script src="../assets/page.js?v=20261012a"></script>
-<script src="../assets/pass.js?v=20261012a"></script>
+<script src="../assets/pass.js?v=20261014a"></script>
 <script src="../assets/protection.js?v=20261012a"></script>
 <script src="../assets/pages.js?v=20261012a"></script>
 </head>
@@ -77,24 +77,31 @@
       <a class="btn-wa" id="pass-preuve" href="https://wa.me/21624321390?text=Bonjour%2C%20voici%20la%20preuve%20de%20paiement%20de%20mon%20Pass%20Examen%20%28Code%20de%20la%20route%20Tunisie%29.%20Nom%20et%20t%C3%A9l%C3%A9phone%20%3A%20" data-texte="Bonjour, voici la preuve de paiement de mon Pass Examen (Code de la route Tunisie). Nom et téléphone : " target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1 1 8.4 19z"/><path d="M9 8.6c0 3.4 2.9 6.4 6.4 6.4l1-1.4-2-1-1 .9c-1-.4-2.1-1.5-2.5-2.5l.9-1-1-2z"/></svg><span data-l="fr">Envoyer la preuve de paiement par WhatsApp</span><span data-l="ar">أرسل إثبات الدفع عبر واتساب</span></a>
       <p class="petit"><span data-l="fr">Payez avec pour motif votre nom et votre téléphone, puis envoyez la preuve par WhatsApp. Vous recevez votre code d'accès par WhatsApp, en général sous 24 heures.</span><span data-l="ar">ادفع مع ذكر اسمك ورقم هاتفك كسبب للدفع، ثم أرسل الإثبات عبر واتساب. يصلك رمز الدخول عبر واتساب، عادة في غضون ⁦24⁩ ساعة.</span></p>
     </details>
-    <a class="btn-pro" href="#inscription"><span data-l="fr">Je commence : 2 jours gratuits</span><span data-l="ar">أبدأ: يومان مجانًا</span></a>
+    <a class="btn-pro" href="#essai-immediat"><span data-l="fr">Je commence : 2 jours gratuits</span><span data-l="ar">أبدأ: يومان مجانًا</span></a>
     <p class="petit"><span data-l="fr">Prix en dinars tunisiens. Voir les</span><span data-l="ar">الأسعار بالدينار التونسي. انظر</span> <a href="conditions/"><span data-l="fr">conditions du Pass Examen</span><span data-l="ar">شروط باقة الامتحان</span></a>.</p>
   </section>
 
   <section class="carte">
     <h2><span data-l="fr">Comment ça marche ?</span><span data-l="ar">كيف يعمل؟</span></h2>
     <ol class="etapes" data-l="fr">
-      <li>Remplissez le formulaire ci-dessous (essai gratuit ou formule payante).</li>
-      <li>Formule payante : payez par D17 ou IZI et envoyez la preuve par WhatsApp.</li>
+      <li><b>Essai gratuit</b> : touchez « Commencer mes 2 jours gratuits » ci-dessous. Le Pass s'ouvre <b>tout de suite</b> sur ce téléphone, sans formulaire ni code.</li>
+      <li>Pour continuer ensuite : remplissez le formulaire, payez par D17 ou IZI et envoyez la preuve par WhatsApp.</li>
       <li>Vous recevez votre <b>code d'accès</b> par WhatsApp (en général sous 24 heures).</li>
       <li>Tapez ce code une seule fois dans « J'ai un code » : le Pass est actif sur ce téléphone.</li>
     </ol>
     <ol class="etapes" data-l="ar">
-      <li>املأ الاستمارة أسفله (تجربة مجانية أو صيغة بمقابل).</li>
-      <li>الصيغة بمقابل: ادفع عبر ⁨D17⁩ أو ⁨IZI⁩ وأرسل الإثبات عبر واتساب.</li>
+      <li><b>التجربة المجانية</b>: المس « ابدأ يوميّ المجانيين » أسفله. تُفتح الباقة <b>فورًا</b> على هذا الهاتف، دون استمارة أو رمز.</li>
+      <li>للمواصلة بعد ذلك: املأ الاستمارة، ادفع عبر ⁨D17⁩ أو ⁨IZI⁩ وأرسل الإثبات عبر واتساب.</li>
       <li>يصلك <b>رمز الدخول</b> عبر واتساب (عادة في غضون ⁦24⁩ ساعة).</li>
       <li>اكتب الرمز مرة واحدة في «لدي رمز»: تُفعَّل الباقة على هذا الهاتف.</li>
     </ol>
+  </section>
+
+  <section class="carte abo" id="essai-immediat">
+    <h2><span data-l="fr">Essai gratuit de 2 jours, tout de suite</span><span data-l="ar">تجربة مجانية ليومين، فورًا</span></h2>
+    <p><span data-l="fr">Sans formulaire, sans code, sans attendre : les examens blancs illimités s'ouvrent maintenant sur ce téléphone. Une fois par téléphone.</span><span data-l="ar">دون استمارة ولا رمز ولا انتظار: تُفتح الامتحانات التجريبية بلا حدود الآن على هذا الهاتف. مرة واحدة لكل هاتف.</span></p>
+    <button type="button" class="btn-pro" id="essai-go"><span data-l="fr">Commencer mes 2 jours gratuits</span><span data-l="ar">ابدأ يوميّ المجانيين</span></button>
+    <p id="essai-statut" role="status" aria-live="polite"></p>
   </section>
 
   <section class="carte abo" id="code-acces">
@@ -118,8 +125,7 @@
       <fieldset class="abo-choix" id="pass-formules">
         <legend><span data-l="fr">Votre formule</span><span data-l="ar">صيغتك</span></legend>
         <div class="cases cases-1">
-          <label class="case"><input type="radio" name="formule" value="essai 2 jours gratuits" checked> <span><span data-l="fr"><b>2 jours d'essai gratuit</b> (une fois par personne)</span><span data-l="ar"><b>تجربة مجانية ليومين</b> (مرة واحدة لكل شخص)</span></span></label>
-          <label class="case"><input type="radio" name="formule" value="7 jours - 9 DT"> <span><span data-l="fr"><b>7 jours</b> : 9 DT</span><span data-l="ar"><b>⁦7⁩ أيام</b>: ⁦9⁩ د</span></span></label>
+          <label class="case"><input type="radio" name="formule" value="7 jours - 9 DT" checked> <span><span data-l="fr"><b>7 jours</b> : 9 DT</span><span data-l="ar"><b>⁦7⁩ أيام</b>: ⁦9⁩ د</span></span></label>
           <label class="case"><input type="radio" name="formule" value="30 jours - 19 DT"> <span><span data-l="fr"><b>30 jours</b> : 19 DT</span><span data-l="ar"><b>⁦30⁩ يومًا</b>: ⁦19⁩ د</span></span></label>
           <label class="case"><input type="radio" name="formule" value="90 jours - 29 DT"> <span><span data-l="fr"><b>90 jours</b> : 29 DT</span><span data-l="ar"><b>⁦90⁩ يومًا</b>: ⁦29⁩ د</span></span></label>
         </div>

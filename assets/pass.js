@@ -18,10 +18,13 @@ const PASS = {
   donnees: "donnees/pass.json",
   cle: "crt-pass-v1",                         // code gardé sur l'appareil
   cleGratuit: "crt-examen-gratuit-v1",        // jour du dernier examen gratuit terminé
+  cleEssai: "crt-essai-v1",                   // { debut } de l'essai gratuit IMMÉDIAT (14 octobre 2026, règle commune § 15)
   alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", // sans O/0 ni I/1 (faciles à confondre)
   longueur: 8,
   whatsapp: "21624321390"
 };
+
+function annoncerPass() { document.dispatchEvent(new Event("pass")); }
 
 /* ---- dates (jour du visiteur, au format AAAA-MM-JJ) ---- */
 function aujourdhui(d) {
@@ -43,8 +46,21 @@ function lirePass() {
 function ecrirePass(p) {
   try { if (p) localStorage.setItem(PASS.cle, JSON.stringify(p)); else localStorage.removeItem(PASS.cle); } catch (e) {}
 }
-function passActif() { const p = lirePass(); return !!p && p.fin >= aujourdhui(); }
-function finPass() { const p = lirePass(); return p ? p.fin : ""; }
+/* ---- essai gratuit IMMÉDIAT (14 octobre 2026, règle commune § 15 : plus de demande + code reçu « sous 24 heures ») ----
+   Le bouton « Commencer mes 2 jours gratuits » ouvre le Pass tout de suite sur ce téléphone (une fois par téléphone). */
+function plusJours(iso, n) { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return aujourdhui(d); }
+function debutEssai() { try { const e = JSON.parse(localStorage.getItem(PASS.cleEssai) || "null"); return e && /^\d{4}-\d{2}-\d{2}$/.test(e.debut) ? e.debut : ""; } catch (e) { return ""; } }
+function finEssai() { const d = debutEssai(); return d ? plusJours(d, PASS.essai - 1) : ""; }       // dernier jour inclus
+function essaiActif() { const f = finEssai(); return !!f && f >= aujourdhui() && debutEssai() <= aujourdhui(); }
+function commencerEssai() {
+  if (debutEssai()) return false;
+  try { localStorage.setItem(PASS.cleEssai, JSON.stringify({ debut: aujourdhui() })); } catch (e) { return false; }
+  annoncerPass();
+  return true;
+}
+function codeActif() { const p = lirePass(); return !!p && p.fin >= aujourdhui(); }
+function passActif() { return codeActif() || essaiActif(); }
+function finPass() { const p = lirePass(); return codeActif() ? p.fin : (essaiActif() ? finEssai() : (p ? p.fin : "")); }
 
 /* ---- 1 examen blanc gratuit par jour, compté sur l'appareil ---- */
 function examenGratuitDispo() { try { return localStorage.getItem(PASS.cleGratuit) !== aujourdhui(); } catch (e) { return true; } }
@@ -80,7 +96,6 @@ async function verifierCode(saisie) {
   if (!(trouve.fin >= aujourdhui())) return { etat: "expire", fin: trouve.fin, code };
   return { etat: "ok", fin: trouve.fin, code };
 }
-function annoncerPass() { document.dispatchEvent(new Event("pass")); }
 async function activerCode(saisie) {
   const r = await verifierCode(saisie);
   if (r.etat === "ok") { ecrirePass({ code: r.code, fin: r.fin, verifie: aujourdhui() }); annoncerPass(); }
@@ -218,6 +233,27 @@ function brancherCodeAcces() {
   });
 }
 
+function brancherEssai() {
+  const b = document.getElementById("essai-go"), statut = document.getElementById("essai-statut");
+  if (!b || b.dataset.branche) return;
+  b.dataset.branche = "1";
+  const dire = () => {
+    if (essaiActif()) {
+      statut.className = "ok";
+      statut.innerHTML = T("✅ Votre essai est actif sur ce téléphone jusqu'au <b>" + dateLisible(finEssai()) + "</b> inclus. ", "✅ تجربتك مفعّلة على هذا الهاتف إلى غاية <b>" + iso(dateLisible(finEssai())) + "</b>. ") +
+        '<a href="../examen/">' + T("Commencer un examen blanc →", "ابدأ امتحانًا تجريبيًا ←") + "</a>";
+      b.hidden = true;
+    } else if (debutEssai()) {
+      statut.className = "err";
+      statut.textContent = T("L'essai gratuit a déjà été utilisé sur ce téléphone (jusqu'au " + dateLisible(finEssai()) + "). Pour continuer : une formule ci-dessous.",
+        "استُعملت التجربة المجانية على هذا الهاتف (إلى غاية " + iso(dateLisible(finEssai())) + "). للمواصلة: اختر صيغة أسفله.");
+      b.hidden = true;
+    }
+  };
+  b.addEventListener("click", () => { commencerEssai(); dire(); });
+  dire();
+}
+
 /* ---- en-tête : bouton doré « Pass Examen » (dessiné par page.js) ---- */
 function majBoutonEntete() {
   document.querySelectorAll(".entete-pass").forEach(a => a.classList.toggle("actif", passActif()));
@@ -226,5 +262,6 @@ document.addEventListener("pass", majBoutonEntete);
 document.addEventListener("DOMContentLoaded", () => {
   brancherFormulairePass();
   brancherCodeAcces();
+  brancherEssai();
   reverifierPass().catch(() => {});
 });
