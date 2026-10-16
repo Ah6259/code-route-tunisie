@@ -563,7 +563,7 @@ async function passExamen() {
   let pj = {}; try { pj = JSON.parse(lire("donnees/pass.json")); } catch (e) {}
   const clesOk = Object.keys(pj).every(k => ["_lisez_moi", "maj", "sel", "tours", "codes"].includes(k));
   check("donnees/pass.json : seulement sel, tours, date et liste {empreinte, fin} (aucun nom, aucun téléphone)",
-    clesOk && typeof pj.sel === "string" && pj.sel.length >= 16 && pj.tours >= 100000 && Array.isArray(pj.codes) &&
+    clesOk && typeof pj.sel === "string" && pj.sel.length >= 16 && pj.tours >= 150000 && Array.isArray(pj.codes) &&
     pj.codes.every(c => Object.keys(c).join() === "h,fin" && /^[0-9a-f]{64}$/.test(c.h) && /^\d{4}-\d{2}-\d{2}$/.test(c.fin)) &&
     !/\b[2-9]\d{7}\b|\b[2-9]\d \d{3} \d{3}\b|nom|telephone|téléphone/i.test(JSON.stringify(pj.codes)));
   check("dépôt public : aucun fichier de clients (clients.json, abonnes.json) ni dossier pass (prive)",
