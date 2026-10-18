@@ -66,6 +66,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 
 ## Avant chaque publication / après chaque modification
 1. `node tools/test_site.mjs` (255 vérifications) puis `node tools/test_sw.mjs` (service worker) et `node tools/test_avis.mjs` (Votre avis). jsdom : `npm install --no-save --no-package-lock jsdom` (une fois par PC).
+1 bis. **Visiteur simulé** (règle générale du 18/10/2026, outil commun copié tel quel) : `python3 tools/visiteur_simule.py` (aussi dans tests.yml) — liens/images morts, pages à 390 px dans Chromium, et `tools/scenarios-visiteur.json` : entraînement et examen blanc répondus jusqu'au score, amendes, panneaux, 10 leçons FR + AR (toujours `lang=` dans l'adresse : la langue choisie est gardée). Jamais de « % » dans un scénario (l'outil plante). 18/10 : il a montré que « toujours cocher le 1er choix » donnait 22 / 30 (bonne réponse en 1er dans 94 questions sur 117) → `melangerChoix()` dans quiz.js mélange l'ordre des choix (test dans test_site.mjs).
 2. Changer le `?v=` des fichiers `assets/` dans **toutes** les pages (le test vérifie qu'il est le même partout).
 3. `bash tools/captures.sh` (ou `bash tools/captures.sh amendes`) : captures 340/390 px FR et AR dans `captures/`
    (non publié), servies par `python -m http.server 8917` (lancé par le script) — les regarder.

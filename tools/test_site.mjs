@@ -146,6 +146,8 @@ for (let i = 0; i < 30; i++) {
   clic(w, d.getElementById("valider"));
 }
 check("examen : 30 questions différentes affichées", vus.size === 30);
+// 18/10/2026 (visiteur simulé) : « toujours cocher le 1er choix » donnait 22 / 30 ; l'ordre des choix est maintenant mélangé
+check("examen : la bonne réponse n'est pas presque toujours le 1er choix (choix mélangés)", ex.questions.filter(q => q.bonnes.includes(0)).length <= 20);
 check("examen : score affiché 25 / 30", texte(d.getElementById("score")) === "25 / 30");
 check("examen : « Réussi » affiché", texte(d.getElementById("statut")) === "Réussi");
 check("examen : seuil de réussite affiché", texte(d.getElementById("quiz")).includes("Seuil de réussite"));

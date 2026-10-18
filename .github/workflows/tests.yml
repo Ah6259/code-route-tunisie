@@ -35,6 +35,19 @@ jobs:
         run: node tools/test_video.mjs
       - name: Test de la section Votre avis (envoi Formspree simule)
         run: node tools/test_avis.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Visiteur simule
+        # Règle générale du 18/10/2026 : le visiteur simulé signale les problèmes AVANT le visiteur réel (tools/visiteur_simule.py, outil commun).
+        # Seule exception tolérée : « /video/ : page non chargée » = faux positif connu de l'outil (la vidéo retarde l'événement
+        # « load » dans Chrome sans écran ; aucun effet pour un vrai visiteur). Toute autre anomalie rend le robot rouge.
+        run: |
+          code=0; python tools/visiteur_simule.py > visiteur.txt || code=$?
+          cat visiteur.txt
+          grep -q '^ANOMALIES' visiteur.txt || exit 1
+          autres=$(grep '^  - ' visiteur.txt | grep -cv '^  - /video/ : page non chargée$' || true)
+          if [ "$code" != 0 ] && [ "$autres" != 0 ]; then exit 1; fi
       - name: Prévenir par une issue si le test échoue
         if: failure()
         env:
@@ -42,7 +55,7 @@ jobs:
         run: |
           TITRE="Le test automatique du site a échoué"
           LIEN="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          CORPS="Le test tools/test_site.mjs, tools/test_sw.mjs ou tools/test_avis.mjs a échoué après l'envoi ${{ github.sha }}. Journal : $LIEN — ne pas laisser le site dans cet état : corriger puis relancer le test."
+          CORPS="Le test tools/test_site.mjs, tools/test_sw.mjs, tools/test_avis.mjs ou le visiteur simulé (tools/visiteur_simule.py) a échoué après l'envoi ${{ github.sha }}. Journal : $LIEN — ne pas laisser le site dans cet état : corriger puis relancer le test."
           NUM=$(gh issue list --state open --search "$TITRE in:title" --json number --jq '.[0].number' || true)
           if [ -n "$NUM" ]; then
             gh issue comment "$NUM" --body "$CORPS"

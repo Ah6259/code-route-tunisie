@@ -1,0 +1,546 @@
+[
+ {
+  "page": "entrainement/?theme=10&lang=fr",
+  "nom": "entraînement thème 10 : 7 questions répondues jusqu'au score",
+  "etapes": [
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   }
+  ],
+  "lire": "#score-theme"
+ },
+ {
+  "page": "entrainement/?theme=9&lang=ar",
+  "nom": "entraînement thème 9 en arabe : 10 questions jusqu'au score",
+  "etapes": [
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": "#suivante",
+    "clic": true
+   }
+  ],
+  "lire": "#score-theme"
+ },
+ {
+  "page": "examen/?lang=fr",
+  "nom": "examen blanc gratuit : 30 questions répondues jusqu'au score",
+  "etapes": [
+   {
+    "sel": "#commencer",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   },
+   {
+    "sel": ".choix-q",
+    "clic": true
+   },
+   {
+    "sel": "#valider",
+    "clic": true
+   }
+  ],
+  "lire": "#score"
+ },
+ {
+  "page": "amendes/?lang=fr",
+  "nom": "amendes : barème affiché (montants)",
+  "lire": "#bareme"
+ },
+ {
+  "page": "amendes/?lang=ar",
+  "nom": "amendes en arabe : barème affiché",
+  "lire": "#bareme"
+ },
+ {
+  "page": "panneaux/?lang=fr",
+  "nom": "panneaux : familles affichées",
+  "lire": "#familles"
+ },
+ {
+  "page": "lecons/?theme=1&lang=fr",
+  "nom": "leçon 1 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=2&lang=fr",
+  "nom": "leçon 2 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=3&lang=fr",
+  "nom": "leçon 3 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=4&lang=fr",
+  "nom": "leçon 4 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=5&lang=fr",
+  "nom": "leçon 5 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=6&lang=fr",
+  "nom": "leçon 6 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=7&lang=fr",
+  "nom": "leçon 7 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=8&lang=fr",
+  "nom": "leçon 8 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=9&lang=fr",
+  "nom": "leçon 9 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=10&lang=fr",
+  "nom": "leçon 10 affichée (français)",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=1&lang=ar",
+  "nom": "leçon 1 en arabe",
+  "lire": "#lecon"
+ },
+ {
+  "page": "lecons/?theme=5&lang=ar",
+  "nom": "leçon 5 en arabe",
+  "lire": "#lecon"
+ }
+]

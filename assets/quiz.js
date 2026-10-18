@@ -31,6 +31,12 @@ function melanger(t, rng = Math.random) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
+// Ordre des choix mélangé à chaque affichage (octobre 2026, visiteur simulé : la bonne réponse était le 1er choix dans 94 questions
+// sur 117 — « toujours cocher A » donnait 22 / 30 à l'examen). Copie de la question : « bonnes » suit les choix déplacés.
+function melangerChoix(q, rng = Math.random) {
+  const ordre = melanger(q.choix.map((_, i) => i), rng);
+  return Object.assign({}, q, { choix: ordre.map(i => q.choix[i]), bonnes: q.bonnes.map(b => ordre.indexOf(b)).sort((a, b) => a - b) });
+}
 function questionsDuTheme(n) { return QUESTIONS.filter(q => q.theme === +n); }
 function estJuste(q, choisis) {
   const s = new Set(choisis);
@@ -131,12 +137,12 @@ function lancerEntrainement() {
   if (params.get("erreurs")) {
     // « Mes erreurs » (révision des questions ratées) fait partie du Pass Examen
     if (!passActif()) { Object.assign(entrainement, { theme: "erreurs-pass", liste: [], i: 0 }); rendreEntrainement(); return; }
-    Object.assign(entrainement, { theme: "erreurs", liste: melanger(questionsRatees()), i: 0, choisis: [], corrige: false, bons: 0 });
+    Object.assign(entrainement, { theme: "erreurs", liste: melanger(questionsRatees()).map(q => melangerChoix(q)), i: 0, choisis: [], corrige: false, bons: 0 });
     rendreEntrainement(); return;
   }
   const t = +params.get("theme");
   if (!THEMES[t]) { entrainement.theme = null; rendreEntrainement(); return; }
-  Object.assign(entrainement, { theme: t, liste: melanger(questionsDuTheme(t)), i: 0, choisis: [], corrige: false, bons: 0 });
+  Object.assign(entrainement, { theme: t, liste: melanger(questionsDuTheme(t)).map(q => melangerChoix(q)), i: 0, choisis: [], corrige: false, bons: 0 });
   rendreEntrainement();
 }
 function rendreEntrainement() {
@@ -256,7 +262,7 @@ function demarrerExamen(serie) {
   const acces = accesExamen();          // pass.js : "pass", "gratuit" (1 par jour) ou "bloque"
   if (acces === "bloque") { examen.etape = "intro"; rendreExamen(); window.scrollTo && window.scrollTo(0, 0); return; }
   serie = +serie || 0;
-  const questions = serie ? serieExamen(serie) : tirerExamen(Math.random, QUESTIONS, questionsRecentes());
+  const questions = (serie ? serieExamen(serie) : tirerExamen(Math.random, QUESTIONS, questionsRecentes())).map(q => melangerChoix(q));
   Object.assign(examen, { etape: "question", questions, reponses: [], i: 0, choisis: [], resultat: null, gratuit: acces === "gratuit", serie, debut: Date.now(), duree: 0 });
   lancerChrono();
   rendreExamen();
