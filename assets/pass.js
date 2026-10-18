@@ -152,6 +152,12 @@ function htmlBoutonPass(id, titreFr, titreAr) {
     <span>${T(titreFr, titreAr)}<small>${T("Examens blancs illimités dès 9 DT · 2 jours d'essai gratuit", "امتحانات تجريبية بلا حدود ابتداءً من " + iso("9") + " د · تجربة مجانية ليومين")}</small></span></a>`;
 }
 
+// lien « J'ai déjà un code » sous chaque écran payant (octobre 2026 : le visiteur qui a payé doit trouver où taper son code)
+function htmlLienCode() {
+  const racine = document.documentElement.dataset.racine || "";
+  return `<p class="petit lien-code"><a href="${racine}pass/#code-acces">${T("J'ai déjà un code d'accès", "لدي رمز دخول")}</a></p>`;
+}
+
 /* ---- page pass/ : formulaire d'inscription (Formspree) et saisie du code ---- */
 function telephoneTn(v) {
   let n = String(v || "").replace(/\D/g, "");
@@ -223,7 +229,7 @@ function brancherCodeAcces() {
       ok: ["Code accepté : votre Pass Examen est actif sur ce téléphone jusqu'au " + dateLisible(r.fin) + " inclus.", "تم قبول الرمز: باقة الامتحان مفعّلة على هذا الهاتف إلى غاية " + iso(dateLisible(r.fin)) + "."],
       forme: ["Le code a 8 caractères (lettres et chiffres), par exemple ABCD-EF23.", "الرمز يتكون من " + iso("8") + " حروف وأرقام، مثال " + iso("ABCD-EF23") + "."],
       inconnu: ["Code non reconnu. Vérifiez-le ; si vous venez de le recevoir, réessayez dans 10 minutes.", "رمز غير معروف. تثبّت منه؛ إن وصلك للتو، أعد المحاولة بعد " + iso("10") + " دقائق."],
-      expire: ["Ce code a expiré le " + dateLisible(r.fin) + ". Pour continuer, choisissez une formule ci-dessus.", "انتهت صلاحية هذا الرمز في " + iso(dateLisible(r.fin)) + ". للمواصلة، اختر صيغة أعلاه."],
+      expire: ["Ce code a expiré le " + dateLisible(r.fin) + ". Pour continuer, choisissez une formule ci-dessous.", "انتهت صلاحية هذا الرمز في " + iso(dateLisible(r.fin)) + ". للمواصلة، اختر صيغة أسفله."],
       reseau: ["Pas de connexion : vérifiez Internet et réessayez.", "لا يوجد اتصال: تحقّق من الإنترنت وأعد المحاولة."],
       impossible: ["Votre navigateur ne peut pas vérifier le code : mettez-le à jour ou essayez Chrome.", "متصفحك لا يستطيع التثبت من الرمز: حدّثه أو جرّب ⁨Chrome⁩."]
     }[r.etat];

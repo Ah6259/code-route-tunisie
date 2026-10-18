@@ -162,6 +162,7 @@ function rendreEntrainement() {
       <p>${n ? T(`Vous avez <b>${n} question(s)</b> ratée(s) à revoir.`, `لديك <b>${nb(n)}</b> سؤال للمراجعة.`) : T("Les questions que vous ratez apparaîtront ici.", "الأسئلة التي تخطئ فيها ستظهر هنا.")}
         ${T("La révision de vos erreurs, les examens blancs illimités et les statistiques par thème font partie du Pass Examen.", "مراجعة الأخطاء والامتحانات التجريبية بلا حدود والإحصائيات حسب المحور جزء من باقة الامتحان.")}</p>
       ${htmlBoutonPass("cta-pass-erreurs", "Pass Examen", "باقة الامتحان")}
+      ${htmlLienCode()}
       <p class="petit">${T("L'entraînement par thème reste gratuit :", "التدريب حسب المحور يبقى مجانيًا:")} <a href="./">${T("s'entraîner par thème", "التدريب حسب المحور")}</a></p></section>`;
     return;
   }
@@ -417,6 +418,7 @@ function rendreExamen() {
       <h2>${T("Vous avez utilisé votre examen gratuit du jour", "لقد استعملت امتحانك المجاني لهذا اليوم")}</h2>
       <p>${T("Prochain examen gratuit : demain. Avec le Pass Examen : examens blancs illimités, statistiques par thème et révision de vos erreurs.", "الامتحان المجاني القادم: غدًا. مع باقة الامتحان: امتحانات تجريبية بلا حدود، إحصائيات حسب المحور ومراجعة أخطائك.")}</p>
       ${htmlBoutonPass("cta-pass-fin", "Passer au Pass Examen", "اختر باقة الامتحان")}
+      ${htmlLienCode()}
     </section>` : ""}
     <section class="carte">
       <h2>${T("Résultat par thème", "النتيجة حسب المحور")}</h2>

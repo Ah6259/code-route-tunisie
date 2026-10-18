@@ -58,7 +58,7 @@ check("au moins 3 questions publiées par thème (pour l'examen)", [1,2,3,4,5,6,
 // ---- 2. Pages chargées comme un navigateur ---------------------------------------
 // Pass Examen actif dans le navigateur (code factice gardé sur l'appareil, date de fin lointaine)
 const PASS_TEST = JSON.stringify({ code: "ABCDEF23", fin: "2099-12-31", verifie: "2099-12-31" });
-async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false, pass = false, examenFait = false } = {}) {
+async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false, pass = false, examenFait = false, ls = null } = {}) {
   const dossier = dirname(join(root, chemin));
   // (les scripts externes, comme GoatCounter, ne sont pas chargés)
   const html = lire(chemin).replace(/<script([^>]*) src="(?!https?:)([^"?]+)(\?[^"]*)?"([^>]*)><\/script>/g,
@@ -71,6 +71,7 @@ async function page(chemin, { lang = "fr", query = "", stockage = null, fichier 
     runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: vc,
     beforeParse(w) { if (stockage) w.localStorage.setItem("crt-progression-v1", typeof stockage === "string" ? stockage : JSON.stringify(stockage));
       if (pass) w.localStorage.setItem("crt-pass-v1", PASS_TEST);
+      if (ls) for (const [k, v] of Object.entries(ls)) w.localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v));
       if (examenFait) { const n = new Date(); w.localStorage.setItem("crt-examen-gratuit-v1", n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0")); } }
   });
   await new Promise(ok => dom.window.addEventListener("load", ok));
@@ -698,6 +699,46 @@ async function passExamen() {
     texte(w.document.getElementById("erreurs-pass")).includes("1 question(s)") && !!w.document.querySelector("#erreurs-pass a.btn-pass-grand"));
   w = await page("pass/index.html", { lang: "ar" }); d = w.document;
   check("pass/ en arabe : titre, prix et formulaire en arabe", AR.test(texte(d.querySelector("h1"))) && AR.test(texte(d.getElementById("tarifs"))) && AR.test(texte(d.querySelector("#pass-formules legend"))));
+
+  // -- 18/10/2026 (problème vu sur l'immobilier : code payé impossible à taper quand le téléphone gardait un autre code)
+  //    la case du code est TOUJOURS visible, EN HAUT de pass/, quel que soit l'état gardé ; le code tapé remplace l'ancien ;
+  //    « essai gratuit » annoncé seulement parce que ce site a un vrai essai (PASS.essai jours)
+  {
+    const SEL = "sel-de-test", TOURS = 1000, FUTUR = "2099-12-31";
+    const h = c => pbkdf2Sync(c, SEL, TOURS, 32, "sha256").toString("hex");
+    const LISTE = { sel: SEL, tours: TOURS, codes: [{ h: h("NEWC2345"), fin: FUTUR }] };
+    const visible = (wx, el) => { for (let e = el; e; e = e.parentElement) if (e.hidden || wx.getComputedStyle(e).display === "none") return false; return !!el; };
+    const ETATS = {
+      "aucun code": {},
+      "un autre code non payé gardé": { "crt-pass-v1": { code: "ZZZZ2222", fin: FUTUR, verifie: "2000-01-01" } },
+      "un code payé gardé": { "crt-pass-v1": PASS_TEST },
+      "un code expiré gardé": { "crt-pass-v1": { code: "ABCDEF23", fin: "2000-01-01", verifie: "2000-01-01" } },
+      "essai déjà utilisé": { "crt-essai-v1": { debut: "2000-01-01" } }
+    };
+    const mal = [];
+    for (const [nom, ls] of Object.entries(ETATS)) {
+      const wx = await page("pass/index.html", { ls }), dx = wx.document, bloc = dx.getElementById("code-acces"), offre = dx.getElementById("offre");
+      const champ = bloc && bloc.querySelector("input[name=code]"), bouton = bloc && bloc.querySelector("button[type=submit]");
+      if (!visible(wx, champ) || !visible(wx, bouton) || !(bloc.compareDocumentPosition(offre) & 4)) mal.push(nom);
+    }
+    check(`Pass : case du code visible EN HAUT de pass/ (avant l'offre) dans tous les états ${mal}`, mal.length === 0);
+    const wx = await page("pass/index.html", { ls: ETATS["un autre code non payé gardé"] }), dx = wx.document;
+    Object.defineProperty(wx, "crypto", { value: webcrypto, configurable: true });
+    wx.fetch = () => Promise.resolve({ ok: true, status: 200, json: async () => JSON.parse(JSON.stringify(LISTE)) });
+    const cf = dx.getElementById("code-form");
+    cf.querySelector("input[name=code]").value = "newc-2345";
+    cf.dispatchEvent(new wx.Event("submit", { bubbles: true, cancelable: true })); await pause(300);
+    const garde = JSON.parse(wx.localStorage.getItem("crt-pass-v1") || "{}");
+    check("Pass : le code tapé REMPLACE l'ancien code gardé (nouveau code, nouvelle date de fin, Pass actif)",
+      garde.code === "NEWC2345" && garde.fin === FUTUR && wx.eval("passActif()") && dx.getElementById("code-status").className === "ok");
+    const essaiAnnonce = /essai gratuit|تجربة مجانية/i.test(lire("pass/index.html") + lire("assets/pass.js"));
+    check("Pass : « essai gratuit » annoncé seulement si le site en a un vrai (PASS.essai = 2 jours, bouton « Commencer mes 2 jours gratuits »)",
+      essaiAnnonce === (wx.eval("PASS.essai") > 0) && !!dx.getElementById("essai-go"));
+    const sansCode = [];
+    let we = await page("entrainement/index.html", { query: "&erreurs=1", stockage: { q: { "T2-001": 0 }, examens: [] } });
+    if (!we.document.querySelector('#erreurs-pass a[href="../pass/#code-acces"]')) sansCode.push("Mes erreurs");
+    check(`Pass : lien « J'ai déjà un code » sur les écrans payants ${sansCode}`, sansCode.length === 0 && lire("assets/quiz.js").split("htmlLienCode()").length >= 3);
+  }
 
   // -- permis à points : non appliqué en Tunisie (06/10/2026) -> aucune question publiée sur le nombre de points
   const pointsPublies = QUESTIONS.filter(q => /\bpoints?\b/i.test(q.question_fr + " " + q.choix.map(c => c.fr).join(" ")) && !/rainures|4 points mesurés/.test(q.question_fr));

@@ -27,12 +27,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css?v=20261018a">
-<script src="../assets/regles.js?v=20261018a"></script>
-<script src="../assets/page.js?v=20261018a"></script>
-<script src="../assets/pass.js?v=20261018a"></script>
-<script src="../assets/protection.js?v=20261018a"></script>
-<script src="../assets/pages.js?v=20261018a"></script>
+<link rel="stylesheet" href="../assets/style.css?v=20261018b">
+<script src="../assets/regles.js?v=20261018b"></script>
+<script src="../assets/page.js?v=20261018b"></script>
+<script src="../assets/pass.js?v=20261018b"></script>
+<script src="../assets/protection.js?v=20261018b"></script>
+<script src="../assets/pages.js?v=20261018b"></script>
 </head>
 <body data-page="pass">
 <header class="entete" id="entete"></header>
@@ -47,6 +47,16 @@
 
 <main class="wrap chevauche">
   <section class="carte pass-etat" id="pass-etat" hidden></section>
+  <section class="carte abo code-haut" id="code-acces">
+    <h2><span data-l="fr">J'ai un code</span><span data-l="ar">لدي رمز</span></h2>
+    <form id="code-form" novalidate>
+      <label class="abo-etiquette" for="code-saisie"><span data-l="fr">Votre code d'accès (8 caractères)</span><span data-l="ar">رمز الدخول (⁦8⁩ حروف وأرقام)</span></label>
+      <input id="code-saisie" name="code" required maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
+      <button type="submit" class="btn-pro"><span data-l="fr">Activer mon Pass</span><span data-l="ar">تفعيل الباقة</span></button>
+      <p id="code-status" role="status" aria-live="polite"></p>
+      <p class="petit"><span data-l="fr">Le code est vérifié dans votre téléphone : il n'est envoyé à personne. Il reste gardé sur ce téléphone jusqu'à la fin du Pass.</span><span data-l="ar">يتم التثبت من الرمز داخل هاتفك: لا يُرسل إلى أحد. ويبقى محفوظًا على هذا الهاتف إلى نهاية الباقة.</span></p>
+    </form>
+  </section>
 
   <section class="offre-pro" id="offre">
     <p class="ruban"><span data-l="fr">2 jours d'essai gratuit</span><span data-l="ar">تجربة مجانية ليومين</span></p>
@@ -104,16 +114,6 @@
     <p id="essai-statut" role="status" aria-live="polite"></p>
   </section>
 
-  <section class="carte abo" id="code-acces">
-    <h2><span data-l="fr">J'ai un code</span><span data-l="ar">لدي رمز</span></h2>
-    <form id="code-form" novalidate>
-      <label class="abo-etiquette" for="code-saisie"><span data-l="fr">Votre code d'accès (8 caractères)</span><span data-l="ar">رمز الدخول (⁦8⁩ حروف وأرقام)</span></label>
-      <input id="code-saisie" name="code" required maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
-      <button type="submit" class="btn-pro"><span data-l="fr">Activer mon Pass</span><span data-l="ar">تفعيل الباقة</span></button>
-      <p id="code-status" role="status" aria-live="polite"></p>
-      <p class="petit"><span data-l="fr">Le code est vérifié dans votre téléphone : il n'est envoyé à personne. Il reste gardé sur ce téléphone jusqu'à la fin du Pass.</span><span data-l="ar">يتم التثبت من الرمز داخل هاتفك: لا يُرسل إلى أحد. ويبقى محفوظًا على هذا الهاتف إلى نهاية الباقة.</span></p>
-    </form>
-  </section>
 
   <section class="carte abo" id="inscription" aria-labelledby="pass-titre">
     <h2 id="pass-titre"><span data-l="fr">Inscription</span><span data-l="ar">التسجيل</span></h2>
@@ -141,7 +141,7 @@
     </form>
     <div class="apres-abo" id="apres-pass" hidden>
       <h3><span data-l="fr">Merci, votre demande est bien reçue</span><span data-l="ar">شكرًا، وصلنا طلبك</span></h3>
-      <p id="apres-essai"><span data-l="fr">Votre essai gratuit de 2 jours commence quand vous tapez votre code. <b>Vous recevrez votre code d'accès par WhatsApp</b>, en général sous 24 heures.</span><span data-l="ar">تبدأ تجربتك المجانية ليومين عندما تكتب رمزك. <b>سيصلك رمز الدخول عبر واتساب</b>، عادة في غضون ⁦24⁩ ساعة.</span></p>
+      <p id="apres-essai" hidden><span data-l="fr"><b>Vous recevrez votre code d'accès par WhatsApp</b>, en général sous 24 heures.</span><span data-l="ar"><b>سيصلك رمز الدخول عبر واتساب</b>، عادة في غضون ⁦24⁩ ساعة.</span></p>
       <div id="apres-paye" hidden>
         <p><span data-l="fr">Payez maintenant par D17 ou IZI, avec pour motif votre nom et votre téléphone, puis envoyez la preuve par WhatsApp. <b>Vous recevrez votre code d'accès par WhatsApp</b>, en général sous 24 heures.</span><span data-l="ar">ادفع الآن عبر ⁨D17⁩ أو ⁨IZI⁩ مع ذكر اسمك ورقم هاتفك، ثم أرسل الإثبات عبر واتساب. <b>سيصلك رمز الدخول عبر واتساب</b>، عادة في غضون ⁦24⁩ ساعة.</span></p>
         <div class="paie"><ol class="paie-etapes"><li><span data-l="fr">Ouvrez l&#39;application :</span><span data-l="ar">افتح التطبيق:</span> <span class="applis"><a class="appli-btn" href="https://play.google.com/store/apps/details?id=tn.mobipost" target="_blank" rel="noopener noreferrer"><img src="../assets/paiement/d17.png" alt="D17" width="44" height="44"></a><a class="appli-btn" href="https://play.google.com/store/apps/details?id=tn.izi.consumer" target="_blank" rel="noopener noreferrer"><img src="../assets/paiement/izi.png" alt="IZI" width="44" height="44"></a></span><br><span class="petit"><span data-l="fr">Sur iPhone :</span><span data-l="ar">على آيفون:</span> <a class="appli" href="https://apps.apple.com/tn/app/digipostbank-d17/id1475640303" target="_blank" rel="noopener noreferrer">D17</a> · <a class="appli" href="https://apps.apple.com/tn/app/izi/id1603653941" target="_blank" rel="noopener noreferrer">IZI</a></span></li><li><span data-l="fr">Dans D17 : « Transfert d’argent » puis « Transfert rapide ». Dans IZI : « Transfert ». Tapez le numéro</span><span data-l="ar">في D17: « تحويل الأموال » ثم « التحويل السريع ». في IZI: « تحويل ». أدخل الرقم</span> <strong><bdi dir="ltr">24 321 390</bdi></strong>.<br><span data-l="fr">Montant :</span><span data-l="ar">المبلغ:</span> <strong><span data-l="fr">9 DT (7 jours), 19 DT (30 jours) ou 29 DT (90 jours)</span><span data-l="ar">⁦9⁩ د (⁦7⁩ أيام)، ⁦19⁩ د (⁦30⁩ يومًا) أو ⁦29⁩ د (⁦90⁩ يومًا)</span></strong><details class="aide-transfert"><summary title="Voir comment faire" aria-label="Voir comment faire">?</summary><div class="aide-images"><figure><img src="../assets/paiement/transfert-d17.svg" alt="Exemple D17 : Transfert rapide, numéro 24 321 390, montant, Envoyer" width="240" height="300" loading="lazy"><figcaption>D17</figcaption></figure><figure><img src="../assets/paiement/transfert-izi.svg" alt="Exemple IZI : Transfert, montant, numéro 24 321 390, Suivant" width="240" height="300" loading="lazy"><figcaption>IZI</figcaption></figure></div></details></li><li><span data-l="fr">Motif :</span><span data-l="ar">سبب الدفع:</span> <strong><span data-l="fr">votre nom et votre téléphone</span><span data-l="ar">اسمك ورقم هاتفك</span></strong>. <span data-l="fr">Puis envoyez la capture du paiement par WhatsApp (bouton vert).</span><span data-l="ar">ثم أرسل لقطة الدفع عبر واتساب (الزر الأخضر).</span></li></ol><p class="paie-confiance"><span data-l="fr">Vous payez directement dans l&#39;application officielle de La Poste Tunisienne (D17) ou de Zitouna Paiement (IZI) : nous ne voyons jamais vos codes.</span><span data-l="ar">تدفع مباشرة في التطبيق الرسمي للبريد التونسي (D17) أو لزيتونة للدفع (IZI): لا نطّلع أبدًا على رموزك.</span></p></div>
