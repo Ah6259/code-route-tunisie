@@ -184,3 +184,9 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - **18/10/2026 (Pass : case du code, leçon de l'immobilier)** : sur `pass/`, la carte « J'ai un code » (`#code-acces`, champ `#code-saisie`, formulaire `#code-form`) est maintenant EN HAUT, juste sous `#pass-etat`, avant l'offre — visible quel que soit l'état du téléphone (aucun code, autre code gardé, code payé, code expiré, essai utilisé) ; un code tapé remplace l'ancien (`crt-pass-v1`). Lien « J'ai déjà un code d'accès » (`htmlLienCode()` de pass.js) ajouté sous « Mes erreurs » et sous la carte de fin d'examen gratuit (`#fin-gratuit`). Texte caché périmé « l'essai commence quand vous tapez votre code » retiré (l'essai de 2 jours est immédiat et réel). Messages « code expiré » : « ci-dessous ». Version `?v=20261018b`. Tests « Pass : … » dans test_site.mjs (5 états + remplacement du code + essai réel).
 
 - **19/10/2026 — Visiteur simulé : contrôle des ESPACES (règle commune § 29)** : nouvelle copie commune installée, 0 anomalie, aucun défaut d'espace sur ce site.
+
+- **20/10/2026 — Rappel de fin du Pass (demande d'Ahmed ; pas de Telegram ni d'e-mail, la page parle au client)** : `afficherRappel()` de `assets/pass.js`
+  met sous l'en-tête un bandeau `#rappel-pass` (au plus 1 fois par jour, mémoire `crt-pass-rappel-v1`) : « Merci pour votre inscription ! Votre Pass
+  se termine le JJ/MM/AAAA » à J-7 (Pass court de début connu — essai, code activé depuis ce jour (`depuis`) : dernier quart seulement), bouton doré
+  « Renouveler mon Pass » (`pass/#offre`), lien « Donner mon avis » (`#avis` de l'accueil), croix ; après la fin (≤ 30 jours) : « terminé — merci ! » une fois.
+  FR + AR, testé dans test_site.mjs (bloc `rappelPass`) ; versions 20261020a.

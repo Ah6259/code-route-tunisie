@@ -98,7 +98,7 @@ async function verifierCode(saisie) {
 }
 async function activerCode(saisie) {
   const r = await verifierCode(saisie);
-  if (r.etat === "ok") { ecrirePass({ code: r.code, fin: r.fin, verifie: aujourdhui() }); annoncerPass(); }
+  if (r.etat === "ok") { ecrirePass({ code: r.code, fin: r.fin, verifie: aujourdhui(), depuis: aujourdhui() }); annoncerPass(); }
   return r;
 }
 // Code déjà gardé : revérifié au plus une fois par jour (ou chaque fois s'il semble expiré : il a peut-être été prolongé)
@@ -109,7 +109,7 @@ async function reverifierPass() {
   if (p.verifie === auj && p.fin >= auj) return;
   const r = await verifierCode(p.code);
   const avant = passActif();
-  if (r.etat === "ok") ecrirePass({ code: p.code, fin: r.fin, verifie: auj });
+  if (r.etat === "ok") ecrirePass({ code: p.code, fin: r.fin, verifie: auj, depuis: p.depuis });
   else if (r.etat === "inconnu" || r.etat === "expire" || r.etat === "forme") ecrirePass(null);   // arrêté, expiré : nettoyé
   // "reseau" / "impossible" : on garde le code jusqu'à sa date de fin connue
   if (avant !== passActif() || r.etat === "ok" && r.fin !== p.fin) annoncerPass();
@@ -260,6 +260,71 @@ function brancherEssai() {
   dire();
 }
 
+/* ---- rappel de fin du Pass (demande d'Ahmed, octobre 2026) ----
+   Pas de Telegram ni d'e-mail : la page elle-même remercie le client et lui rappelle la fin.
+   - Pass valide qui finit dans 7 jours ou moins (Pass court de moins de 30 jours dont on connaît le début, comme l'essai :
+     seulement le dernier quart de sa durée) -> petit bandeau, au plus une fois par jour.
+   - Pass terminé (au plus 30 jours après la fin) -> message « Votre Pass est terminé — merci ! », une seule fois.
+   Mémoire sur l'appareil : PASS.cleRappel = { fin, debut, vu (jour du dernier bandeau), finVu (message de fin montré) }. */
+PASS.cleRappel = "crt-pass-rappel-v1";
+function lireRappel() { try { const r = JSON.parse(localStorage.getItem(PASS.cleRappel) || "null"); return r && typeof r === "object" ? r : {}; } catch (e) { return {}; } }
+function ecrireRappel(r) { try { localStorage.setItem(PASS.cleRappel, JSON.stringify(r)); } catch (e) {} }
+function joursEntre(a, b) { return Math.round((Date.parse(b + "T12:00:00") - Date.parse(a + "T12:00:00")) / 864e5); }
+// note la fin connue AVANT la revérification (qui efface un code expiré) : le message de fin reste possible
+function noterFinPass() {
+  const r = lireRappel(), p = lirePass();
+  let fin = "", debut = "";
+  if (codeActif()) { fin = p.fin; debut = p.depuis || ""; }
+  else if (essaiActif()) { fin = finEssai(); debut = debutEssai(); }
+  else if (p && p.fin && (!r.fin || p.fin > r.fin)) { fin = p.fin; debut = p.depuis || ""; }       // code expiré encore gardé
+  else if (finEssai() && !r.fin) { fin = finEssai(); debut = debutEssai(); }
+  if (fin && fin !== r.fin) { ecrireRappel({ fin, debut, vu: r.vu || "", finVu: false }); return; }
+  if (fin && debut && r.debut !== debut) { r.debut = debut; ecrireRappel(r); }
+}
+// { type: "proche" | "fini", fin } ou null
+function etatRappel() {
+  const auj = aujourdhui(), r = lireRappel();
+  if (passActif()) {
+    const fin = finPass(), debut = r.fin === fin ? r.debut : "";
+    const reste = joursEntre(auj, fin), total = debut ? joursEntre(debut, fin) + 1 : 0;
+    const proche = total > 0 && total < 30 ? reste + 1 <= Math.max(1, Math.ceil(total / 4)) : reste <= 7;
+    return proche && r.vu !== auj ? { type: "proche", fin } : null;
+  }
+  if (r.fin && r.fin < auj && !r.finVu && joursEntre(r.fin, auj) <= 30) return { type: "fini", fin: r.fin };
+  return null;
+}
+function afficherRappel() {
+  const e = etatRappel(), main = document.querySelector("main");
+  const ancien = document.getElementById("rappel-zone");
+  if (ancien) ancien.remove();
+  if (!e || !main) return;
+  const racine = document.documentElement.dataset.racine || "";
+  const r = lireRappel();
+  if (e.type === "proche") r.vu = aujourdhui(); else r.finVu = true;
+  ecrireRappel(r);
+  const b = document.createElement("aside");
+  b.className = "rappel-pass" + (e.type === "fini" ? " fini" : "");
+  b.id = "rappel-pass";
+  b.setAttribute("role", "status");
+  const date = dateLisible(e.fin);
+  b.innerHTML = '<button type="button" class="rappel-fermer" aria-label="' + T("Fermer", "إغلاق") + '">×</button>' +
+    (e.type === "proche"
+      ? "<p><b>" + T("Merci pour votre inscription !", "شكرًا على اشتراكك!") + "</b> " +
+        T("Votre Pass Examen se termine le " + date + ".", "تنتهي باقة الامتحان في " + iso(date) + ".") + "</p>"
+      : "<p><b>" + T("Votre Pass Examen est terminé — merci !", "انتهت باقة الامتحان — شكرًا لك!") + "</b> " +
+        T("Il a pris fin le " + date + ".", "انتهت في " + iso(date) + ".") + "</p>") +
+    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre">' + T("Renouveler mon Pass", "جدّد باقتي") + "</a>" +
+    '<a class="rappel-avis" href="' + racine + '#avis">' + T("Donner mon avis", "أعطِ رأيك") + "</a></p>";
+  // tout en haut, sous l'en-tête (avant le grand bandeau de la page) : vu sans faire défiler
+  const zone = document.createElement("div");
+  zone.className = "wrap rappel-zone";
+  zone.id = "rappel-zone";
+  zone.appendChild(b);
+  b.querySelector(".rappel-fermer").addEventListener("click", () => zone.remove());
+  const avant = document.querySelector("body > .hero") || main;
+  avant.parentNode.insertBefore(zone, avant);
+}
+
 /* ---- en-tête : bouton doré « Pass Examen » (dessiné par page.js) ---- */
 function majBoutonEntete() {
   document.querySelectorAll(".entete-pass").forEach(a => a.classList.toggle("actif", passActif()));
@@ -269,5 +334,6 @@ document.addEventListener("DOMContentLoaded", () => {
   brancherFormulairePass();
   brancherCodeAcces();
   brancherEssai();
-  reverifierPass().catch(() => {});
+  noterFinPass();
+  reverifierPass().catch(() => {}).then(() => { noterFinPass(); afficherRappel(); });
 });

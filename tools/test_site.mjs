@@ -312,6 +312,7 @@ check("robot surveillance.yml : mensuel, groupe de concurrence, issue + commit",
 
 await nouvellesRubriques();
 await passExamen();
+await rappelPass();
 await boutonPartager();
 // ---- Affichage : éléments cachés et faux boutons (06/10/2026) ----
 check("style : [hidden]{display:none!important} (écrans de l'examen, du Pass, messages : un display:flex/grid ne les fait jamais réapparaître)",
@@ -556,6 +557,55 @@ async function nouvellesRubriques() {
     return /(api[_-]?key|secret|password|mot de passe)\s*[:=]\s*["'][^"']{6,}/i.test(s) || /\b(ghp_|github_pat_|sk-|AIza)[A-Za-z0-9_]{10,}/.test(s) || /[\w.+-]+@(?!example\.)[\w-]+\.(com|tn|fr|net|org)\b/i.test(s);
   });
   check(`aucun secret ni adresse e-mail dans le site ${secrets.map(f => f.slice(root.length))}`, secrets.length === 0);
+}
+
+// ---- 5 bis. Rappel de fin du Pass (20/10/2026, demande d'Ahmed) : merci + date de fin + Renouveler + Donner mon avis ----
+async function rappelPass() {
+  const jour = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); };
+  const lisible = iso => iso.split("-").reverse().join("/");
+  const code = (fin, extra = {}) => ({ "crt-pass-v1": { code: "ABCDEF23", fin, verifie: jour(0), ...extra } });
+  const pause = ms => new Promise(r => setTimeout(r, ms));
+  const voir = async (chemin, ls, opt = {}) => { const wx = await page(chemin, { ls, ...opt }); await pause(30); return wx; };
+  let wx = await voir("index.html", code(jour(7))), b = wx.document.getElementById("rappel-pass");
+  check("rappel du Pass : bandeau affiché à J-7 (merci, « se termine le JJ/MM/AAAA »)", !!b && wx.fautes.length === 0 &&
+    texte(b).includes("Merci pour votre inscription") && texte(b).includes("se termine le " + lisible(jour(7))));
+  const ren = b && b.querySelector("a.rappel-renouveler"), av = b && b.querySelector("a.rappel-avis"), x = b && b.querySelector("button.rappel-fermer");
+  check("rappel du Pass : vrai bouton « Renouveler mon Pass » vers pass/#offre, lien « Donner mon avis » vers le formulaire #avis, croix",
+    !!ren && ren.getAttribute("href") === "pass/#offre" && texte(ren) === "Renouveler mon Pass" && !!av && av.getAttribute("href") === "#avis" &&
+    !!wx.document.getElementById("avis") && !!x && x.getAttribute("type") === "button" && !!wx.document.getElementById("offre") === false);
+  x.dispatchEvent(new wx.MouseEvent("click", { bubbles: true }));
+  check("rappel du Pass : la croix ferme le bandeau", !wx.document.getElementById("rappel-pass"));
+  const memo = JSON.parse(wx.localStorage.getItem("crt-pass-rappel-v1") || "{}");
+  wx = await voir("index.html", { ...code(jour(7)), "crt-pass-rappel-v1": memo });
+  check("rappel du Pass : une fois par jour au plus (pas de 2e bandeau le même jour)", memo.vu === jour(0) && !wx.document.getElementById("rappel-pass"));
+  wx = await voir("index.html", { ...code(jour(6)), "crt-pass-rappel-v1": { ...memo, fin: jour(6), vu: jour(-1) } });
+  check("rappel du Pass : de nouveau affiché le lendemain", !!wx.document.getElementById("rappel-pass"));
+  wx = await voir("index.html", code(jour(20)));
+  check("rappel du Pass : rien à J-20", !wx.document.getElementById("rappel-pass") && wx.fautes.length === 0);
+  wx = await voir("index.html", code(jour(3), { depuis: jour(-3) }));
+  check("rappel du Pass : Pass de 7 jours (début connu) -> rien à J-3 (dernier quart seulement)", !wx.document.getElementById("rappel-pass"));
+  wx = await voir("index.html", code(jour(1), { depuis: jour(-5) }));
+  check("rappel du Pass : Pass de 7 jours -> bandeau à J-1", !!wx.document.getElementById("rappel-pass"));
+  wx = await voir("index.html", { "crt-essai-v1": { debut: jour(0) } });
+  check("rappel du Pass : essai de 2 jours -> rien le 1er jour", !wx.document.getElementById("rappel-pass"));
+  wx = await voir("index.html", { "crt-essai-v1": { debut: jour(-1) } });
+  check("rappel du Pass : essai de 2 jours -> bandeau le dernier jour", !!wx.document.getElementById("rappel-pass"));
+  wx = await voir("lecons/index.html", code(jour(2)));
+  b = wx.document.getElementById("rappel-pass");
+  check("rappel du Pass : liens justes depuis une sous-page (../pass/#offre, ../#avis)", !!b && b.querySelector("a.rappel-renouveler").getAttribute("href") === "../pass/#offre" && b.querySelector("a.rappel-avis").getAttribute("href") === "../#avis");
+  wx = await voir("index.html", code(jour(-1)));
+  b = wx.document.getElementById("rappel-pass");
+  check("rappel du Pass : après la fin, message « Votre Pass Examen est terminé — merci ! » avec Renouveler et Donner mon avis",
+    !!b && texte(b).includes("est terminé — merci") && !!b.querySelector("a.rappel-renouveler") && !!b.querySelector("a.rappel-avis") && wx.fautes.length === 0);
+  const memo2 = JSON.parse(wx.localStorage.getItem("crt-pass-rappel-v1") || "{}");
+  wx = await voir("index.html", { "crt-pass-rappel-v1": memo2 });
+  check("rappel du Pass : message de fin montré une seule fois", memo2.finVu === true && !wx.document.getElementById("rappel-pass"));
+  wx = await voir("index.html", code(jour(5)), { lang: "ar" });
+  b = wx.document.getElementById("rappel-pass");
+  check("rappel du Pass : en arabe (شكرًا على اشتراكك، جدّد باقتي)", !!b && texte(b).includes("شكرًا على اشتراكك") && texte(b).includes("جدّد باقتي"));
+  wx = await voir("index.html", { "crt-pass-v1": "{abîmé", "crt-pass-rappel-v1": "{abîmé" });
+  check("rappel du Pass : stockage abîmé = pas de plantage, pas de bandeau", wx.fautes.length === 0 && !wx.document.getElementById("rappel-pass"));
+  check("rappel du Pass : aucun gestionnaire en ligne (écouteur dans pass.js)", !/onclick|on[a-z]+=/.test((lire("assets/pass.js").match(/function afficherRappel[\s\S]*?\n}\n/) || [""])[0]));
 }
 
 // ---- 5. Pass Examen (06/10/2026) : page, prix, paiement, conditions, code d'accès, 1 examen gratuit/jour, chrono, séries ----
