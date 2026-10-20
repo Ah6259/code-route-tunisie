@@ -14,11 +14,11 @@
      sans code gardé (aucun appel réseau). */
 const PASS = {
   formules: [{ jours: 7, dt: 9 }, { jours: 30, dt: 19 }, { jours: 90, dt: 29 }],
-  essai: 2,                                   // jours d'essai gratuit
+  essai: 2,                                   // durée des anciens essais (plus AUCUN nouveau depuis le 20 octobre 2026, décision d'Ahmed)
   donnees: "donnees/pass.json",
   cle: "crt-pass-v1",                         // code gardé sur l'appareil
   cleGratuit: "crt-examen-gratuit-v1",        // jour du dernier examen gratuit terminé
-  cleEssai: "crt-essai-v1",                   // { debut } de l'essai gratuit IMMÉDIAT (14 octobre 2026, règle commune § 15)
+  cleEssai: "crt-essai-v1",                   // { debut } d'un essai commencé avant le 20 octobre 2026 (il va jusqu'à sa fin)
   alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", // sans O/0 ni I/1 (faciles à confondre)
   longueur: 8,
   whatsapp: "21624321390"
@@ -46,18 +46,12 @@ function lirePass() {
 function ecrirePass(p) {
   try { if (p) localStorage.setItem(PASS.cle, JSON.stringify(p)); else localStorage.removeItem(PASS.cle); } catch (e) {}
 }
-/* ---- essai gratuit IMMÉDIAT (14 octobre 2026, règle commune § 15 : plus de demande + code reçu « sous 24 heures ») ----
-   Le bouton « Commencer mes 2 jours gratuits » ouvre le Pass tout de suite sur ce téléphone (une fois par téléphone). */
+/* ---- anciens essais (décision d'Ahmed du 20 octobre 2026 : « Enlève tous les essais gratuits ») ----
+   Plus aucun nouvel essai : le bouton a disparu de pass/. Un essai déjà commencé sur un téléphone va jusqu'à sa fin (rien n'est coupé). */
 function plusJours(iso, n) { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return aujourdhui(d); }
 function debutEssai() { try { const e = JSON.parse(localStorage.getItem(PASS.cleEssai) || "null"); return e && /^\d{4}-\d{2}-\d{2}$/.test(e.debut) ? e.debut : ""; } catch (e) { return ""; } }
 function finEssai() { const d = debutEssai(); return d ? plusJours(d, PASS.essai - 1) : ""; }       // dernier jour inclus
 function essaiActif() { const f = finEssai(); return !!f && f >= aujourdhui() && debutEssai() <= aujourdhui(); }
-function commencerEssai() {
-  if (debutEssai()) return false;
-  try { localStorage.setItem(PASS.cleEssai, JSON.stringify({ debut: aujourdhui() })); } catch (e) { return false; }
-  annoncerPass();
-  return true;
-}
 function codeActif() { const p = lirePass(); return !!p && p.fin >= aujourdhui(); }
 function passActif() { return codeActif() || essaiActif(); }
 function finPass() { const p = lirePass(); return codeActif() ? p.fin : (essaiActif() ? finEssai() : (p ? p.fin : "")); }
@@ -149,7 +143,7 @@ function prixCourt() { return T("dès 9 DT", "ابتداءً من " + iso("9") +
 function htmlBoutonPass(id, titreFr, titreAr) {
   const racine = document.documentElement.dataset.racine || "";
   return `<a class="btn-pass-grand" id="${id}" href="${racine}pass/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M14 7v12"/></svg>
-    <span>${T(titreFr, titreAr)}<small>${T("Examens blancs illimités dès 9 DT · 2 jours d'essai gratuit", "امتحانات تجريبية بلا حدود ابتداءً من " + iso("9") + " د · تجربة مجانية ليومين")}</small></span></a>`;
+    <span>${T(titreFr, titreAr)}<small>${T("Examens blancs illimités dès 9 DT", "امتحانات تجريبية بلا حدود ابتداءً من " + iso("9") + " د")}</small></span></a>`;
 }
 
 // lien « J'ai déjà un code » sous chaque écran payant (octobre 2026 : le visiteur qui a payé doit trouver où taper son code)
@@ -186,9 +180,8 @@ function brancherFormulairePass() {
       // message WhatsApp de la preuve de paiement : on ajoute le nom et le téléphone (= motif du paiement)
       document.querySelectorAll("a.btn-wa[data-texte]").forEach(a =>
         a.setAttribute("href", "https://wa.me/" + PASS.whatsapp + "?text=" + encodeURIComponent(a.getAttribute("data-texte") + val("nom") + " — " + tel + " — " + f.value)));
-      const essai = document.getElementById("apres-essai"), paye = document.getElementById("apres-paye");
-      if (essai) essai.hidden = f.value.indexOf("essai") !== 0;
-      if (paye) paye.hidden = f.value.indexOf("essai") === 0;
+      const paye = document.getElementById("apres-paye");
+      if (paye) paye.hidden = false;
       form.hidden = true;
       if (apres) { apres.hidden = false; try { apres.scrollIntoView({ block: "start" }); } catch (x) {} }
     };
@@ -198,7 +191,7 @@ function brancherFormulairePass() {
     donnees.set("telephone", tel);
     // ligne prête à recopier dans le bouton GitHub « pass » (dépôt privé)
     const jours = (f.value.match(/\d+/) || [""])[0];
-    donnees.set("pour_activer", "action: " + (f.value.indexOf("essai") === 0 ? "essai" : "paye") + " ; nom: " + val("nom") + " ; telephone: " + tel + (f.value.indexOf("essai") === 0 ? "" : " ; jours: " + jours));
+    donnees.set("pour_activer", "action: paye ; nom: " + val("nom") + " ; telephone: " + tel + " ; jours: " + jours);
     bouton.disabled = true;
     dire("", "Envoi…", "جارٍ الإرسال…");
     fetch(form.getAttribute("action"), { method: "POST", body: donnees, headers: { "Accept": "application/json" } })
@@ -239,32 +232,13 @@ function brancherCodeAcces() {
   });
 }
 
-function brancherEssai() {
-  const b = document.getElementById("essai-go"), statut = document.getElementById("essai-statut");
-  if (!b || b.dataset.branche) return;
-  b.dataset.branche = "1";
-  const dire = () => {
-    if (essaiActif()) {
-      statut.className = "ok";
-      statut.innerHTML = T("✅ Votre essai est actif sur ce téléphone jusqu'au <b>" + dateLisible(finEssai()) + "</b> inclus. ", "✅ تجربتك مفعّلة على هذا الهاتف إلى غاية <b>" + iso(dateLisible(finEssai())) + "</b>. ") +
-        '<a href="../examen/">' + T("Commencer un examen blanc →", "ابدأ امتحانًا تجريبيًا ←") + "</a>";
-      b.hidden = true;
-    } else if (debutEssai()) {
-      statut.className = "err";
-      statut.textContent = T("L'essai gratuit a déjà été utilisé sur ce téléphone (jusqu'au " + dateLisible(finEssai()) + "). Pour continuer : une formule ci-dessous.",
-        "استُعملت التجربة المجانية على هذا الهاتف (إلى غاية " + iso(dateLisible(finEssai())) + "). للمواصلة: اختر صيغة أسفله.");
-      b.hidden = true;
-    }
-  };
-  b.addEventListener("click", () => { commencerEssai(); dire(); });
-  dire();
-}
-
 /* ---- rappel de fin du Pass (demande d'Ahmed, octobre 2026) ----
    Pas de Telegram ni d'e-mail : la page elle-même remercie le client et lui rappelle la fin.
-   - Pass valide qui finit dans 7 jours ou moins (Pass court de moins de 30 jours dont on connaît le début, comme l'essai :
-     seulement le dernier quart de sa durée) -> petit bandeau, au plus une fois par jour.
-   - Pass terminé (au plus 30 jours après la fin) -> message « Votre Pass est terminé — merci ! », une seule fois.
+   - Pass payé (code) valide qui finit dans 7 jours ou moins (Pass court de moins de 30 jours dont on connaît le début,
+     c'est-à-dire activé sur ce téléphone depuis cette version (« depuis ») : seulement le dernier quart de sa durée)
+     -> petit bandeau, au plus une fois par jour.
+   - Pass terminé (au plus 30 jours après la fin) -> message « Votre Pass Examen est terminé — merci ! », une seule fois.
+   Seuls les codes comptent (jamais les anciens essais).
    Mémoire sur l'appareil : PASS.cleRappel = { fin, debut, vu (jour du dernier bandeau), finVu (message de fin montré) }. */
 PASS.cleRappel = "crt-pass-rappel-v1";
 function lireRappel() { try { const r = JSON.parse(localStorage.getItem(PASS.cleRappel) || "null"); return r && typeof r === "object" ? r : {}; } catch (e) { return {}; } }
@@ -273,19 +247,16 @@ function joursEntre(a, b) { return Math.round((Date.parse(b + "T12:00:00") - Dat
 // note la fin connue AVANT la revérification (qui efface un code expiré) : le message de fin reste possible
 function noterFinPass() {
   const r = lireRappel(), p = lirePass();
-  let fin = "", debut = "", essai = false;
-  if (codeActif()) { fin = p.fin; debut = p.depuis || ""; }
-  else if (essaiActif()) { fin = finEssai(); debut = debutEssai(); essai = true; }
-  else if (p && p.fin && (!r.fin || p.fin > r.fin)) { fin = p.fin; debut = p.depuis || ""; }       // code expiré encore gardé
-  else if (finEssai() && !r.fin) { fin = finEssai(); debut = debutEssai(); essai = true; }
-  if (fin && fin !== r.fin) { ecrireRappel({ fin, debut, essai, vu: r.vu || "", finVu: false }); return; }
-  if (fin && (debut && r.debut !== debut || !!r.essai !== essai)) { r.debut = debut; r.essai = essai; ecrireRappel(r); }
+  if (!p || !p.fin) return;
+  const debut = p.depuis || "";
+  if (p.fin !== r.fin) ecrireRappel({ fin: p.fin, debut, vu: r.vu || "", finVu: false });
+  else if (debut && r.debut !== debut) { r.debut = debut; ecrireRappel(r); }
 }
 // { type: "proche" | "fini", fin } ou null
 function etatRappel() {
   const auj = aujourdhui(), r = lireRappel();
-  if (passActif()) {
-    const fin = finPass(), debut = r.fin === fin ? r.debut : "";
+  if (codeActif()) {
+    const fin = lirePass().fin, debut = r.fin === fin ? r.debut : "";
     const reste = joursEntre(auj, fin), total = debut ? joursEntre(debut, fin) + 1 : 0;
     const proche = total > 0 && total < 30 ? reste + 1 <= Math.max(1, Math.ceil(total / 4)) : reste <= 7;
     return proche && r.vu !== auj ? { type: "proche", fin } : null;
@@ -307,20 +278,13 @@ function afficherRappel() {
   b.id = "rappel-pass";
   b.setAttribute("role", "status");
   const date = dateLisible(e.fin);
-  // essai gratuit (bouton « Commencer mes 2 jours gratuits », sans paiement) : mots justes, « Prendre mon Pass »
-  const essai = !!r.essai && r.fin === e.fin;
   b.innerHTML = '<button type="button" class="rappel-fermer" aria-label="' + T("Fermer", "إغلاق") + '">×</button>' +
     (e.type === "proche"
-      ? (essai
-        ? "<p><b>" + T("Merci d'avoir essayé le Pass Examen !", "شكرًا على تجربة باقة الامتحان!") + "</b> " +
-          T("Votre essai gratuit se termine le " + date + ".", "تنتهي تجربتك المجانية في " + iso(date) + ".") + "</p>"
-        : "<p><b>" + T("Merci pour votre inscription !", "شكرًا على اشتراكك!") + "</b> " +
-          T("Votre Pass Examen se termine le " + date + ".", "تنتهي باقة الامتحان في " + iso(date) + ".") + "</p>")
-      : "<p><b>" + (essai ? T("Votre essai gratuit est terminé — merci !", "انتهت تجربتك المجانية — شكرًا لك!")
-          : T("Votre Pass Examen est terminé — merci !", "انتهت باقة الامتحان — شكرًا لك!")) + "</b> " +
+      ? "<p><b>" + T("Merci pour votre inscription !", "شكرًا على اشتراكك!") + "</b> " +
+        T("Votre Pass Examen se termine le " + date + ".", "تنتهي باقة الامتحان في " + iso(date) + ".") + "</p>"
+      : "<p><b>" + T("Votre Pass Examen est terminé — merci !", "انتهت باقة الامتحان — شكرًا لك!") + "</b> " +
         T("Il a pris fin le " + date + ".", "انتهت في " + iso(date) + ".") + "</p>") +
-    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre">' +
-    (essai ? T("Prendre mon Pass", "اشترك في الباقة") : T("Renouveler mon Pass", "جدّد باقتي")) + "</a>" +
+    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre">' + T("Renouveler mon Pass", "جدّد باقتي") + "</a>" +
     '<a class="rappel-avis" href="' + racine + '#avis">' + T("Donner mon avis", "أعطِ رأيك") + "</a></p>";
   // tout en haut, sous l'en-tête (avant le grand bandeau de la page) : vu sans faire défiler
   const zone = document.createElement("div");
@@ -340,7 +304,6 @@ document.addEventListener("pass", majBoutonEntete);
 document.addEventListener("DOMContentLoaded", () => {
   brancherFormulairePass();
   brancherCodeAcces();
-  brancherEssai();
   noterFinPass();
   reverifierPass().catch(() => {}).then(() => { noterFinPass(); afficherRappel(); });
 });

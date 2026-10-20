@@ -586,15 +586,11 @@ async function rappelPass() {
   check("rappel du Pass : Pass de 7 jours (début connu) -> rien à J-3 (dernier quart seulement)", !wx.document.getElementById("rappel-pass"));
   wx = await voir("index.html", code(jour(1), { depuis: jour(-5) }));
   check("rappel du Pass : Pass de 7 jours -> bandeau à J-1", !!wx.document.getElementById("rappel-pass"));
-  wx = await voir("index.html", { "crt-essai-v1": { debut: jour(0) } });
-  check("rappel du Pass : essai de 2 jours -> rien le 1er jour", !wx.document.getElementById("rappel-pass"));
   wx = await voir("index.html", { "crt-essai-v1": { debut: jour(-1) } });
-  b = wx.document.getElementById("rappel-pass");
-  check("rappel du Pass : essai de 2 jours -> bandeau le dernier jour, mots de l'essai (« Merci d'avoir essayé », « Prendre mon Pass »)", !!b &&
-    texte(b).includes("Merci d'avoir essayé") && texte(b).includes("essai gratuit se termine le " + lisible(jour(0))) && texte(b.querySelector("a.rappel-renouveler")) === "Prendre mon Pass");
+  check("rappel du Pass : un ancien essai encore en cours ne déclenche aucun bandeau (seuls les codes payés comptent)", !wx.document.getElementById("rappel-pass"));
   wx = await voir("index.html", { "crt-essai-v1": { debut: jour(-3) } });
-  b = wx.document.getElementById("rappel-pass");
-  check("rappel du Pass : essai fini -> « Votre essai gratuit est terminé — merci ! » une fois", !!b && texte(b).includes("essai gratuit est terminé — merci"));
+  check("rappel du Pass : un ancien essai fini ne déclenche aucun message", !wx.document.getElementById("rappel-pass"));
+  check("rappel du Pass : ne parle jamais d'essai", !/essai|تجرب/i.test((lire("assets/pass.js").match(/function afficherRappel[\s\S]*?\n}\n/) || ["essai"])[0]));
   wx = await voir("lecons/index.html", code(jour(2)));
   b = wx.document.getElementById("rappel-pass");
   check("rappel du Pass : liens justes depuis une sous-page (../pass/#offre, ../#avis)", !!b && b.querySelector("a.rappel-renouveler").getAttribute("href") === "../pass/#offre" && b.querySelector("a.rappel-avis").getAttribute("href") === "../#avis");
@@ -632,8 +628,8 @@ async function passExamen() {
   const t = texte(d.getElementById("offre"));
   check("pass/ : aucune erreur JavaScript", w.fautes.length === 0);
   check("pass/ : prix 9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours visibles tout de suite", ["9 DT", "19 DT", "29 DT", "7 jours", "30 jours", "90 jours"].every(m => texte(d.getElementById("tarifs")).includes(m)));
-  check("pass/ : essai gratuit 2 jours, examens illimités, statistiques, erreurs, pas de renouvellement automatique",
-    ["2 jours d'essai gratuit", "Examens blancs illimités", "Statistiques par thème", "Révision de vos erreurs", "Pas de renouvellement automatique"].every(m => t.includes(m)));
+  check("pass/ : examens illimités, statistiques, erreurs, pas de renouvellement automatique",
+    ["Examens blancs illimités", "Statistiques par thème", "Révision de vos erreurs", "Pas de renouvellement automatique"].every(m => t.includes(m)));
   check("pass/ : aucun prix « TTC » ni nom de société", !/TTC|SUARL|S\.U\.A\.R\.L/i.test(lire("pass/index.html") + lire("pass/conditions/index.html")));
   const pay = d.getElementById("paiement");
   check("pass/ : bouton « Paiement » (<details>) avec D17 et IZI (liens vers les applications officielles) au 24 321 390, mode d'emploi, plus de Wafacash, motif nom + téléphone", !!pay && pay.tagName === "DETAILS" && texte(pay.querySelector("summary")).startsWith("Paiement") &&
@@ -659,22 +655,24 @@ async function passExamen() {
   check("pass/ : envoi Formspree (nom, téléphone 8 chiffres, formule, ligne « pour_activer »)", appels.length === 1 && appels[0].u === "https://formspree.io/f/mwlpakqj" &&
     envoi.nom === "Test Candidat" && envoi.telephone === "98765432" && envoi.formule === "30 jours - 19 DT" && String(envoi.pour_activer).includes("action: paye") && String(envoi.pour_activer).includes("jours: 30"));
   check("pass/ : après l'envoi, confirmation + paiement + « Vous recevrez votre code d'accès par WhatsApp »", form.hidden && !d.getElementById("apres-pass").hidden &&
-    !d.getElementById("apres-paye").hidden && d.getElementById("apres-essai").hidden && texte(d.getElementById("apres-paye")).includes("Vous recevrez votre code d'accès par WhatsApp") &&
+    !d.getElementById("apres-paye").hidden && texte(d.getElementById("apres-paye")).includes("Vous recevrez votre code d'accès par WhatsApp") &&
     decodeURIComponent(d.getElementById("pass-preuve-apres").href).includes("Test Candidat — 98765432"));
-  // 14/10/2026 (règle commune § 15) : essai gratuit IMMÉDIAT, sans formulaire ni code « sous 24 heures »
+  // 20/10/2026 (décision d'Ahmed : « Enlève tous les essais gratuits ») : plus de bouton d'essai ; un essai déjà commencé va jusqu'à sa fin
   w = await page("pass/index.html"); d = w.document;
-  check("pass/ : essai immédiat proposé en premier (bouton « Commencer mes 2 jours gratuits »), plus d'essai dans le formulaire ni d'attente de 24 heures pour l'essai",
-    !!d.getElementById("essai-go") && d.querySelector('a.btn-pro[href="#essai-immediat"]') && ![...d.querySelectorAll("input[name=formule]")].some(r => /essai/.test(r.value))
-    && !w.passActif());
-  d.getElementById("essai-go").click(); await pause(20);
-  check("pass/ : un clic -> Pass actif TOUT DE SUITE sur ce téléphone (2 jours), lien vers l'examen blanc", w.passActif() && w.essaiActif()
-    && /essai est actif/.test(texte(d.getElementById("essai-statut"))) && !!d.querySelector('#essai-statut a[href="../examen/"]') && d.getElementById("essai-go").hidden);
-  w.commencerEssai();
-  check("pass/ : l'essai ne se relance pas (une fois par téléphone)", w.commencerEssai() === false && w.finEssai() === w.plusJours(w.aujourdhui(), 1));
+  check("pass/ : plus aucun essai à commencer (ni bouton, ni section, ni lien), le bouton doré mène au formulaire",
+    !d.getElementById("essai-go") && !d.getElementById("essai-immediat") && !d.querySelector('a[href="#essai-immediat"]') && !!d.querySelector('#offre a.btn-pro[href="#inscription"]')
+    && ![...d.querySelectorAll("input[name=formule]")].some(r => /essai/.test(r.value)) && typeof w.commencerEssai === "undefined" && !w.passActif());
+  { const wa = await page("index.html", { ls: { "crt-essai-v1": { debut: w.aujourdhui() } } }), wb = await page("index.html", { ls: { "crt-essai-v1": { debut: "2000-01-01" } } });
+    check("ancien essai déjà commencé sur un téléphone : il va jusqu'à sa fin (rien n'est coupé), puis s'arrête", wa.passActif() && wa.essaiActif() && !wb.passActif()); }
+  { const mots = /essai gratuit|essais gratuits|jours gratuits|يومان مجانًا|التجربة المجانية|تجربة مجانية|تجربتك المجانية|يوميّ المجانيين/i, mal = [];
+    for (const p of PAGES) if (mots.test(lire(p))) mal.push(p);
+    for (const f of ["manifest.webmanifest", "assets/page.js", "assets/quiz.js"]) if (existsSync(join(root, f)) && mots.test(lire(f))) mal.push(f);
+    { const pj = lire("assets/pass.js").replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, ""); if (mots.test(pj)) mal.push("assets/pass.js"); }
+    check(`plus aucune page ne parle d'essai gratuit (titres, descriptions, JSON-LD, textes, boutons ; FR + AR) ${mal}`, mal.length === 0); }
   w = await page("pass/conditions/index.html"); d = w.document;
   const tc = texte(d.querySelector(".conditions"));
-  check("conditions : vendeur « l'éditeur du site », prix, essai 2 jours, pas de renouvellement, aucune période payée remboursée, INPDP",
-    ["l'éditeur du site", "9 DT pour 7 jours", "19 DT pour 30 jours", "29 DT pour 90 jours", "2 jours d'essai gratuit", "Aucun renouvellement automatique", "Aucune période payée n'est remboursée", "INPDP"].every(m => tc.includes(m)));
+  check("conditions : vendeur « l'éditeur du site », prix, pas de renouvellement, aucune période payée remboursée, INPDP",
+    ["l'éditeur du site", "9 DT pour 7 jours", "19 DT pour 30 jours", "29 DT pour 90 jours", "Aucun renouvellement automatique", "Aucune période payée n'est remboursée", "INPDP"].every(m => tc.includes(m)));
 
   // -- bouton doré « Pass Examen » (règle d'Ahmed) : caché tant que l'examen gratuit du jour n'est pas fait ;
   //    dès qu'il est fait : sur TOUTES les pages jusqu'au lendemain ; toujours sur les pages Pass ; avec un Pass actif : partout (coché)
@@ -757,7 +755,7 @@ async function passExamen() {
 
   // -- 18/10/2026 (problème vu sur l'immobilier : code payé impossible à taper quand le téléphone gardait un autre code)
   //    la case du code est TOUJOURS visible, EN HAUT de pass/, quel que soit l'état gardé ; le code tapé remplace l'ancien ;
-  //    « essai gratuit » annoncé seulement parce que ce site a un vrai essai (PASS.essai jours)
+  //    plus d'essai gratuit (20/10/2026)
   {
     const SEL = "sel-de-test", TOURS = 1000, FUTUR = "2099-12-31";
     const h = c => pbkdf2Sync(c, SEL, TOURS, 32, "sha256").toString("hex");
@@ -786,9 +784,8 @@ async function passExamen() {
     const garde = JSON.parse(wx.localStorage.getItem("crt-pass-v1") || "{}");
     check("Pass : le code tapé REMPLACE l'ancien code gardé (nouveau code, nouvelle date de fin, Pass actif)",
       garde.code === "NEWC2345" && garde.fin === FUTUR && wx.eval("passActif()") && dx.getElementById("code-status").className === "ok");
-    const essaiAnnonce = /essai gratuit|تجربة مجانية/i.test(lire("pass/index.html") + lire("assets/pass.js"));
-    check("Pass : « essai gratuit » annoncé seulement si le site en a un vrai (PASS.essai = 2 jours, bouton « Commencer mes 2 jours gratuits »)",
-      essaiAnnonce === (wx.eval("PASS.essai") > 0) && !!dx.getElementById("essai-go"));
+    check("Pass : plus d'essai gratuit annoncé ni proposé (décision d'Ahmed du 20/10/2026)",
+      !/essai gratuit|تجربة مجانية/i.test(lire("pass/index.html") + lire("pass/conditions/index.html")) && !dx.getElementById("essai-go"));
     const sansCode = [];
     let we = await page("entrainement/index.html", { query: "&erreurs=1", stockage: { q: { "T2-001": 0 }, examens: [] } });
     if (!we.document.querySelector('#erreurs-pass a[href="../pass/#code-acces"]')) sansCode.push("Mes erreurs");

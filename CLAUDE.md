@@ -135,7 +135,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   l'appareil : `localStorage` `crt-examen-gratuit-v1` = jour du dernier examen gratuit TERMINÉ ; stockage impossible = permis).
 - **Pass Examen** : examens blancs illimités, statistiques par thème (page examen, `#stats`), « Mes erreurs »
   (`entrainement/?erreurs=1`, réservé au Pass depuis le 06/10/2026), bouton « Écouter » (synthèse vocale du téléphone :
-  promis seulement « selon votre téléphone »). **9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours, essai gratuit 2 jours**
+  promis seulement « selon votre téléphone »). **9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours** (essai gratuit SUPPRIMÉ le 20/10/2026, décision d'Ahmed)
   (une fois par téléphone), pas de renouvellement automatique, aucune période payée remboursée, vendeur = « l'éditeur du site »
   (JAMAIS le nom de la société), prix non annoncés TTC.
 - Pages : `pass/` (prix et avantages, bouton « Paiement » <details> D17/IZI 24 321 390, motif nom + téléphone,
@@ -189,4 +189,10 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   met sous l'en-tête un bandeau `#rappel-pass` (au plus 1 fois par jour, mémoire `crt-pass-rappel-v1`) : « Merci pour votre inscription ! Votre Pass
   se termine le JJ/MM/AAAA » à J-7 (Pass court de début connu — essai, code activé depuis ce jour (`depuis`) : dernier quart seulement), bouton doré
   « Renouveler mon Pass » (`pass/#offre`), lien « Donner mon avis » (`#avis` de l'accueil), croix ; après la fin (≤ 30 jours) : « terminé — merci ! » une fois.
-  FR + AR, testé dans test_site.mjs (bloc `rappelPass`) ; versions 20261020b ; pour un essai (2 jours gratuits) : « Merci d'avoir essayé », « Prendre mon Pass ».
+  FR + AR, testé dans test_site.mjs (bloc `rappelPass`) ; versions 20261020c. Seuls les codes payés comptent (jamais un ancien essai).
+
+- **20/10/2026 — Plus AUCUN essai gratuit (décision écrite d'Ahmed : « Enlève tous les essais gratuits », comme l'immobilier le 15/10)** :
+  section `#essai-immediat` et bouton « Commencer mes 2 jours gratuits » retirés de `pass/`, mentions retirées (titres, descriptions, og, JSON-LD,
+  conditions § 3 devenu « Durée », accueil). Un essai déjà commencé sur un téléphone (`crt-essai-v1`) va jusqu'à sa fin (`essaiActif()` gardé).
+  Robot privé code-route-pass : action « essai » refusée (« plus d'essai gratuit depuis le 20/10/2026 »), retirée du bouton « pass ».
+  Test : aucune page ne parle d'essai gratuit (FR + AR).
