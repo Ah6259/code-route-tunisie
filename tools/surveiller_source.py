@@ -85,7 +85,7 @@ def sortie(**kv):
     for k, v in kv.items():
         print(f"{k} = {v}")
         if f:
-            with open(f, "a", encoding="utf-8") as o:
+            with open(f, "a", encoding="utf-8", newline="\n") as o:
                 o.write(f"{k}={v}\n")
 
 
