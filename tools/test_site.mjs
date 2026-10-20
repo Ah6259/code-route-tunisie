@@ -589,7 +589,12 @@ async function rappelPass() {
   wx = await voir("index.html", { "crt-essai-v1": { debut: jour(0) } });
   check("rappel du Pass : essai de 2 jours -> rien le 1er jour", !wx.document.getElementById("rappel-pass"));
   wx = await voir("index.html", { "crt-essai-v1": { debut: jour(-1) } });
-  check("rappel du Pass : essai de 2 jours -> bandeau le dernier jour", !!wx.document.getElementById("rappel-pass"));
+  b = wx.document.getElementById("rappel-pass");
+  check("rappel du Pass : essai de 2 jours -> bandeau le dernier jour, mots de l'essai (« Merci d'avoir essayé », « Prendre mon Pass »)", !!b &&
+    texte(b).includes("Merci d'avoir essayé") && texte(b).includes("essai gratuit se termine le " + lisible(jour(0))) && texte(b.querySelector("a.rappel-renouveler")) === "Prendre mon Pass");
+  wx = await voir("index.html", { "crt-essai-v1": { debut: jour(-3) } });
+  b = wx.document.getElementById("rappel-pass");
+  check("rappel du Pass : essai fini -> « Votre essai gratuit est terminé — merci ! » une fois", !!b && texte(b).includes("essai gratuit est terminé — merci"));
   wx = await voir("lecons/index.html", code(jour(2)));
   b = wx.document.getElementById("rappel-pass");
   check("rappel du Pass : liens justes depuis une sous-page (../pass/#offre, ../#avis)", !!b && b.querySelector("a.rappel-renouveler").getAttribute("href") === "../pass/#offre" && b.querySelector("a.rappel-avis").getAttribute("href") === "../#avis");

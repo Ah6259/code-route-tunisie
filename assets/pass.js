@@ -273,13 +273,13 @@ function joursEntre(a, b) { return Math.round((Date.parse(b + "T12:00:00") - Dat
 // note la fin connue AVANT la revérification (qui efface un code expiré) : le message de fin reste possible
 function noterFinPass() {
   const r = lireRappel(), p = lirePass();
-  let fin = "", debut = "";
+  let fin = "", debut = "", essai = false;
   if (codeActif()) { fin = p.fin; debut = p.depuis || ""; }
-  else if (essaiActif()) { fin = finEssai(); debut = debutEssai(); }
+  else if (essaiActif()) { fin = finEssai(); debut = debutEssai(); essai = true; }
   else if (p && p.fin && (!r.fin || p.fin > r.fin)) { fin = p.fin; debut = p.depuis || ""; }       // code expiré encore gardé
-  else if (finEssai() && !r.fin) { fin = finEssai(); debut = debutEssai(); }
-  if (fin && fin !== r.fin) { ecrireRappel({ fin, debut, vu: r.vu || "", finVu: false }); return; }
-  if (fin && debut && r.debut !== debut) { r.debut = debut; ecrireRappel(r); }
+  else if (finEssai() && !r.fin) { fin = finEssai(); debut = debutEssai(); essai = true; }
+  if (fin && fin !== r.fin) { ecrireRappel({ fin, debut, essai, vu: r.vu || "", finVu: false }); return; }
+  if (fin && (debut && r.debut !== debut || !!r.essai !== essai)) { r.debut = debut; r.essai = essai; ecrireRappel(r); }
 }
 // { type: "proche" | "fini", fin } ou null
 function etatRappel() {
@@ -307,13 +307,20 @@ function afficherRappel() {
   b.id = "rappel-pass";
   b.setAttribute("role", "status");
   const date = dateLisible(e.fin);
+  // essai gratuit (bouton « Commencer mes 2 jours gratuits », sans paiement) : mots justes, « Prendre mon Pass »
+  const essai = !!r.essai && r.fin === e.fin;
   b.innerHTML = '<button type="button" class="rappel-fermer" aria-label="' + T("Fermer", "إغلاق") + '">×</button>' +
     (e.type === "proche"
-      ? "<p><b>" + T("Merci pour votre inscription !", "شكرًا على اشتراكك!") + "</b> " +
-        T("Votre Pass Examen se termine le " + date + ".", "تنتهي باقة الامتحان في " + iso(date) + ".") + "</p>"
-      : "<p><b>" + T("Votre Pass Examen est terminé — merci !", "انتهت باقة الامتحان — شكرًا لك!") + "</b> " +
+      ? (essai
+        ? "<p><b>" + T("Merci d'avoir essayé le Pass Examen !", "شكرًا على تجربة باقة الامتحان!") + "</b> " +
+          T("Votre essai gratuit se termine le " + date + ".", "تنتهي تجربتك المجانية في " + iso(date) + ".") + "</p>"
+        : "<p><b>" + T("Merci pour votre inscription !", "شكرًا على اشتراكك!") + "</b> " +
+          T("Votre Pass Examen se termine le " + date + ".", "تنتهي باقة الامتحان في " + iso(date) + ".") + "</p>")
+      : "<p><b>" + (essai ? T("Votre essai gratuit est terminé — merci !", "انتهت تجربتك المجانية — شكرًا لك!")
+          : T("Votre Pass Examen est terminé — merci !", "انتهت باقة الامتحان — شكرًا لك!")) + "</b> " +
         T("Il a pris fin le " + date + ".", "انتهت في " + iso(date) + ".") + "</p>") +
-    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre">' + T("Renouveler mon Pass", "جدّد باقتي") + "</a>" +
+    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre">' +
+    (essai ? T("Prendre mon Pass", "اشترك في الباقة") : T("Renouveler mon Pass", "جدّد باقتي")) + "</a>" +
     '<a class="rappel-avis" href="' + racine + '#avis">' + T("Donner mon avis", "أعطِ رأيك") + "</a></p>";
   // tout en haut, sous l'en-tête (avant le grand bandeau de la page) : vu sans faire défiler
   const zone = document.createElement("div");
