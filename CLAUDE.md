@@ -148,7 +148,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   (`crt-pass-v1`), revérifie au plus 1 fois par jour (code arrêté/expiré = effacé ; pas de réseau = gardé jusqu'à la fin).
   Rien n'est demandé au réseau si aucun code n'est gardé. sw.js : `.json` = réseau d'abord.
 - **Activation** : dépôt PRIVÉ `Ah6259/code-route-pass` (dossier local `../pass (prive)/`), bouton « pass » dans l'application
-  GitHub (essai / paye 7-30-90 / arret / liste) + nettoyage chaque nuit. Il écrit ici `donnees/pass.json` avec la clé de
+  GitHub (paye 7-30-90 / offert / arret / liste ; plus d'action « essai » depuis le 20/10/2026) + nettoyage chaque nuit (3h15). Il écrit ici `donnees/pass.json` avec la clé de
   déploiement « robot-pass » (secret `CLE_SITE` du dépôt privé ; secours : `JETON_SITE`). Voir son README.
 - **Limite honnête** : un code peut être partagé entre plusieurs téléphones (acceptable pour ce prix ; `arret` s'il est publié).
   Le Pass est gardé dans le navigateur : navigateur vidé = retaper le code. GitHub Pages met jusqu'à 10 min à publier un code.
