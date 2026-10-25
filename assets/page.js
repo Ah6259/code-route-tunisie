@@ -66,7 +66,7 @@ const MENU_SITE = [
           <a href="${racine}examen/">${T("Examen blanc", "امتحان تجريبي")}</a>
           <a href="${racine}amendes/">${T("Amendes et sanctions", "الخطايا والعقوبات")}</a>
           <a href="${racine}permis/">${T("Passer le permis", "اجتياز رخصة السياقة")}</a>
-          <a href="${racine}a-propos/">${T("À propos et sources", "من نحن والمصادر")}</a>
+          <a href="${racine}a-propos/">${T("Comment fonctionne le site ?", "كيف يعمل الموقع؟")}</a>
           <a href="${racine}pass/">${T("Pass Examen", "باقة الامتحان")}</a>
           <a href="${racine}#avis">${T("Votre avis", "رأيك")}</a>
         <a href="https://clicvia.com/" rel="noopener" target="_blank">${T("Tous nos services", "كل خدماتنا")}</a>

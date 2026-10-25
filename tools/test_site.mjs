@@ -271,6 +271,33 @@ check("à propos : aucune erreur JavaScript", w.fautes.length === 0);
 check("à propos : recueil IORT 2012, transport.tn, loi 99-71", ["IORT", "2012", "transport.tn", "99-71", "2000-150"].every(m => texte(d.body).includes(m)));
 check("à propos : méthode (pas de copie) et limites (amendes 2025)", texte(d.body).includes("copiée") && texte(d.body).includes("loi de finances 2025"));
 check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verifie-le")) === REGLES_SITE.verifie_le);
+// 25/10/2026 (RÈGLE d'Ahmed, règle commune § 44 : « la page Comment fonctionne le site doit être mise à jour chaque fois qu'on modifie le site ») :
+// chaque fonction visible du site (repère dans le code ou les pages) doit être expliquée dans a-propos/ ; nouvelle fonction = une ligne ici + la page
+{ const ap = texte(d.body), js = lire("assets/page.js") + lire("assets/pages.js") + lire("assets/quiz.js") + lire("assets/pass.js"), acc = lire("index.html");
+  const FONCTIONS = [
+    ["leçons", existsSync(join(root, "lecons/index.html")), /Leçons : 10 leçons/],
+    ["panneaux", existsSync(join(root, "panneaux/index.html")), /Panneaux : les panneaux rangés par famille/],
+    ["entraînement par thème", existsSync(join(root, "entrainement/index.html")), /Entraînement par thème : une question à la fois/],
+    ["examen blanc et séries", /serieExamen/.test(js), /Examen blanc : 30 questions[\s\S]*Série 10/],
+    ["derniers scores sur l'accueil", /afficherHistorique/.test(js), /Vos derniers scores/],
+    ["Mes erreurs", /erreurs=1/.test(js), /Mes erreurs : rejouer les questions ratées/],
+    ["amendes", existsSync(join(root, "amendes/index.html")), /Amendes : barème 2025/],
+    ["passer le permis", existsSync(join(root, "permis/index.html")), /Passer le permis : catégories/],
+    ["liens Auto-écoles et Ma voiture", /auto-ecoles\.clicvia\.com/.test(js) && /voiture\.clicvia\.com/.test(js), /Auto-écoles et Ma voiture/],
+    ["langue FR / AR", /\.langue/.test(js), /Français \/ arabe : le bouton de langue/],
+    ["bouton Partager", /\.partager/.test(js), /Partager : le bouton rond/],
+    ["Signaler une erreur", /Signaler une erreur/.test(js), /Signaler une erreur : le petit lien/],
+    ["Votre avis", existsSync(join(root, "assets/avis.js")) && /id="avis"/.test(acc), /Votre avis : un formulaire/],
+    ["installation et hors connexion", existsSync(join(root, "sw.js")), /Installer sur le téléphone/],
+    ["vidéo de présentation", existsSync(join(root, "video/index.html")), /Vidéo de présentation : courte vidéo/],
+    ["Pass Examen (prix, code, Écouter)", existsSync(join(root, "pass/index.html")) && /Écouter/.test(js), /Pass Examen \(payant\)[\s\S]*Écouter[\s\S]*9 DT pour 7 jours[\s\S]*code/],
+    ["vie privée", true, /Pas de compte\. Votre progression, vos scores et votre code restent dans votre téléphone/],
+    ["surveillance mensuelle du texte officiel", existsSync(join(root, "tools/surveiller_source.py")), /Chaque mois, un robot vérifie/],
+    ["site indépendant", true, /site est indépendant/]];
+  const manque = FONCTIONS.filter(([, sur, re]) => sur && !re.test(ap)).map(([n]) => n);
+  check(`page « Comment fonctionne le site ? » à jour : titre et chaque fonction du site expliquée (${FONCTIONS.length} fonctions)` + (manque.length ? " — manque : " + manque.join(", ") : ""),
+    manque.length === 0 && /Comment fonctionne le site \?/.test(texte(d.querySelector("h1")))
+    && /href="\$\{racine\}a-propos\/">\$\{T\("Comment fonctionne le site \?"/.test(lire("assets/page.js")) && /id="lien-fonctionnement"/.test(acc)); }
 
 // ---- 3. Date unique, référencement, aperçu, licence, cache, robots GitHub ----------
 const fichiersCode = [...PAGES, "assets/page.js", "assets/pass.js", "assets/quiz.js", "assets/pages.js", "assets/lecons.js", "assets/amendes.js", "assets/panneaux.js", "assets/protection.js"];

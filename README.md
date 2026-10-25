@@ -20,7 +20,7 @@ Adresse prévue : https://code.clicvia.com/
   correction immédiate avec explication et article de loi (« Source : … »), schéma pour certaines questions.
 - **Examen blanc** (`examen/`) : 30 questions tirées au hasard (3 par thème), score sur 30, réussite à 24
   (**chiffres à confirmer**), résultat par thème, revue des erreurs expliquées, partage WhatsApp.
-- **À propos et sources** (`a-propos/`) : texte officiel utilisé, méthode, limites connues.
+- **Comment fonctionne le site ?** (`a-propos/`) : chaque fonction expliquée, gratuit / Pass, vos données, puis texte officiel utilisé, méthode, limites connues. Mise à jour à chaque modification visible (règle § 44, test `FONCTIONS` de `tools/test_site.mjs`).
 - **Votre avis** (accueil, `#avis`, lien dans le pied de page de toutes les pages) : note facultative (😀🙂😐🙁), message
   (obligatoire, 1000 caractères max), e-mail facultatif ; envoyé **seulement au clic** à Formspree (formulaire `mwlpakqj`, le même
   que le site des prix de l'eau) avec les champs cachés `site` = « Code de la route Tunisie » et `page`. Code : `assets/avis.js`.
