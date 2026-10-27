@@ -69,6 +69,7 @@ const MENU_SITE = [
           <a href="${racine}a-propos/">${T("Comment fonctionne le site ?", "كيف يعمل الموقع؟")}</a>
           <a href="${racine}pass/">${T("Pass Examen", "باقة الامتحان")}</a>
           <a href="${racine}#avis">${T("Votre avis", "رأيك")}</a>
+        <a href="https://immobilier.clicvia.com/">${T("Immobilier en Tunisie", "العقارات في تونس")}</a>
         <a href="https://clicvia.com/" rel="noopener" target="_blank">${T("Tous nos services", "كل خدماتنا")}</a>
         </nav>
         <p>${T(`Sources : Code de la route (loi n° 99-71 du 26 juillet 1999) et ses décrets d'application, recueil officiel de l'IORT (édition 2012) publié sur transport.tn ; loi de finances 2025 (JORT n° 149). Texte vérifié le ${MAJ}.`,

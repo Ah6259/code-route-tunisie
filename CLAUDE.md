@@ -198,3 +198,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   Test : aucune page ne parle d'essai gratuit (FR + AR).
 
 - **RÈGLE D'AHMED (25/10/2026, règle commune § 44) : la page « Comment fonctionne le site ? » (`a-propos/`, FR + AR, h1 « Comment fonctionne le site ? » / « كيف يعمل الموقع؟ ») est mise à jour à CHAQUE modification visible, dans le même envoi** (nouvelle fonction, fonction changée ou retirée). Carte `#fonctionnement` en haut de la page (à quoi sert le site, chaque fonction en une ligne, gratuit / Pass Examen, vos données, mises à jour automatiques, site indépendant), puis les sections sources / méthode / limites / photos. Liens : pied de page de toutes les pages (`page.js`, « Comment fonctionne le site ? »), accueil (`#lien-fonctionnement` sous « Comment ça marche ? » et lien du bas). **Test `FONCTIONS` dans `tools/test_site.mjs`** (repère dans le code -> phrase attendue dans la page) : une fonction présente mais non expliquée = test rouge = publication bloquée. Nouvelle fonction = une ligne dans `FONCTIONS` + son explication FR + AR. Versions 20261025a.
+
+- **27/10/2026 — Lien vers l'immobilier (« fais » d'Ahmed, visibilité Google)** : Google n'avait enregistré aucune page d'immobilier.clicvia.com (Search Console
+  via OpenSEO). Ce site, déjà bien vu par Google, y renvoie : phrase « Nos autres services gratuits : Immobilier en Tunisie… » écrite dans l'accueil
+  (`.autres-services`, sous les liens du bas) + « Immobilier en Tunisie » dans le pied de page (page.js). Versions 20261027a.
