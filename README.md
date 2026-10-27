@@ -121,3 +121,4 @@ preuves (`../sources/`, `../preuves…/`) sont hors du dépôt : les garder sauv
 
 ## Nouveautés (suite)
 - 06/10/2026 : Pass Examen (payant, essai gratuit) ; chronomètre et 10 séries d'examen ; permis à points signalé comme non appliqué.
+- 27/10/2026 : lien vers Immobilier Tunisie (immobilier.clicvia.com) sur l'accueil (« Nos autres services gratuits ») et dans le pied de page, pour aider Google à le trouver.

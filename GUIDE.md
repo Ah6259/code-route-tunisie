@@ -73,3 +73,8 @@ Guide réutilisable pour créer un autre site du même genre. Une ligne par éta
 6. Captures Edge 500 px FR + AR (la CSP interdit `eval` : les actions de capture appellent les fonctions directement).
 7. Même jour : chronomètre (temps écoulé, aucune durée officielle), 10 séries + examen au hasard qui évite les questions
    déjà vues ; permis à points vérifié (non appliqué) → questions dépubliées, leçons et page Amendes corrigées.
+
+## 27/10/2026 — Lien vers un autre site d'Ahmed (visibilité Google)
+1. Constat dans Search Console (via OpenSEO) : Google n'avait enregistré aucune page du site immobilier, alors qu'il connaît bien ce site-ci.
+2. Phrase « Nos autres services gratuits » écrite DANS la page d'accueil (lisible par Google sans script) + lien dans le pied de page (page.js).
+3. `?v=` changé dans toutes les pages (20261027a), tests (test_site, test_sw, test_avis) verts, capture à 390 px regardée, envoi.
