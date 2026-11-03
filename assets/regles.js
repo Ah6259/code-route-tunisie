@@ -12,7 +12,7 @@ var REGLES_SITE = {
   relecture: false,
   annee: 2026,
   verifie_le: "09/10/2026",
-  derniere_surveillance: "09/10/2026",
+  derniere_surveillance: "03/11/2026",
   source: {
     url: "https://www.transport.tn/uploads/Loi/Route.pdf",
     taille: 2778492,
