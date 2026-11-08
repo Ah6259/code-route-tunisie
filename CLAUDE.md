@@ -202,3 +202,10 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - **27/10/2026 — Lien vers l'immobilier (« fais » d'Ahmed, visibilité Google)** : Google n'avait enregistré aucune page d'immobilier.clicvia.com (Search Console
   via OpenSEO). Ce site, déjà bien vu par Google, y renvoie : phrase « Nos autres services gratuits : Immobilier en Tunisie… » écrite dans l'accueil
   (`.autres-services`, sous les liens du bas) + « Immobilier en Tunisie » dans le pied de page (page.js). Versions 20261027a.
+
+- **08/11/2026 — plan SEO d'Ahmed appliqué à ce site (phase 2 ; contrôle commun `outils visibilite/controle_seo.mjs` de projets-ahmed ;
+  plan : `consignes des taches/seo-code.md`)** : titres des 10 pages publiques ramenés à <= 70 caractères et descriptions à <= 165 (les
+  anciens faisaient 77 à 111 et 191 à 289 : Google les coupait) ; « gratuit » gardé dans chaque titre où c'est vrai ; test « SEO : titre de
+  10 à 70 caractères et description de 40 à 170 » dans test_site.mjs (289 vérifications). Reste (phase 2 point 7) : une adresse par langue
+  (chaque page mêle français et arabe sous lang="fr"), méthode de robot/langues.py de l'immobilier — Code de la route est le 2e site du
+  plan d'Ahmed après l'Immobilier.

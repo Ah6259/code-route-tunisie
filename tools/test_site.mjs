@@ -13,6 +13,13 @@ const lire = f => readFileSync(join(root, f), "utf8");
 const require = createRequire(import.meta.url);
 let erreurs = 0, total = 0;
 const check = (desc, cond) => { total++; console.log((cond ? "OK   " : "FAIL ") + desc); if (!cond) erreurs++; };
+// 08/11/2026 (plan SEO d'Ahmed, tous les sites) : titre <= 70 caractères et description <= 170 sur chaque page publique (Google coupe au-delà)
+{ const dec = x => x.replace(/&#x27;|&#39;|&apos;/g, "’").replace(/&amp;/g, "&").replace(/&quot;/g, '"'), longs = [], toutes = [];
+  const voir = d => { for (const x of readdirSync(join(root, d))) { const p = (d ? d + "/" : "") + x; if (x === "node_modules" || x.startsWith(".") || x === "captures") continue;
+    if (statSync(join(root, p)).isDirectory()) voir(p); else if (x === "index.html") toutes.push(p); } }; voir("");
+  for (const p of toutes) { const h = lire(p); const t = dec((h.match(/<title>([^<]*)<\/title>/) || [])[1] || ""), d = dec((h.match(/<meta name="description" content="([^"]*)"/) || [])[1] || "");
+    if (t.length > 70 || t.length < 10) longs.push(`${p} titre ${t.length}`); if (d.length > 170 || d.length < 40) longs.push(`${p} description ${d.length}`); }
+  check(`SEO : titre de 10 à 70 caractères et description de 40 à 170 sur les ${toutes.length} pages` + (longs.length ? " — " + longs.slice(0, 4).join(" ; ") : ""), toutes.length >= 10 && longs.length === 0); }
 const AR = /[؀-ۿ]/;
 const PAGES = ["index.html", "lecons/index.html", "panneaux/index.html", "entrainement/index.html", "examen/index.html", "amendes/index.html", "permis/index.html", "a-propos/index.html", "pass/index.html", "pass/conditions/index.html", "video/index.html", "relecture/index.html"];
 const PAGES_PUBLIQUES = PAGES.filter(p => p !== "relecture/index.html");
