@@ -23,6 +23,7 @@ const check = (desc, cond) => { total++; console.log((cond ? "OK   " : "FAIL ") 
 const AR = /[؀-ۿ]/;
 const PAGES = ["index.html", "lecons/index.html", "panneaux/index.html", "entrainement/index.html", "examen/index.html", "amendes/index.html", "permis/index.html", "a-propos/index.html", "pass/index.html", "pass/conditions/index.html", "video/index.html", "relecture/index.html"];
 const PAGES_PUBLIQUES = PAGES.filter(p => p !== "relecture/index.html");
+const PAGES_AR = PAGES_PUBLIQUES.filter(p => p !== "video/index.html").map(p => "ar/" + p);   // une adresse par langue (08/11/2026)
 
 // ---- 1. Les questions ----------------------------------------------------------
 const cheminJson = join(root, "..", "questions", "questions-v1.json");
@@ -66,6 +67,8 @@ check("au moins 3 questions publiées par thème (pour l'examen)", [1,2,3,4,5,6,
 // Pass Examen actif dans le navigateur (code factice gardé sur l'appareil, date de fin lointaine)
 const PASS_TEST = JSON.stringify({ code: "ABCDEF23", fin: "2099-12-31", verifie: "2099-12-31" });
 async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false, pass = false, examenFait = false, ls = null } = {}) {
+  // UNE ADRESSE PAR LANGUE (08/11/2026) : la page arabe est ar/<chemin> ; video/ et relecture/ n'existent qu'à une adresse (?lang=)
+  if (lang === "ar" && !chemin.startsWith("ar/") && existsSync(join(root, "ar", chemin))) chemin = "ar/" + chemin;
   const dossier = dirname(join(root, chemin));
   // (les scripts externes, comme GoatCounter, ne sont pas chargés)
   const html = lire(chemin).replace(/<script([^>]*) src="(?!https?:)([^"?]+)(\?[^"]*)?"([^>]*)><\/script>/g,
@@ -165,10 +168,10 @@ check("examen : bonne réponse montrée en vert dans la revue", d.querySelectorA
 check("examen : résultat par thème (10 lignes)", d.querySelectorAll("#par-theme tr").length === 10);
 check("examen : score gardé dans le navigateur", JSON.parse(w.localStorage.getItem("crt-progression-v1")).examens.at(-1).score === 25);
 check("examen : lien WhatsApp de partage du score", d.getElementById("partage").href.startsWith("https://wa.me/?text=") && decodeURIComponent(d.getElementById("partage").href).includes("25/30"));
-clic(w, d.querySelector(".langue"));
-check("examen : changement de langue garde le résultat (affiché en arabe)", d.documentElement.lang === "ar" && texte(d.getElementById("score")) === "25 / 30" && AR.test(texte(d.getElementById("statut"))));
+{ const allees = []; w.allerVers = u => allees.push(u); clic(w, d.querySelector(".langue"));
+  check("examen : le bouton de langue mène à la page arabe ar/examen/ (une adresse par langue) ; la page française garde son résultat", allees[0] === "../ar/examen/" && d.documentElement.lang === "fr" && texte(d.getElementById("score")) === "25 / 30"); }
 check("examen gratuit terminé : carte « Vous avez utilisé votre examen gratuit du jour » + gros bouton doré vers pass/",
-  /امتحانك المجاني/.test(texte(d.getElementById("fin-gratuit"))) && d.querySelector("#fin-gratuit a.btn-pass-grand").getAttribute("href") === "../pass/");
+  /examen gratuit du jour/.test(texte(d.getElementById("fin-gratuit"))) && d.querySelector("#fin-gratuit a.btn-pass-grand").getAttribute("href") === "../pass/");
 check("examen gratuit terminé : jour noté sur l'appareil", w.localStorage.getItem("crt-examen-gratuit-v1") === w.eval("aujourdhui()"));
 clic(w, d.getElementById("nouvel"));
 check("2e examen le même jour sans Pass : écran « examen gratuit du jour utilisé », pas de question", !!d.getElementById("examen-utilise") && !d.getElementById("valider") &&
@@ -250,7 +253,7 @@ w = await page("examen/index.html"); d = w.document;
   check("examen : dessin sans emblème ni logo officiel, sans photo ni texte (pas d'ATTT, République, drapeau, croissant, étoile, <text>, <image>)",
     !/attt|r[ée]publique|tunisi|الجمهورية|التونسية|تونس|الوكالة|armoirie|drapeau|flag|croissant|crescent|[ée]toile|star|<text|<image|xlink:href|\.(png|jpe?g|webp)/i.test(svg));
   check("examen : légende FR + AR sous le dessin (rouge A, orange B, vert C)", texte(d.querySelector("#ecran-examen figcaption [data-l='fr']")) === "À l'examen officiel, vous répondez sur un écran avec un boîtier à 3 boutons : rouge (A), orange (B), vert (C)." &&
-    /أحمر \(أ\).*برتقالي \(ب\).*أخضر \(ج\)/.test(texte(d.querySelector("#ecran-examen figcaption [data-l='ar']"))));
+    /أحمر \(أ\).*برتقالي \(ب\).*أخضر \(ج\)/.test(texte((await page("examen/index.html", { lang: "ar" })).document.querySelector("#ecran-examen figcaption [data-l='ar']"))));
   check("examen : plus de photo dans le bandeau (donc plus de crédit à afficher)", !d.querySelector(".hero img[src*='assets/photos/']") && !d.getElementById("credit-hero"));
   const off = texte(d.getElementById("examen-officiel"));
   check("examen : encadré « Comment se passe l'examen officiel » (écran, boîtier rouge/orange/vert, 30 questions, demi-heure selon les guides, durée non publiée)",
@@ -291,7 +294,7 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
     ["amendes", existsSync(join(root, "amendes/index.html")), /Amendes : barème 2025/],
     ["passer le permis", existsSync(join(root, "permis/index.html")), /Passer le permis : catégories/],
     ["liens Auto-écoles et Ma voiture", /auto-ecoles\.clicvia\.com/.test(js) && /voiture\.clicvia\.com/.test(js), /Auto-écoles et Ma voiture/],
-    ["langue FR / AR", /\.langue/.test(js), /Français \/ arabe : le bouton de langue/],
+    ["langue FR / AR (une adresse par langue)", /\.langue/.test(js) && existsSync(join(root, "ar/index.html")), /Français \/ arabe : chaque page existe en français[\s\S]*ar\/[\s\S]*bouton de langue/],
     ["bouton Partager", /\.partager/.test(js), /Partager : le bouton rond/],
     ["Signaler une erreur", /Signaler une erreur/.test(js), /Signaler une erreur : le petit lien/],
     ["Votre avis", existsSync(join(root, "assets/avis.js")) && /id="avis"/.test(acc), /Votre avis : un formulaire/],
@@ -304,7 +307,74 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
   const manque = FONCTIONS.filter(([, sur, re]) => sur && !re.test(ap)).map(([n]) => n);
   check(`page « Comment fonctionne le site ? » à jour : titre et chaque fonction du site expliquée (${FONCTIONS.length} fonctions)` + (manque.length ? " — manque : " + manque.join(", ") : ""),
     manque.length === 0 && /Comment fonctionne le site \?/.test(texte(d.querySelector("h1")))
-    && /href="\$\{racine\}a-propos\/">\$\{T\("Comment fonctionne le site \?"/.test(lire("assets/page.js")) && /id="lien-fonctionnement"/.test(acc)); }
+    && /href="\$\{site\}a-propos\/">\$\{T\("Comment fonctionne le site \?"/.test(lire("assets/page.js")) && /id="lien-fonctionnement"/.test(acc)); }
+
+// ---- 2 ter. UNE ADRESSE PAR LANGUE (08/11/2026, plan SEO d'Ahmed, phase 2 point 7 ; tools/construire.py) ----------
+{
+  const SOURCES = PAGES_PUBLIQUES.filter(p => p !== "video/index.html");
+  const dec = x => x.replace(/&#x27;|&#39;|&apos;/g, "’").replace(/&amp;/g, "&").replace(/&quot;/g, '"');
+  const existe = (depuis, rel) => { const c = rel.split("#")[0].split("?")[0]; if (!c) return true; const f = join(root, dirname(depuis), c, c.endsWith("/") ? "index.html" : ""); return existsSync(f); };
+  const pb = [], titres = new Map();
+  for (const p of SOURCES) {
+    const src = "tools/sources/" + p, ar = "ar/" + p, chemin = p.replace("index.html", "");
+    if (!existsSync(join(root, src))) { pb.push(`${p} : pas de source dans tools/sources/`); continue; }
+    if (!existsSync(join(root, ar))) { pb.push(`${p} : pas de page arabe ${ar}`); continue; }
+    const f = lire(p), a = lire(ar), S = lire(src);
+    if (!/data-l="fr"/.test(S) || !/data-l="ar"/.test(S)) pb.push(`${src} : la source doit être bilingue`);
+    if (/data-l="ar"/.test(f)) pb.push(`${p} : texte arabe resté dans la page française`);
+    if (/data-l="fr"/.test(a)) pb.push(`${ar} : texte français resté dans la page arabe`);
+    if (!/<html [^>]*lang="fr" dir="ltr"[^>]*data-langue-fixe="fr"[^>]*data-autre-langue="([^"]*)"/.test(f)) pb.push(`${p} : lang / data-langue-fixe / data-autre-langue`);
+    if (!/<html [^>]*lang="ar" dir="rtl"[^>]*data-langue-fixe="ar"[^>]*data-autre-langue="([^"]*)"/.test(a)) pb.push(`${ar} : lang / dir / data-langue-fixe`);
+    const versAr = (f.match(/data-autre-langue="([^"]*)"/) || [])[1], versFr = (a.match(/data-autre-langue="([^"]*)"/) || [])[1];
+    if (!versAr || !existe(p, versAr) || !/ar\//.test(versAr)) pb.push(`${p} : bouton de langue -> ${versAr} introuvable`);
+    if (!versFr || !existe(ar, versFr) || /ar\//.test(versFr)) pb.push(`${ar} : bouton de langue -> ${versFr} introuvable`);
+    for (const [page, url] of [[f, "https://code.clicvia.com/" + chemin], [a, "https://code.clicvia.com/ar/" + chemin]]) {
+      if (!page.includes(`<link rel="canonical" href="${url}">`)) pb.push(`${url} : canonical`);
+      if (!page.includes(`<link rel="alternate" hreflang="fr" href="https://code.clicvia.com/${chemin}">`) || !page.includes(`<link rel="alternate" hreflang="ar" href="https://code.clicvia.com/ar/${chemin}">`)
+          || !page.includes(`<link rel="alternate" hreflang="x-default" href="https://code.clicvia.com/${chemin}">`)) pb.push(`${url} : hreflang fr / ar / x-default`);
+      const t = dec((page.match(/<title>([^<]*)<\/title>/) || [])[1] || ""), d = dec((page.match(/name="description" content="([^"]*)"/) || [])[1] || "");
+      if (t.length < 15 || t.length > 70) pb.push(`${url} : titre de ${t.length} caractères`);
+      if (d.length < 50 || d.length > 165) pb.push(`${url} : description de ${d.length} caractères`);
+      if (titres.has(t)) pb.push(`${url} : même titre que ${titres.get(t)}`); titres.set(t, url);
+    }
+    if (!/[\u0600-\u06FF]/.test((a.match(/<title>([^<]*)<\/title>/) || [])[1] || "")) pb.push(`${ar} : titre pas en arabe`);
+    if (!a.includes(`<meta property="og:url" content="https://code.clicvia.com/ar/${chemin}">`)) pb.push(`${ar} : og:url`);
+    if (/application\/ld\+json/.test(a)) pb.push(`${ar} : FAQ Google française laissée sur la page arabe`);
+    // chaque lien et fichier de la page arabe mène quelque part (fichiers à la racine, pages dans ar/, video/ et relecture/ à la racine)
+    for (const m of a.matchAll(/\b(?:href|src|poster)="([^"]*)"/g)) {
+      const u = m[1]; if (/^(https?:|mailto:|tel:|data:|#|\?)/.test(u) || /^\//.test(u)) continue;
+      if (!existe(ar, u)) pb.push(`${ar} : ${u} introuvable`);
+    }
+  }
+  check(`une adresse par langue : ${SOURCES.length} pages françaises + ${SOURCES.length} pages arabes (ar/), chacune dans UNE langue, hreflang, canonical, titres <= 70 uniques, liens valides` + (pb.length ? " — " + pb.slice(0, 5).join(" ; ") : ""), pb.length === 0);
+  // la page arabe se comporte comme une page arabe (en-tête, lang), le bouton de langue mène à l'adresse française
+  { const wa = await page("lecons/index.html", { lang: "ar", query: "&theme=2" }); const allees = []; 
+    const da = wa.document; const bouton = da.querySelector("#entete .langue");
+    check("page arabe ar/lecons/ : lang=ar, en-tête en arabe, aucune erreur JavaScript, menu vers les pages arabes (ar/…)", da.documentElement.lang === "ar" && wa.fautes.length === 0
+      && /الدروس/.test(texte(da.querySelector("#entete .menu"))) && da.querySelector('#entete .menu a[href="../examen/"]') !== null && da.querySelector('#pied a[href="../pass/"]') !== null && /^\.\.\/\.\.\/assets\//.test(da.querySelector("#entete .logo-mark").getAttribute("src")));
+    // images fabriquées par les scripts (vignettes des thèmes…) : chaque fichier existe (le visiteur simulé a vu 9 vignettes cassées sur ar/ le 08/11/2026)
+    const cassees = [];
+    for (const [pg, win] of [["ar/lecons/index.html", wa], ["ar/index.html", await page("index.html", { lang: "ar" })], ["ar/entrainement/index.html", await page("entrainement/index.html", { lang: "ar" })]])
+      for (const im of win.document.querySelectorAll("img[src]")) { const u = im.getAttribute("src"); if (!/^(https?:|data:)/.test(u) && !existe(pg, u)) cassees.push(pg + " : " + u); }
+    check("pages arabes : chaque image (y compris celles fabriquées par les scripts) existe" + (cassees.length ? " — " + cassees.slice(0, 3).join(" ; ") : ""), cassees.length === 0);
+    wa.allerVers = u => allees.push(u); clic(wa, bouton);
+    check("page arabe : le bouton de langue ouvre la page française (mêmes paramètres)", allees.length === 1 && allees[0] === "../../lecons/?theme=2");
+    const wf = await page("lecons/index.html", { query: "&theme=3" }); const alleesF = []; wf.allerVers = u => alleesF.push(u);
+    clic(wf, wf.document.querySelector("#entete .langue"));
+    check("page française : lang=fr, le bouton de langue ouvre ar/lecons/ (mêmes paramètres)", wf.document.documentElement.lang === "fr" && alleesF.length === 1 && alleesF[0] === "../ar/lecons/?theme=3"); }
+  // un ancien lien « ?lang=ar » vers la page française renvoie vers la page arabe ; une préférence gardée aussi, mais seulement en venant du site
+  { const essai = async (chemin, lang, ls, referrer) => { const allees = []; const w2 = await (async () => {
+        const html = lire(chemin).replace(/<script([^>]*) src="(?!https?:)([^"?]+)(\?[^"]*)?"([^>]*)><\/script>/g, (_, a2, src) => `<script>${readFileSync(join(root, dirname(chemin), src), "utf8")}</script>`);
+        const dom = new JSDOM(html, { url: `https://code.clicvia.com/${chemin.replace("index.html", "")}${lang ? "?lang=" + lang : ""}`, referrer, runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: new VirtualConsole(),
+          beforeParse(w) { w.allerVers = u => allees.push(u); if (ls) w.localStorage.setItem("langue", ls); } });
+        await new Promise(ok => dom.window.addEventListener("load", ok)); return dom.window; })();
+      return { allees, lang: w2.document.documentElement.lang }; };
+    const r1 = await essai("amendes/index.html", "ar"), r2 = await essai("ar/amendes/index.html", "fr"), r3 = await essai("amendes/index.html", "", "ar", "https://code.clicvia.com/"),
+      r4 = await essai("amendes/index.html", "", "ar", "https://www.google.com/"), r5 = await essai("amendes/index.html", "", "fr", "https://code.clicvia.com/");
+    check("ancien lien « ?lang=ar » sur la page française -> page arabe ; « ?lang=fr » sur la page arabe -> page française", r1.allees[0] === "../ar/amendes/" && r2.allees[0] === "../../amendes/");
+    check("langue « ar » gardée dans le téléphone : renvoi vers ar/ seulement en venant d'une page du site (jamais depuis Google ou un lien partagé) ; la page reste française en attendant",
+      r3.allees[0] === "../ar/amendes/" && r4.allees.length === 0 && r4.lang === "fr" && r5.allees.length === 0); }
+}
 
 // ---- 3. Date unique, référencement, aperçu, licence, cache, robots GitHub ----------
 const fichiersCode = [...PAGES, "assets/page.js", "assets/pass.js", "assets/quiz.js", "assets/pages.js", "assets/lecons.js", "assets/amendes.js", "assets/panneaux.js", "assets/protection.js"];
@@ -321,6 +391,11 @@ for (const p of PAGES) {
   const pied = texte(ww.document.getElementById("pied"));
   check(`${p} : © et « non officiel » dans le pied de page`, pied.includes("©") && pied.includes("non officiel") && pied.includes("transport.tn"));
 }
+for (const p of PAGES_AR) {
+  const s = lire(p);
+  check(`${p} : même version ?v= que les autres pages, manifeste, icône iPhone, image d'aperçu`, new Set(s.match(/\?v=\d+\w/g)).size === 1 && s.match(/\?v=(\d+\w)/)[1] === lire("index.html").match(/\?v=(\d+\w)/)[1]
+    && s.includes('<link rel="manifest" href="' + "../".repeat(p.split("/").length - 1) + 'manifest.webmanifest">') && s.includes('property="og:image" content="https://code.clicvia.com/assets/og-image-v4.jpg"'));
+}
 const ld = JSON.parse(lire("index.html").match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
 check("FAQ Google (JSON-LD) valide sur l'accueil", ld["@type"] === "FAQPage" && ld.mainEntity.length >= 3);
 check("image d'aperçu, logo et icône présents", ["assets/og-image-v4.jpg", "assets/logo.svg", "assets/icone-180.png"].every(f => existsSync(join(root, f))));
@@ -335,7 +410,8 @@ check("manifeste présent, id unique = chemin du site, start_url/scope ./, icôn
   && man.icons.every(i => existsSync(join(root, i.src))));
 check("toutes les pages : lien vers le manifeste, icône iPhone et theme-color", PAGES.every(p => { const s = lire(p), r = "../".repeat(p.split("/").length - 1);
   return s.includes(`<link rel="manifest" href="${r}manifest.webmanifest">`) && s.includes(`<link rel="apple-touch-icon" href="${r}assets/icone-180.png">`) && s.includes('<meta name="theme-color"'); }));
-check(`plan du site : ${PAGES_PUBLIQUES.length} pages publiques (sans relecture/)`, (lire("sitemap.xml").match(/<loc>https:\/\/code\.clicvia\.com\//g) || []).length === PAGES_PUBLIQUES.length && !lire("sitemap.xml").includes("relecture"));
+check(`plan du site : ${PAGES_PUBLIQUES.length} pages publiques + ${PAGES_AR.length} pages arabes (sans relecture/), toutes datées`, (lire("sitemap.xml").match(/<loc>https:\/\/code\.clicvia\.com\//g) || []).length === PAGES_PUBLIQUES.length + PAGES_AR.length && !lire("sitemap.xml").includes("relecture")
+  && PAGES_AR.every(p => lire("sitemap.xml").includes(`<loc>https://code.clicvia.com/${p.replace("index.html", "")}</loc>`)) && (lire("sitemap.xml").match(/<lastmod>/g) || []).length === PAGES_PUBLIQUES.length + PAGES_AR.length);
 check("robots.txt indique le plan du site", lire("robots.txt").includes("code.clicvia.com/sitemap.xml"));
 check("LICENSE tous droits réservés", lire("LICENSE").includes("Tous droits réservés"));
 check(".gitignore : node_modules et captures", /node_modules\//.test(lire(".gitignore")) && /captures\//.test(lire(".gitignore")));
@@ -356,7 +432,7 @@ check("style : plus de règles .confiance / .badge-c (badges supprimés)", !/\.c
 // (une étiquette en gras dans un encadré qui donne une vraie information, ex. « Coût : 50 DT », n'est pas une tuile)
 const tuilesSansLien = doc => [...doc.body.querySelectorAll("*")].filter(el => {
   if (/^(a|button|label|summary|svg|h[1-6]|b|strong|em|small|i|option|select|input|textarea|form|header|footer|nav|main|figure|img|section|article)$/i.test(el.tagName)) return false;
-  if (el.closest("a,button,label,summary,header,footer,nav,form,svg,[hidden],template")) return false;
+  if (el.closest("a,button,label,summary,header,footer,nav,form,svg,[hidden],template,[role=note]")) return false;   // une note déclarée (role=note) n'est pas une tuile
   const f = el.firstElementChild;
   if (!f || f.tagName.toLowerCase() !== "svg" || el.querySelector("a,button,input,select,textarea")) return false;
   const t = el.textContent.replace(/\s+/g, " ").trim();

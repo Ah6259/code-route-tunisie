@@ -28,7 +28,10 @@ jobs:
       - name: Installer jsdom (sans fichier package)
         run: npm install --no-save --no-package-lock jsdom
       - name: Test du site
-        run: node tools/test_site.mjs
+        run: |
+          python3 tools/construire.py
+          git diff --quiet -- . ':!node_modules' || { echo "ÉCHEC - les pages fabriquées (français + ar/) ne sont pas à jour : lancer python tools/construire.py et envoyer le résultat"; git diff --stat; exit 1; }
+          node tools/test_site.mjs
       - name: Test du service worker (installation sur le telephone)
         run: node tools/test_sw.mjs
       - name: Test de la vidéo de présentation et du bouton Partager

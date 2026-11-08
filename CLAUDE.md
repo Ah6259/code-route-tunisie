@@ -209,3 +209,20 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   10 à 70 caractères et description de 40 à 170 » dans test_site.mjs (289 vérifications). Reste (phase 2 point 7) : une adresse par langue
   (chaque page mêle français et arabe sous lang="fr"), méthode de robot/langues.py de l'immobilier — Code de la route est le 2e site du
   plan d'Ahmed après l'Immobilier.
+
+- **08/11/2026 — UNE ADRESSE PAR LANGUE (plan SEO d'Ahmed, phase 2 point 7, « fais » d'Ahmed ; méthode de l'Immobilier)** : les 10 pages
+  publiques (accueil, leçons, panneaux, entraînement, examen, amendes, permis, à propos, pass, pass/conditions) sont maintenant ÉCRITES
+  dans `tools/sources/<chemin>/index.html` (bilingues, spans data-l comme avant) et FABRIQUÉES par `python tools/construire.py` :
+  `<chemin>/index.html` = français seul (lang="fr", data-langue-fixe="fr", data-autre-langue) et `ar/<chemin>/index.html` = arabe seul
+  (lang="ar" dir="rtl", titre et description arabes de `TEXTES_AR`, canonical ar/…, fichiers pris à la racine : data-racine un niveau
+  plus bas, data-site = dossier des pages), hreflang fr / ar / x-default sur les deux, FAQ JSON-LD (française) retirée de la page arabe.
+  **Ne plus modifier `<chemin>/index.html` ni `ar/` à la main** : modifier la source puis construire (le robot `tests` vérifie que les pages
+  fabriquées sont à jour). `video/` et `relecture/` gardent une seule adresse (`?lang=ar`). `assets/page.js` : sur une page à langue fixe, la
+  langue est celle de l'adresse ; le bouton de langue ouvre l'autre adresse (`data-autre-langue`, mêmes paramètres et ancre, crochet
+  `window.allerVers` pour les tests) ; un ancien lien `?lang=ar` renvoie vers ar/ ; une langue gardée dans le téléphone renvoie seulement
+  si le visiteur vient d'une page du site (jamais depuis Google ou un lien partagé, jamais pour un robot ni dans un cadre) ; liens des pages
+  de l'en-tête / du pied / de pass.js = `window.racinePages()` (dossier des pages), fichiers = `data-racine`. Plan du site : 10 FR + 10 AR +
+  video/, dates `lastmod` (date du dernier changement de chaque page). Tests : `page(…, { lang: "ar" })` ouvre ar/<chemin> ; bloc « une adresse
+  par langue » (une langue par page, hreflang, canonical, titres <= 70 uniques, liens valides, bouton de langue, renvois) ; test_avis et
+  test_video adaptés ; scénarios du visiteur simulé en arabe sur `ar/…`. Version `?v=20261108a`.
+

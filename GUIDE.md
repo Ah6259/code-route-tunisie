@@ -78,3 +78,7 @@ Guide réutilisable pour créer un autre site du même genre. Une ligne par éta
 1. Constat dans Search Console (via OpenSEO) : Google n'avait enregistré aucune page du site immobilier, alors qu'il connaît bien ce site-ci.
 2. Phrase « Nos autres services gratuits » écrite DANS la page d'accueil (lisible par Google sans script) + lien dans le pied de page (page.js).
 3. `?v=` changé dans toutes les pages (20261027a), tests (test_site, test_sw, test_avis) verts, capture à 390 px regardée, envoi.
+
+## Une adresse par langue (08/11/2026)
+Les pages publiques s'écrivent dans `tools/sources/…` (français + arabe), puis `python tools/construire.py` fabrique la page française et la page arabe `ar/…` (titres arabes dans `TEXTES_AR`). Ne jamais modifier les pages fabriquées à la main.
+

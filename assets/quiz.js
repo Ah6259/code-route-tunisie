@@ -103,7 +103,7 @@ function htmlSignalerQ(q) {
 const CONSIGNE = () => T("Une ou plusieurs bonnes réponses : cochez tout ce qui est juste.", "إجابة صحيحة واحدة أو أكثر: اختر كل ما هو صحيح.");
 
 /* ---------- grille des thèmes (accueil et page entraînement) ---------- */
-function afficherThemes(cible, racine) {
+function afficherThemes(cible, racine) {    // racine = dossier des PAGES (lien du thème) ; les images viennent de data-racine (dossier des fichiers : page arabe ar/…)
   const el = typeof cible === "string" ? document.getElementById(cible) : cible;
   if (!el) return;
   const prog = lireProgression();
@@ -112,7 +112,7 @@ function afficherThemes(cible, racine) {
     const reussies = qs.filter(q => prog.q[q.id] === 1).length;
     const pc = qs.length ? Math.round(reussies / qs.length * 100) : 0;
     return `<a class="theme" href="${racine}entrainement/?theme=${t}" data-theme="${t}">
-      <div class="haut"><span class="ic ill"><img src="${racine}assets/illustrations/theme-${t}.svg" alt="" width="34" height="34"></span>
+      <div class="haut"><span class="ic ill"><img src="${document.documentElement.dataset.racine || racine}assets/illustrations/theme-${t}.svg" alt="" width="34" height="34"></span>
         <div><div class="num">${T("Thème", "المحور")} ${nb(t)}</div><b>${nomTheme(t)}</b></div></div>
       <div class="droite"><span class="nb">${nb(qs.length)} ${T("questions", "سؤالًا")}</span>
         <div class="jauge" title="${pc} %"><span style="width:${pc}%"></span></div></div></a>`;

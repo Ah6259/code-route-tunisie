@@ -142,14 +142,14 @@ function brancherEcouter(q) {
 function prixCourt() { return T("dès 9 DT", "ابتداءً من " + iso("9") + " د"); }
 function htmlBoutonPass(id, titreFr, titreAr) {
   const racine = document.documentElement.dataset.racine || "";
-  return `<a class="btn-pass-grand" id="${id}" href="${racine}pass/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M14 7v12"/></svg>
+  return `<a class="btn-pass-grand" id="${id}" href="${(window.racinePages ? racinePages() : racine)}pass/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M14 7v12"/></svg>
     <span>${T(titreFr, titreAr)}<small>${T("Examens blancs illimités dès 9 DT", "امتحانات تجريبية بلا حدود ابتداءً من " + iso("9") + " د")}</small></span></a>`;
 }
 
 // lien « J'ai déjà un code » sous chaque écran payant (octobre 2026 : le visiteur qui a payé doit trouver où taper son code)
 function htmlLienCode() {
   const racine = document.documentElement.dataset.racine || "";
-  return `<p class="petit lien-code"><a href="${racine}pass/#code-acces">${T("J'ai déjà un code d'accès", "لدي رمز دخول")}</a></p>`;
+  return `<p class="petit lien-code"><a href="${(window.racinePages ? racinePages() : racine)}pass/#code-acces">${T("J'ai déjà un code d'accès", "لدي رمز دخول")}</a></p>`;
 }
 
 /* ---- page pass/ : formulaire d'inscription (Formspree) et saisie du code ---- */
@@ -284,8 +284,8 @@ function afficherRappel() {
         T("Votre Pass Examen se termine le " + date + ".", "تنتهي باقة الامتحان في " + iso(date) + ".") + "</p>"
       : "<p><b>" + T("Votre Pass Examen est terminé — merci !", "انتهت باقة الامتحان — شكرًا لك!") + "</b> " +
         T("Il a pris fin le " + date + ".", "انتهت في " + iso(date) + ".") + "</p>") +
-    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre">' + T("Renouveler mon Pass", "جدّد باقتي") + "</a>" +
-    '<a class="rappel-avis" href="' + racine + '#avis">' + T("Donner mon avis", "أعطِ رأيك") + "</a></p>";
+    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + (window.racinePages ? racinePages() : racine) + 'pass/#offre">' + T("Renouveler mon Pass", "جدّد باقتي") + "</a>" +
+    '<a class="rappel-avis" href="' + (window.racinePages ? racinePages() : racine) + '#avis">' + T("Donner mon avis", "أعطِ رأيك") + "</a></p>";
   // tout en haut, sous l'en-tête (avant le grand bandeau de la page) : vu sans faire défiler
   const zone = document.createElement("div");
   zone.className = "wrap rappel-zone";

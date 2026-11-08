@@ -1,6 +1,6 @@
 [
  {
-  "page": "entrainement/?theme=10&lang=fr",
+  "page": "entrainement/?theme=10",
   "nom": "entraînement thème 10 : 7 questions répondues jusqu'au score",
   "etapes": [
    {
@@ -91,7 +91,7 @@
   "lire": "#score-theme"
  },
  {
-  "page": "entrainement/?theme=9&lang=ar",
+  "page": "ar/entrainement/?theme=9",
   "nom": "entraînement thème 9 en arabe : 10 questions jusqu'au score",
   "etapes": [
    {
@@ -218,7 +218,7 @@
   "lire": "#score-theme"
  },
  {
-  "page": "examen/?lang=fr",
+  "page": "examen/",
   "nom": "examen blanc gratuit : 30 questions répondues jusqu'au score",
   "etapes": [
    {
@@ -469,77 +469,77 @@
   "lire": "#score"
  },
  {
-  "page": "amendes/?lang=fr",
+  "page": "amendes/",
   "nom": "amendes : barème affiché (montants)",
   "lire": "#bareme"
  },
  {
-  "page": "amendes/?lang=ar",
+  "page": "ar/amendes/",
   "nom": "amendes en arabe : barème affiché",
   "lire": "#bareme"
  },
  {
-  "page": "panneaux/?lang=fr",
+  "page": "panneaux/",
   "nom": "panneaux : familles affichées",
   "lire": "#familles"
  },
  {
-  "page": "lecons/?theme=1&lang=fr",
+  "page": "lecons/?theme=1",
   "nom": "leçon 1 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=2&lang=fr",
+  "page": "lecons/?theme=2",
   "nom": "leçon 2 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=3&lang=fr",
+  "page": "lecons/?theme=3",
   "nom": "leçon 3 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=4&lang=fr",
+  "page": "lecons/?theme=4",
   "nom": "leçon 4 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=5&lang=fr",
+  "page": "lecons/?theme=5",
   "nom": "leçon 5 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=6&lang=fr",
+  "page": "lecons/?theme=6",
   "nom": "leçon 6 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=7&lang=fr",
+  "page": "lecons/?theme=7",
   "nom": "leçon 7 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=8&lang=fr",
+  "page": "lecons/?theme=8",
   "nom": "leçon 8 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=9&lang=fr",
+  "page": "lecons/?theme=9",
   "nom": "leçon 9 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=10&lang=fr",
+  "page": "lecons/?theme=10",
   "nom": "leçon 10 affichée (français)",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=1&lang=ar",
+  "page": "ar/lecons/?theme=1",
   "nom": "leçon 1 en arabe",
   "lire": "#lecon"
  },
  {
-  "page": "lecons/?theme=5&lang=ar",
+  "page": "ar/lecons/?theme=5",
   "nom": "leçon 5 en arabe",
   "lire": "#lecon"
  }

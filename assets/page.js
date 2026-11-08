@@ -19,11 +19,34 @@ const MENU_SITE = [
 // (le site des conférences gardait « en » → textes tous cachés)
 (function () {
   const html = document.documentElement;
-  const racine = html.dataset.racine || "";
-  let langue = "fr";
-  try { langue = (/^(fr|ar)$/.test(localStorage.getItem("langue") || "") ? localStorage.getItem("langue") : "") || ((navigator.language || "").startsWith("ar") ? "ar" : "fr"); } catch (e) {}
+  const racine = html.dataset.racine || "";                      // dossier des fichiers (style, scripts, images)
+  // UNE ADRESSE PAR LANGUE (novembre 2026, tools/construire.py) : la page française est à son adresse, la page arabe dans ar/.
+  // Sur ces pages (data-langue-fixe), la langue est celle de l'ADRESSE : le bouton de langue ouvre l'autre adresse
+  // (data-autre-langue) ; un ancien lien « ?lang=ar », ou un visiteur venu d'une page du site qui avait choisi l'autre langue,
+  // est renvoyé vers la bonne adresse. Jamais pour un robot (Google, visiteur simulé) ni dans un cadre.
+  // video/ et relecture/ gardent une seule adresse (?lang=ar) et l'ancien bouton qui change la page sur place.
+  const FIXE = html.dataset.langueFixe === "fr" || html.dataset.langueFixe === "ar" ? html.dataset.langueFixe : "";
+  const site = html.dataset.site !== undefined ? html.dataset.site : racine;   // dossier des PAGES (ar/… sur une page arabe)
+  window.racinePages = () => site;
+  let langue = "fr", gardee = "";
+  try { gardee = /^(fr|ar)$/.test(localStorage.getItem("langue") || "") ? localStorage.getItem("langue") : ""; } catch (e) {}
+  langue = gardee || ((navigator.language || "").startsWith("ar") ? "ar" : "fr");
   const demande = new URLSearchParams(location.search).get("lang");
   if (demande === "ar" || demande === "fr") langue = demande;
+  const aller = (l) => {                                          // autre adresse de la même page, mêmes paramètres, même ancre
+    const q = new URLSearchParams(location.search); q.delete("lang");
+    const u = html.dataset.autreLangue + (q.toString() ? "?" + q : "") + location.hash;
+    if (window.allerVers) return window.allerVers(u);            // pour les tests
+    try { location.replace(u); } catch (e) {}
+  };
+  if (FIXE) {
+    let robot = false;
+    try { robot = navigator.webdriver === true || window.top !== window.self; } catch (e) { robot = true; }
+    const duSite = (document.referrer || "").indexOf(location.origin + "/") === 0;
+    const voulue = (demande === "ar" || demande === "fr") ? demande : (duSite ? gardee : "");
+    langue = FIXE;
+    if (voulue && voulue !== FIXE && !robot) aller(voulue);
+  }
 
   window.T = (fr, ar) => html.lang === "ar" ? ar : fr;
 
@@ -40,7 +63,7 @@ const MENU_SITE = [
         <b>${T("Version de relecture", "نسخة للمراجعة")}</b> — ${T("en cours de vérification par un moniteur d'auto-école. Merci de signaler toute erreur.", "قيد التثبت من قبل مدرّب سياقة. شكرًا على الإعلام بأي خطأ.")}
         <a href="${racine}relecture/">${T("Tout relire", "مراجعة الكل")} ›</a></div></div>` : ""}
       <div class="wrap haut-entete">
-        <a class="logo" href="${racine || "./"}">
+        <a class="logo" href="${site || "./"}">
           <img class="logo-mark" src="${racine}assets/logo.svg" alt="" width="34" height="34">
           <span class="logo-nom">${T("Code de la route Tunisie", "قانون الطرقات تونس")}
             <small>${T("Révision gratuite du permis", "مراجعة مجانية لرخصة السياقة")}</small></span>
@@ -53,22 +76,22 @@ const MENU_SITE = [
       </div>
       <nav class="menu" aria-label="${T("Menu", "القائمة")}"><div class="wrap">${MENU_SITE.map(([h, fr, ar, ico]) => /^https:/.test(h)
         ? `<a class="menu-annuaire" href="${h}" data-lien="annuaire-auto-ecoles">${ico ? `<img src="${racine}${ico}" alt="" width="20" height="20">` : ""}${T(fr, ar)}</a>`
-        : `<a href="${racine}${h}"${h === actuelle ? ' aria-current="page"' : ""}>${T(fr, ar)}</a>`).join("")}</div></nav>`;
+        : `<a href="${site}${h}"${h === actuelle ? ' aria-current="page"' : ""}>${T(fr, ar)}</a>`).join("")}</div></nav>`;
     const p = document.getElementById("pied");
     if (p) p.innerHTML = `
       <div class="wrap">
         <div class="pied-logo"><img src="${racine}assets/logo.svg" alt="" width="24" height="24"> ${T("Code de la route Tunisie", "قانون الطرقات تونس")}</div>
         <nav>
-          <a href="${racine}lecons/">${T("Leçons", "الدروس")}</a>
-          <a href="${racine}panneaux/">${T("Panneaux", "العلامات")}</a>
-          <a href="${racine}entrainement/">${T("Entraînement par thème", "تدريب حسب المحور")}</a>
-          <a href="${racine}entrainement/?erreurs=1">${T("Mes erreurs", "أخطائي")}</a>
-          <a href="${racine}examen/">${T("Examen blanc", "امتحان تجريبي")}</a>
-          <a href="${racine}amendes/">${T("Amendes et sanctions", "الخطايا والعقوبات")}</a>
-          <a href="${racine}permis/">${T("Passer le permis", "اجتياز رخصة السياقة")}</a>
-          <a href="${racine}a-propos/">${T("Comment fonctionne le site ?", "كيف يعمل الموقع؟")}</a>
-          <a href="${racine}pass/">${T("Pass Examen", "باقة الامتحان")}</a>
-          <a href="${racine}#avis">${T("Votre avis", "رأيك")}</a>
+          <a href="${site}lecons/">${T("Leçons", "الدروس")}</a>
+          <a href="${site}panneaux/">${T("Panneaux", "العلامات")}</a>
+          <a href="${site}entrainement/">${T("Entraînement par thème", "تدريب حسب المحور")}</a>
+          <a href="${site}entrainement/?erreurs=1">${T("Mes erreurs", "أخطائي")}</a>
+          <a href="${site}examen/">${T("Examen blanc", "امتحان تجريبي")}</a>
+          <a href="${site}amendes/">${T("Amendes et sanctions", "الخطايا والعقوبات")}</a>
+          <a href="${site}permis/">${T("Passer le permis", "اجتياز رخصة السياقة")}</a>
+          <a href="${site}a-propos/">${T("Comment fonctionne le site ?", "كيف يعمل الموقع؟")}</a>
+          <a href="${site}pass/">${T("Pass Examen", "باقة الامتحان")}</a>
+          <a href="${site}#avis">${T("Votre avis", "رأيك")}</a>
         <a href="https://immobilier.clicvia.com/">${T("Immobilier en Tunisie", "العقارات في تونس")}</a>
         <a href="https://clicvia.com/" rel="noopener" target="_blank">${T("Tous nos services", "كل خدماتنا")}</a>
         </nav>
@@ -81,7 +104,7 @@ const MENU_SITE = [
         <p>© ${ANNEE} Code de la route Tunisie — ${T("tous droits réservés. Reproduction des leçons, questions et dessins interdite.", "جميع الحقوق محفوظة. يُمنع نسخ الدروس والأسئلة والرسوم.")}</p>
       </div>`;
     document.querySelectorAll(".langue").forEach(b =>
-      b.addEventListener("click", () => appliquer(html.lang === "ar" ? "fr" : "ar")));
+      b.addEventListener("click", () => FIXE ? aller(FIXE === "ar" ? "fr" : "ar") : appliquer(html.lang === "ar" ? "fr" : "ar")));
     // bouton Partager (demande d'Ahmed) : menu de partage du téléphone, sinon WhatsApp avec le lien de la page
     document.querySelectorAll(".partager").forEach(b => b.addEventListener("click", async () => {
       const url = location.href.split("#")[0].replace(/[?&]lang=(fr|ar)/, ""), titre = document.title.split(" | ")[0];
@@ -93,6 +116,7 @@ const MENU_SITE = [
   }
 
   function appliquer(l) {
+    if (FIXE) l = FIXE;                                           // page à une langue : jamais changée sur place
     html.lang = l; html.dir = l === "ar" ? "rtl" : "ltr";
     try { localStorage.setItem("langue", l); } catch (e) {}
     cadre();
@@ -238,7 +262,7 @@ window.VIDEO_SITE = {"base": BASE_SITE, "defaut": "fr", "nom": {"fr": "Code de l
       if (v.getAttribute("poster") !== po) v.setAttribute("poster", po);
     }
     // lien discret « Vidéo de présentation » en bas de l'accueil et de À propos -> la page vidéo
-    var p = location.pathname.replace(/index\.html$/, "");
+    var p = location.pathname.replace(/index\.html$/, "").replace(S.base + "ar/", S.base);
     if (p === S.base || p === S.base + "a-propos/") {
       var b = document.getElementById("lien-video");
       if (!b) {
