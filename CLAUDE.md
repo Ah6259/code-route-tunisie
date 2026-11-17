@@ -226,3 +226,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   par langue » (une langue par page, hreflang, canonical, titres <= 70 uniques, liens valides, bouton de langue, renvois) ; test_avis et
   test_video adaptés ; scénarios du visiteur simulé en arabe sur `ar/…`. Version `?v=20261108a`.
 
+- **17/11/2026 — page 404 commune + liens Confidentialité / Conditions (liste des « 20 points » d'Ahmed)** : `404.html` + `404.js` à la racine
+  (modèle `outils communs/page-404/` de projets-ahmed : le modifier là-bas puis `installer.py site "Code de la route Tunisie" "#1F5FA8"`) ;
+  pied (assets/page.js) : liens https://clicvia.com/confidentialite/ et /conditions/ (versions ar/ sur les pages arabes) ; test_site.mjs
+  bloque si la 404 ou un lien manque (pages FR et ar/) ; 404.html exclue de test_sw / test_avis (page autonome). Version `?v=20261117a`.

@@ -377,6 +377,13 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
 }
 
 // ---- 3. Date unique, référencement, aperçu, licence, cache, robots GitHub ----------
+// Liens « Confidentialité » / « Conditions d'utilisation » du pied (17/11/2026) et page 404 commune (règle commune § 58 point 14 ;
+// modèle : outils communs/page-404 de projets-ahmed, sinon GitHub montre sa page anglaise)
+const lienPied = (doc, u, t) => [...doc.querySelectorAll("#pied nav a")].some(a => a.getAttribute("href") === u && a.textContent.trim() === t);
+check("page 404 commune à la racine publiée : 404.html (nom du site, couleur) + 404.js qui cherche la page (« Recherche de la page »)",
+  existsSync(join(root, "404.html")) && existsSync(join(root, "404.js")) && lire("404.html").includes("<title>Page introuvable — Code de la route Tunisie</title>")
+  && lire("404.html").includes('<script src="/404.js"></script>') && lire("404.js").includes("Recherche de la page"));
+check("À propos : la page introuvable et les liens Confidentialité / Conditions sont expliqués (FR + AR)", lire("a-propos/index.html").includes("Page introuvable, confidentialité, conditions") && lire("ar/a-propos/index.html").includes("صفحة غير موجودة، الخصوصية، الشروط"));
 const fichiersCode = [...PAGES, "assets/page.js", "assets/pass.js", "assets/quiz.js", "assets/pages.js", "assets/lecons.js", "assets/amendes.js", "assets/panneaux.js", "assets/protection.js"];
 const datesEnDur = fichiersCode.filter(f => /\b\d{2}\/\d{2}\/20\d{2}\b/.test(lire(f)));
 check(`aucune date jj/mm/aaaa écrite en dur hors de regles.js ${datesEnDur.join(" ")}`, datesEnDur.length === 0);
@@ -390,9 +397,13 @@ for (const p of PAGES) {
   const ww = await page(p);
   const pied = texte(ww.document.getElementById("pied"));
   check(`${p} : © et « non officiel » dans le pied de page`, pied.includes("©") && pied.includes("non officiel") && pied.includes("transport.tn"));
+  check(`${p} : pied : liens « Confidentialité » et « Conditions d'utilisation » (pages communes de clicvia.com, 17/11/2026)`, lienPied(ww.document, "https://clicvia.com/confidentialite/", "Confidentialité") && lienPied(ww.document, "https://clicvia.com/conditions/", "Conditions d'utilisation"));
 }
 for (const p of PAGES_AR) {
   const s = lire(p);
+  { const wa = await page(p, { lang: "ar" });
+    check(`${p} : pied en arabe : liens « الخصوصية » et « شروط الاستعمال » vers les pages arabes de clicvia.com`, wa.document.documentElement.lang === "ar"
+      && lienPied(wa.document, "https://clicvia.com/ar/confidentialite/", "الخصوصية") && lienPied(wa.document, "https://clicvia.com/ar/conditions/", "شروط الاستعمال")); }
   check(`${p} : même version ?v= que les autres pages, manifeste, icône iPhone, image d'aperçu`, new Set(s.match(/\?v=\d+\w/g)).size === 1 && s.match(/\?v=(\d+\w)/)[1] === lire("index.html").match(/\?v=(\d+\w)/)[1]
     && s.includes('<link rel="manifest" href="' + "../".repeat(p.split("/").length - 1) + 'manifest.webmanifest">') && s.includes('property="og:image" content="https://code.clicvia.com/assets/og-image-v4.jpg"'));
 }
