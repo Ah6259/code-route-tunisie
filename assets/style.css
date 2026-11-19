@@ -532,3 +532,12 @@ html[dir="rtl"] .paie-etapes>li::before{left:auto;right:12px}
 .rappel-pass .rappel-avis{font-weight:700;color:var(--p)}
 .rappel-fermer{position:absolute;top:6px;inset-inline-end:6px;width:36px;height:36px;border:0;background:transparent;color:var(--doux);font-size:24px;line-height:1;cursor:pointer;border-radius:50%}
 .rappel-fermer:hover,.rappel-fermer:focus-visible{background:var(--p-clair);color:var(--texte)}
+/* QR code à partager (19/11/2026) : noir sur blanc, grand, quel que soit le thème (lisible par l'appareil photo) */
+.carte-qr{text-align:center}
+.carte-qr p{max-width:34em;margin-left:auto;margin-right:auto}
+.qr-boite{display:inline-block;margin:6px auto 4px;padding:14px 14px 8px;background:#fff;border:1px solid var(--ligne);border-radius:16px}
+.qr-boite img{display:block;width:min(232px,62vw);height:auto;margin:0 auto}
+.qr-adresse{margin:6px 0 0;font-weight:700;color:#111;font-size:15px}
+.qr-actions{margin:18px 0 4px}
+.qr-actions .btn{display:inline-flex;align-items:center;justify-content:center;max-width:100%;white-space:normal}
+

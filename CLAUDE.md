@@ -230,3 +230,10 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   (modèle `outils communs/page-404/` de projets-ahmed : le modifier là-bas puis `installer.py site "Code de la route Tunisie" "#1F5FA8"`) ;
   pied (assets/page.js) : liens https://clicvia.com/confidentialite/ et /conditions/ (versions ar/ sur les pages arabes) ; test_site.mjs
   bloque si la 404 ou un lien manque (pages FR et ar/) ; 404.html exclue de test_sw / test_avis (page autonome). Version `?v=20261117a`.
+
+- **19/11/2026 — QR CODE À PARTAGER (Ahmed : « les élèves peuvent se le partager pendant leur pause au lycée »)** : carte `#qr` sur l'accueil
+  (source `tools/sources/index.html`, après les thèmes) : QR noir sur blanc de https://code.clicvia.com/ (page française) ou /ar/ (page arabe),
+  « code.clicvia.com » dessous, bouton « Télécharger le QR code » (PNG 1024 px, à envoyer ou imprimer). Images fabriquées par
+  `python tools/qr_code.py` (segno, sur le PC ; `assets/qr/`). Ligne « QR code » dans « Comment fonctionne le site ? » (FR + AR) + FONCTIONS ;
+  test « QR code à partager » (chaque langue a SON QR, fichiers présents, adresse codée). Version `?v=20261119a`. Leçon : aucune date jj/mm/aaaa
+  dans un commentaire HTML (le test l'attrape).

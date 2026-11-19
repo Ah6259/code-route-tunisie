@@ -296,6 +296,8 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
     ["liens Auto-écoles et Ma voiture", /auto-ecoles\.clicvia\.com/.test(js) && /voiture\.clicvia\.com/.test(js), /Auto-écoles et Ma voiture/],
     ["langue FR / AR (une adresse par langue)", /\.langue/.test(js) && existsSync(join(root, "ar/index.html")), /Français \/ arabe : chaque page existe en français[\s\S]*ar\/[\s\S]*bouton de langue/],
     ["bouton Partager", /\.partager/.test(js), /Partager : le bouton rond/],
+    // 19/11/2026 (Ahmed : « les élèves peuvent se le partager pendant leur pause au lycée »)
+    ["QR code à partager", /class="carte carte-qr"/.test(acc) && existsSync(join(root, "assets/qr/code-route-fr.svg")), /QR code : sur l'accueil/],
     ["Signaler une erreur", /Signaler une erreur/.test(js), /Signaler une erreur : le petit lien/],
     ["Votre avis", existsSync(join(root, "assets/avis.js")) && /id="avis"/.test(acc), /Votre avis : un formulaire/],
     ["installation et hors connexion", existsSync(join(root, "sw.js")), /Installer sur le téléphone/],
@@ -475,6 +477,16 @@ async function boutonPartager() {
       && comptes.length === 1 && comptes[0].path.startsWith("partage/") && comptes[0].event === true);
   }
 }
+
+// 19/11/2026 (Ahmed) : QR code de l'accueil : page française -> QR de https://code.clicvia.com/, page arabe -> QR de /ar/, images
+// présentes (SVG affiché, PNG à télécharger), fabriquées par tools/qr_code.py ; le SVG contient bien l'adresse (titre) qu'il code
+{ const fr = lire("index.html"), ar = lire("ar/index.html"), q = f => existsSync(join(root, "assets/qr/" + f));
+  check("QR code à partager : accueil FR et AR, chacun avec le QR de sa langue (SVG + PNG à télécharger), images présentes",
+    /<section class="carte carte-qr" id="qr"/.test(fr) && /assets\/qr\/code-route-fr\.svg/.test(fr) && !/code-route-ar/.test(fr)
+    && /assets\/qr\/code-route-ar\.svg/.test(ar) && !/code-route-fr/.test(ar) && /download=/.test(fr) && /download=/.test(ar)
+    && ["code-route-fr.svg", "code-route-fr.png", "code-route-ar.svg", "code-route-ar.png"].every(q)
+    && lire("assets/qr/code-route-fr.svg").includes("https://code.clicvia.com/<") && lire("assets/qr/code-route-ar.svg").includes("https://code.clicvia.com/ar/<")); }
+
 
 console.log(erreurs ? `\n${erreurs} PROBLÈME(S) sur ${total} vérifications` : `\nTOUT PASSE (${total} vérifications)`);
 process.exit(erreurs ? 1 : 0);
