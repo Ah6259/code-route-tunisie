@@ -237,3 +237,9 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   `python tools/qr_code.py` (segno, sur le PC ; `assets/qr/`). Ligne « QR code » dans « Comment fonctionne le site ? » (FR + AR) + FONCTIONS ;
   test « QR code à partager » (chaque langue a SON QR, fichiers présents, adresse codée). Version `?v=20261119a`. Leçon : aucune date jj/mm/aaaa
   dans un commentaire HTML (le test l'attrape).
+
+- **21/11/2026 — mode sombre lisible (Ahmed, tous les sites)** : bloc final de `assets/style.css` : en sombre, texte foncé sur les boutons
+  d'accent devenus clairs (`.btn` dont « Examen blanc » et « Télécharger le QR code », « Envoyer », menu actif, lettres des réponses), bandeau
+  du haut plus foncé, `.partage` vert plus foncé, fonds blancs codés en dur -> `--carte`. Mode clair inchangé. Contrôle « contraste < 3 » : 3 -> 0.
+  Version `?v=20261121a`. Attention : `node tools/page_video.mjs` refait mal `video/` depuis la page à langue fixe (test_video rouge) ->
+  pour un simple changement de version, remplacer le `?v=` dans `video/index.html`.
