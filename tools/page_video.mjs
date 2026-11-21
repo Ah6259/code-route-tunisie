@@ -40,6 +40,11 @@ export function pagesVideo(root, cfg = JSON.parse(readFileSync(join(root, "tools
       .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\s*/g, "")
       .replace(/<link rel="canonical"[^>]*>\s*/g, "")
       .replace(/<link rel="alternate" hreflang[^>]*>\s*/g, "")      // la page vidéo n'est pas une traduction de la page modèle (portail, 21/10/2026 : dans l'original)
+      // la page vidéo est UNE seule adresse (?lang=) : on retire aussi la « langue fixe » de la page modèle (21/11/2026 : la vidéo
+      // se croyait la page À propos, son bouton de langue ouvrait ar/a-propos/ et le test « bouton traduit » était rouge)
+      .replace(/(<html[^>]*?)\s+data-(?:chemin|langue-fixe|autre-langue)="[^"]*"/g, "$1")
+      .replace(/(<html[^>]*?)\s+data-(?:chemin|langue-fixe|autre-langue)="[^"]*"/g, "$1")
+      .replace(/(<html[^>]*?)\s+data-fixe(?=[\s>])/, "$1")
       .replace(/<meta (property="og:[^"]*"|name="twitter:[^"]*")[^>]*>\s*/g, "")
       .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(titre)} | ${esc(nom)}</title>`)
       .replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc(desc)}$2`)
