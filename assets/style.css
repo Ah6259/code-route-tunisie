@@ -2,7 +2,7 @@
 :root{
   --bg:#F3F6FA; --carte:#FFFFFF; --texte:#0E2238; --doux:#5A6878; --ligne:#DFE6EE;
   --p:#1F5FA8; --p-fonce:#174A84; --p-clair:#E5EEF8; --p-tres-clair:#F2F7FC;
-  --orange:#E8731A; --orange-clair:#FDF0E5;
+  --orange:#A84E0A; --orange-clair:#FDF0E5;
   --ok:#14804A; --ok-clair:#E4F4EA; --ko:#C2382B; --ko-clair:#FBE9E7;
   --ombre:0 1px 2px rgba(14,34,56,.06),0 8px 24px rgba(14,34,56,.07);
   --rayon:18px;
@@ -72,7 +72,7 @@ html[lang="ar"] h1{line-height:1.4}
 html[dir="rtl"] .btn .sens{transform:scaleX(-1)}
 .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .actions .btn{flex:1 1 180px}
-.partage{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#1FAF5A;color:#fff;text-decoration:none;font-weight:700;border-radius:12px;padding:12px 18px;font-size:15px}
+.partage{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#15803D;color:#fff;text-decoration:none;font-weight:700;border-radius:12px;padding:12px 18px;font-size:15px}
 .partage svg{width:18px;height:18px;fill:#fff}
 
 /* ---- carte d'appel examen ---- */
@@ -381,7 +381,7 @@ html[dir="rtl"] .btn-pass-grand svg{transform:scaleX(-1)}
   border-radius:12px;padding:11px 14px;cursor:pointer}
 .paiement summary.btn-clair{justify-content:center}
 .paiement summary.btn-clair::after{content:none}
-.btn-wa{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:800;font-size:15px;color:#fff;background:#1F9D55;
+.btn-wa{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:800;font-size:15px;color:#fff;background:#15803D;
   border-radius:12px;padding:12px 14px;margin:10px 0;text-align:center}
 .btn-wa svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .offre-pro{position:relative;background:var(--carte);border:2px solid #F2B33D;border-radius:var(--rayon);padding:22px 18px 18px;margin:12px 0 14px;box-shadow:var(--ombre)}
