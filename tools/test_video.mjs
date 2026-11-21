@@ -120,5 +120,9 @@ for (const page of ["index.html", APROPOS].filter(Boolean)) {
   const a = w.document.querySelector("#lien-video a");
   check(`lien « Vidéo de présentation » sur ${page} -> page vidéo`, !!a && a.getAttribute("href") === BASE + "video/");
 }
+// 7. la page vidéo est UNE seule adresse (?lang=) : jamais les liens hreflang ni la « langue fixe » de la page modèle (21/11/2026)
+{ const h = lire("video/index.html"), tete = (h.match(/<html[^>]*>/) || [""])[0];
+  check("page vidéo : pas de liens hreflang ni de langue fixe recopiés de la page modèle",
+    !/hreflang=/.test(h) && !/data-(fixe|chemin|langue-fixe|autre-langue)\b/.test(tete)); }
 console.log(pb.length ? `${pb.length} PROBLÈME(S) sur ${ok + pb.length} vérifications (page vidéo et partage)` : `TOUT PASSE (${ok} vérifications : page vidéo et partage)`);
 process.exit(pb.length ? 1 : 0);

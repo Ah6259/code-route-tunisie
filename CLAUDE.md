@@ -241,7 +241,6 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
 - **21/11/2026 — mode sombre lisible (Ahmed, tous les sites)** : bloc final de `assets/style.css` : en sombre, texte foncé sur les boutons
   d'accent devenus clairs (`.btn` dont « Examen blanc » et « Télécharger le QR code », « Envoyer », menu actif, lettres des réponses), bandeau
   du haut plus foncé, `.partage` vert plus foncé, fonds blancs codés en dur -> `--carte`. Mode clair inchangé. Contrôle « contraste < 3 » : 3 -> 0.
-  Version `?v=20261121a`. Attention : `node tools/page_video.mjs` refait mal `video/` depuis la page à langue fixe (test_video rouge) ->
-  pour un simple changement de version, remplacer le `?v=` dans `video/index.html`.
+  Version `?v=20261121a`. (`node tools/page_video.mjs` réparé le 21/11/2026 : il ne recopie plus la langue fixe de la page modèle ; test n° 7 de test_video.mjs.)
 - **21/11/2026 — mode CLAIR plus lisible (accord d'Ahmed : « foncer un peu »)** : bloc clair `:root` de `assets/style.css` : `--orange` #E8731A -> #A84E0A
   (« Examen blanc (30 questions) », montants des amendes), `.partage` #1FAF5A et `.btn-wa` #1F9D55 -> #15803D. Version `?v=20261121b`. Contrôle `--clair --seuil 4.5` : 0 ; sombre : 0.
