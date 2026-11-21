@@ -541,3 +541,23 @@ html[dir="rtl"] .paie-etapes>li::before{left:auto;right:12px}
 .qr-actions{margin:18px 0 4px}
 .qr-actions .btn{display:inline-flex;align-items:center;justify-content:center;max-width:100%;white-space:normal}
 
+
+/* ---- mode sombre lisible (21/11/2026) : en sombre, les couleurs d'accent deviennent claires -> texte foncé dessus ;
+   bandeau du haut plus foncé (texte blanc lisible) ; fonds blancs codés en dur -> fond de carte ---- */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .hero{background:linear-gradient(160deg,#1F5FA8 0%,#123A6B 100%)}
+  :root:not([data-theme="light"]) .btn:not(.second),
+  :root:not([data-theme="light"]) .menu a[aria-current="page"],
+  :root:not([data-theme="light"]) .bandeau-relecture,
+  :root:not([data-theme="light"]) .bandeau-relecture a,
+  :root:not([data-theme="light"]) .avis-envoyer,
+  :root:not([data-theme="light"]) .btn-video-site,
+  :root:not([data-theme="light"]) .choix-q.on .lettre,
+  :root:not([data-theme="light"]) .choix-q.bonne .lettre,
+  :root:not([data-theme="light"]) .choix-q.fausse .lettre,
+  :root:not([data-theme="light"]) .paie-etapes>li::before{color:#0C1520}
+  :root:not([data-theme="light"]) .boitier .choix-q[class*="bouton-"].on .lettre{color:#fff}
+  :root:not([data-theme="light"]) .appli-btn,
+  :root:not([data-theme="light"]) .btn-video-partager{background:var(--carte)}
+  :root:not([data-theme="light"]) .partage{background:#157A3F}
+}
