@@ -2,7 +2,8 @@
    Toutes les pages les reprennent d'ici (en-tête, pied de page, étiquettes « à jour au »).
    - "verifie_le" et "derniere_surveillance" sont mis à jour CHAQUE MOIS par le robot
      .github/workflows/surveillance.yml (tools/surveiller_source.py) : ne pas changer leur format (jj/mm/aaaa).
-   - "annee" : changer aussi les titres des pages avec  python tools/changer_annee.py 2026 2027
+   - "annee" : année CIVILE du pied de page (© …), mise à jour seule par tools/annee.py (robot annee.yml, le 1er du mois).
+     L'année des TITRES suit la règle de tools/annee.py ({{ANNEE}} dans tools/sources/ : « N », ou « N-N+1 » dès le 1er novembre).
    - "source" : empreinte du texte officiel lu pour écrire les questions. Si le fichier en ligne change,
      le robot ouvre une issue GitHub « questions à revoir ». Après relecture, mettre ici la nouvelle empreinte. */
 var REGLES_SITE = {
