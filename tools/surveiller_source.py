@@ -4,8 +4,9 @@
 2. Compare : « inchange », « change » (taille ou empreinte différente) ou « disparu » (erreur, page qui n'est plus un PDF).
 3. Met à jour assets/regles.js : derniere_surveillance = aujourd'hui (toujours),
    verifie_le = aujourd'hui (SEULEMENT si le texte n'a pas changé).
-   Au passage à une nouvelle année : change aussi l'année (tools/changer_annee.py).
-4. Change le ?v= des pages (cache des téléphones) et écrit le résultat pour le robot (GITHUB_OUTPUT).
+   Année civile du pied de page : tools/annee.py (l'année des TITRES suit la règle de tools/annee.py, robot annee.yml).
+4. Change le ?v= des pages sources (cache des téléphones), refait les pages (tools/construire.py : français, ar/, plan du site)
+   et écrit le résultat pour le robot (GITHUB_OUTPUT).
 
 Lecture lente et honnête : un seul fichier par mois, User-Agent qui dit qui nous sommes.
 """
@@ -21,7 +22,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from changer_annee import changer, pages  # noqa: E402
+import annee as ANNEE  # noqa: E402
 
 RACINE = Path(__file__).resolve().parent.parent
 REGLES = RACINE / "assets" / "regles.js"
@@ -41,8 +42,7 @@ def lire_regles():
     url = re.search(r'url:\s*"([^"]+)"', s).group(1)
     taille = int(re.search(r"taille:\s*(\d+)", s).group(1))
     sha = re.search(r'sha256:\s*"([0-9a-f]{64})"', s).group(1)
-    annee = int(re.search(r"annee:\s*(\d{4})", s).group(1))
-    return s, url, taille, sha, annee
+    return s, url, taille, sha
 
 
 def telecharger(url, essais=3):
@@ -71,15 +71,6 @@ def telecharger(url, essais=3):
     raise RuntimeError(f"téléchargement impossible : {derniere}")
 
 
-def changer_version_cache(jour):
-    v = jour.strftime("%Y%m%d") + "s"
-    for p in pages():
-        s = p.read_text(encoding="utf-8")
-        n = re.sub(r"\?v=\d+\w", "?v=" + v, s)
-        if n != s:
-            p.write_text(n, encoding="utf-8", newline="\n")
-
-
 def sortie(**kv):
     f = os.environ.get("GITHUB_OUTPUT")
     for k, v in kv.items():
@@ -90,7 +81,7 @@ def sortie(**kv):
 
 
 def main():
-    s, url, taille_ref, sha_ref, annee = lire_regles()
+    s, url, taille_ref, sha_ref = lire_regles()
     try:
         statut, contenu = telecharger(url)
         if not contenu.startswith(b"%PDF"):
@@ -110,9 +101,9 @@ def main():
     if etat == "inchange":
         n = re.sub(r'verifie_le:\s*"[^"]*"', f'verifie_le: "{date}"', n)
     REGLES.write_text(n, encoding="utf-8", newline="\n")
-    if etat == "inchange" and jour.year != annee:
-        changer(annee, jour.year)       # nouvelle année : titres, meta et regles.js
-    changer_version_cache(jour)
+    ANNEE.annee_civile_a_jour(jour)    # pied de page « © » = année civile (21/11/2026 : séparée de la vérification du texte)
+    ANNEE.changer_version_cache(jour, "s")   # regles.js a changé : ?v= des pages sources
+    ANNEE.appliquer(jour, "s")         # pages refaites (titres avec l'année de la règle, ar/, plan du site)
     sortie(etat=etat, detail=detail, date=date)
 
 

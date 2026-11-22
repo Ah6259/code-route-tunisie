@@ -244,3 +244,18 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   Version `?v=20261121a`. (`node tools/page_video.mjs` réparé le 21/11/2026 : il ne recopie plus la langue fixe de la page modèle ; test n° 7 de test_video.mjs.)
 - **21/11/2026 — mode CLAIR plus lisible (accord d'Ahmed : « foncer un peu »)** : bloc clair `:root` de `assets/style.css` : `--orange` #E8731A -> #A84E0A
   (« Examen blanc (30 questions) », montants des amendes), `.partage` #1FAF5A et `.btn-wa` #1F9D55 -> #15803D. Version `?v=20261121b`. Contrôle `--clair --seuil 4.5` : 0 ; sombre : 0.
+
+- **21-22/11/2026 — ANNÉE QUI CHANGE TOUTE SEULE + SEO (demande d'Ahmed)** : `tools/annee.py` = règle unique : du 1er janvier au 31 octobre
+  « N », du 1er novembre au 31 décembre « N-N+1 » (en novembre 2026 toutes les recherches qui amènent des visiteurs contiennent « 2026 »,
+  les élèves cherchent l'année suivante avant janvier). Dans `tools/sources/` et `TEXTES_AR` l'année s'écrit `{{ANNEE}}` (titres de
+  l'accueil, examen, entraînement, leçons ; h1 de l'accueil) ; `tools/construire.py` la remplace et vérifie que chaque titre tient
+  (≤ 70) avec « 2026-2027 ». `REGLES_SITE.annee` = année CIVILE du pied « © » (séparée de la date de vérification). Robot
+  `.github/workflows/annee.yml` le 1er et le 2 de chaque mois (5h11 Tunis) : `python tools/annee.py --appliquer` (année civile, ?v= si
+  regles.js change, pages FR + ar/ + plan du site), tests, enregistrement seulement si quelque chose change. `tools/changer_annee.py`
+  supprimé (il modifiait les pages fabriquées, défaites ensuite par construire.py) ; `surveiller_source.py` refait maintenant les pages.
+  Test test_site.mjs : même règle Python / JS sur 5 dates fixes, année des titres = règle du jour (`CODE_ROUTE_DATE=AAAA-MM-JJ` pour
+  essayer une autre date), aucune année ≥ 2026 écrite en dur dans les sources ni TEXTES_AR. `python tools/construire.py --verifier` existe.
+  Amendes : titre « barème 2025 » (jamais l'année future : la loi de finances peut changer les montants). SEO (Search Console : seul
+  l'accueil a des affichages, position ~9 ; les autres pages « découvertes, non indexées ») : liens des rubriques écrits dans la page
+  (visibles sans JavaScript), FAQ + JSON-LD « Où télécharger le code de la route en PDF ? » (texte officiel IORT 2012 sur transport.tn,
+  règles changées depuis). Version ?v=20261122a.

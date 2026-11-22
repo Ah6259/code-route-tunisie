@@ -1,0 +1,69 @@
+# Robot « Année » (21/11/2026, demande d'Ahmed : « l'année doit changer toute seule chaque année »).
+# Les gens tapent l'année dans Google (« code de la route tunisie 2026 »). Règle de tools/annee.py :
+#   du 1er janvier au 31 octobre : « N » ; du 1er novembre au 31 décembre : « N-N+1 » (on cherche déjà l'année suivante).
+# Le 1er et le 2 de chaque mois (2e essai si le 1er a échoué) : met l'année du pied de page (© , assets/regles.js) à l'année
+# civile, refait les pages (titres, descriptions, ar/, plan du site), lance les tests, enregistre SEULEMENT si quelque chose a changé.
+# Seule l'année des titres change : jamais le texte officiel, ni la date de vérification (robot surveillance.yml), ni un barème.
+name: annee
+
+on:
+  schedule:
+    - cron: "11 4 1,2 * *"    # le 1er et le 2 du mois à 4h11 UTC (5h11 à Tunis) : le 1er novembre et le 1er janvier compris
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: robots-site        # même groupe que les autres robots qui écrivent dans ce dépôt
+  cancel-in-progress: false
+
+jobs:
+  annee:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Annee du jour et pages refaites
+        id: annee
+        run: |
+          python tools/annee.py --appliquer
+          if git diff --quiet; then echo "change=non" >> "$GITHUB_OUTPUT"; else echo "change=oui" >> "$GITHUB_OUTPUT"; git diff --stat; fi
+
+      - name: Tests avant d'enregistrer
+        if: steps.annee.outputs.change == 'oui'
+        run: |
+          npm install --no-save --no-package-lock jsdom
+          python tools/construire.py --verifier
+          node tools/test_site.mjs
+          node tools/test_sw.mjs
+          node tools/test_video.mjs
+          node tools/test_avis.mjs
+
+      - name: Enregistrer
+        if: steps.annee.outputs.change == 'oui'
+        run: |
+          git config user.name "robot-annee"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u
+          git commit -m "Année des titres mise à jour automatiquement ($(python tools/annee.py | tail -n 1))"
+          git pull -q --rebase -X theirs --autostash
+          git push
+
+      - name: Prévenir si le robot a échoué
+        if: failure()
+        run: |
+          TITRE="Le robot de l'année a échoué"
+          CORPS="Journal : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          NUM=$(gh issue list --state open --search "$TITRE in:title" --json number --jq '.[0].number' || true)
+          if [ -n "$NUM" ]; then gh issue comment "$NUM" --body "$CORPS"; else gh issue create --title "$TITRE" --body "$CORPS"; fi

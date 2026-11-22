@@ -13,6 +13,10 @@ Pages qui gardent une seule adresse (comme avant, ?lang=ar) : video/ (fabriquée
 Le plan du site (sitemap.xml) est refait : pages françaises + pages arabes + video/, avec la date du dernier changement.
 
   python tools/construire.py            puis  node tools/test_site.mjs …
+  python tools/construire.py --verifier : ne change rien ; « ÉCHEC » (code 1) si une page fabriquée n'est pas à jour.
+ANNÉE AUTOMATIQUE (21/11/2026) : {{ANNEE}} dans une source ou dans TEXTES_AR est remplacé par l'année du jour selon la règle
+de tools/annee.py (« N », ou « N-N+1 » à partir du 1er novembre). Les pages changent donc seules le 1er novembre et le 1er janvier
+(robot .github/workflows/annee.yml). Chaque titre est vérifié ici avec la forme la plus longue (« 2026-2027 ») : il tiendra toujours.
 Toute modification d'une page se fait dans tools/sources/, jamais dans <chemin>/index.html ni ar/ (refaits ici).
 """
 import datetime as dt
@@ -24,11 +28,15 @@ import sys
 ICI = os.path.dirname(os.path.abspath(__file__))
 RACINE = os.path.dirname(ICI)
 SOURCES = os.path.join(ICI, "sources")
+sys.path.insert(0, ICI)
+import annee as ANNEE   # noqa: E402
+VERIFIER = "--verifier" in sys.argv[1:]
+DIFFERENCES = []
 URL_SITE = "https://code.clicvia.com/"
 NOM_AR = "قانون الطرقات تونس"
 # titre et description arabes de chaque page (Google les lit ; <= 70 et <= 165 caractères, voir titre_seo / desc_seo)
 TEXTES_AR = {
-    "": ("قانون الطرقات تونس 2026: أسئلة مجانية وامتحان تجريبي",
+    "": ("قانون الطرقات تونس {{ANNEE}}: أسئلة مجانية وامتحان تجريبي",
          "راجع مجانًا الامتحان النظري لرخصة السياقة في تونس: أسئلة حسب المحور مع التصحيح ومادة القانون، امتحان تجريبي ودروس، بالعربية والفرنسية."),
     "lecons/": ("دروس قانون الطرقات تونس: 10 دروس مجانية",
                 "10 دروس قصيرة ومجانية في قانون الطرقات التونسي: العلامات، الأولوية، التجاوز، السرعة، التوقف، الأضواء، الكحول، مع رسم و«ما يجب حفظه»."),
@@ -36,9 +44,9 @@ TEXTES_AR = {
                   "علامات المرور التونسية مرتبة حسب العائلة (خطر، منع، إلزام، إرشاد) مع معنى كل علامة ورسمها، مجانًا وبالعربية."),
     "entrainement/": ("تدريب على قانون الطرقات تونس: أسئلة حسب المحور (مجاني)",
                       "تدرّب على الامتحان النظري لرخصة السياقة: سؤال تلو الآخر مع التصحيح المفصّل ومادة القانون، 10 محاور، مجانًا وبالعربية."),
-    "examen/": ("امتحان تجريبي لقانون الطرقات تونس 2026: 30 سؤالًا",
+    "examen/": ("امتحان تجريبي لقانون الطرقات تونس {{ANNEE}}: 30 سؤالًا",
                 "امتحان تجريبي مجاني على نمط الامتحان الرسمي: 30 سؤالًا، النتيجة فورًا مع التصحيح، سلاسل مختلفة، بالعربية والفرنسية."),
-    "amendes/": ("الخطايا المرورية في تونس 2026: الجدول والعقوبات",
+    "amendes/": ("الخطايا المرورية في تونس: سلّم 2025 والعقوبات",
                  "جدول الخطايا المرورية في تونس (قانون المالية 2025): المبالغ حسب الصنف، سحب الرخصة، الكحول، الهاتف، السرعة، وطريقة الدفع."),
     "permis/": ("اجتياز رخصة السياقة في تونس: الأصناف والملف والمراحل",
                 "كيف تجتاز رخصة السياقة في تونس: أصناف الرخصة، الوثائق المطلوبة، مدرسة السياقة، الامتحان النظري والتطبيقي، الوكالة الفنية للنقل البري."),
@@ -186,7 +194,7 @@ def versions(source, chemin, miroir):
     ar = re.sub(r'<link rel="canonical" href="[^"]*">', lambda x: tete + f'\n<link rel="canonical" href="{url_ar}">', ar, count=1)
     ar = re.sub(r'<meta property="og:url" content="[^"]*">', f'<meta property="og:url" content="{url_ar}">', ar, count=1)
     ar = re.sub(r'<script type="application/ld\+json">.*?</script>\n?', "", ar, flags=re.S)   # FAQ Google écrite en français : pas sur la page arabe
-    titre_ar, desc_ar = TEXTES_AR.get(chemin, ("", ""))
+    titre_ar, desc_ar = (ANNEE.remplacer(x) for x in TEXTES_AR.get(chemin, ("", "")))
     if not titre_ar:
         raise SystemExit(f"ÉCHEC - {chemin or 'accueil'} : titre arabe manquant dans TEXTES_AR")
     t, d = H.escape(titre_seo(titre_ar), quote=False), H.escape(desc_seo(desc_ar))
@@ -200,8 +208,12 @@ def versions(source, chemin, miroir):
 
 def ecrire(chemin_fichier, contenu):
     dest = os.path.join(RACINE, chemin_fichier)
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
     ancien = open(dest, encoding="utf-8").read() if os.path.exists(dest) else None
+    if VERIFIER:
+        if ancien != contenu:
+            DIFFERENCES.append(chemin_fichier)
+        return ancien != contenu
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
     if ancien != contenu:
         open(dest, "w", encoding="utf-8", newline="\n").write(contenu)
     return ancien != contenu
@@ -233,12 +245,31 @@ def sitemap(chemins, changes):
     ecrire("sitemap.xml", contenu)
 
 
+def tient_toujours(source, chemin):
+    """Une année écrite {{ANNEE}} doit tenir dans les limites de Google sous sa forme la plus longue (« 2026-2027 »)."""
+    fautes = []
+    longue = source.replace(ANNEE.MARQUE, ANNEE.FORME_LA_PLUS_LONGUE)
+    t = H.unescape((re.search(r"<title>(.*?)</title>", longue, re.S) or [None, ""])[1])
+    d = H.unescape((re.search(r'<meta name="description" content="([^"]*)"', longue) or [None, ""])[1])
+    if len(t) > 70:
+        fautes.append(f"titre de {len(t)} caractères avec « {ANNEE.FORME_LA_PLUS_LONGUE} »")
+    if len(d) > 165:
+        fautes.append(f"description de {len(d)} caractères avec « {ANNEE.FORME_LA_PLUS_LONGUE} »")
+    ta, da = TEXTES_AR.get(chemin, ("", ""))
+    if ANNEE.MARQUE in ta and len(titre_seo(ta.replace(ANNEE.MARQUE, ANNEE.FORME_LA_PLUS_LONGUE))) != len(ta.replace(ANNEE.MARQUE, ANNEE.FORME_LA_PLUS_LONGUE)):
+        fautes.append("titre arabe coupé avec « 2026-2027 »")
+    if fautes:
+        raise SystemExit(f"ÉCHEC - {chemin or 'accueil'} : " + " ; ".join(fautes))
+
+
 def main():
     chemins = pages_sources()
     miroir = set(chemins)
     changes = set()
     for chemin in chemins:
         source = open(os.path.join(SOURCES, chemin, "index.html"), encoding="utf-8").read()
+        tient_toujours(source, chemin)
+        source = ANNEE.remplacer(source)
         fr, ar = versions(source, chemin, miroir)
         if ecrire(chemin + "index.html", fr):
             changes.add(chemin)
@@ -251,10 +282,20 @@ def main():
             if "index.html" in fichiers:
                 rel = os.path.relpath(dossier, base).replace(os.sep, "/")
                 if ("" if rel == "." else rel + "/") not in miroir:
+                    if VERIFIER:
+                        DIFFERENCES.append(f"ar/{rel}/index.html (en trop)")
+                        continue
                     os.remove(os.path.join(dossier, "index.html"))
-            if dossier != base and not os.listdir(dossier):
+            if not VERIFIER and dossier != base and not os.listdir(dossier):
                 os.rmdir(dossier)
     sitemap(chemins, changes)
+    if VERIFIER:
+        if DIFFERENCES:
+            print("ÉCHEC - pages fabriquées pas à jour (lancer python tools/construire.py puis envoyer) : " + ", ".join(DIFFERENCES))
+            return 1
+        print(f"OK - {len(chemins)} page(s) français + arabe à jour (année des titres : {ANNEE.annee_seo()})")
+        return 0
+    print(f"Année des titres : « {ANNEE.annee_seo()} » (tools/annee.py)")
     print(f"{len(chemins)} page(s) : français + arabe (ar/) ; {len(changes)} fichier(s) changé(s) ; plan du site refait")
 
 

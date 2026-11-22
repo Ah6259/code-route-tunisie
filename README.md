@@ -44,7 +44,7 @@ Adresse prévue : https://code.clicvia.com/
 | `sw.js`, `tools/test_sw.mjs` | Service worker (réseau d'abord, installation sur le téléphone) et son test |
 | `assets/avis.js`, `tools/test_avis.mjs` | Section « Votre avis » (envoi Formspree) et son test (envoi simulé) |
 | `tools/surveiller_source.py` | Surveillance mensuelle du texte officiel (appelé par le robot) |
-| `tools/changer_annee.py` | Change l'année des titres et balises meta |
+| `tools/annee.py` | Année automatique des titres ({{ANNEE}} : « N », ou « N-N+1 » dès le 1er novembre) et du pied de page ; robot `annee.yml` le 1er du mois |
 | `tools/captures.sh` | Captures mobiles 340/390 px, FR et AR (dossier `captures/`, non publié), via un serveur local |
 
 ## Plan de continuité
@@ -87,8 +87,8 @@ Une alerte déjà ouverte reçoit un commentaire au lieu d'une nouvelle issue (p
    `gh workflow run surveillance.yml -R Ah6259/code-route-tunisie`.
 
 ### Chaque année (rien à faire)
-L'année des titres, du © et la date « vérifié le » changent seules au premier passage du robot de l'année
-(si le texte officiel n'a pas changé). À la main si besoin : `python tools/changer_annee.py 2026 2027`.
+L'année des titres (« 2026 », puis « 2026-2027 » dès le 1er novembre, puis « 2027 » le 1er janvier) et celle du © changent
+seules, la date « vérifié le » au passage mensuel de la surveillance (si le texte officiel n'a pas changé). L'année change seule (robot `annee.yml`, règle de `tools/annee.py`) ; à la main si besoin : `python tools/annee.py --appliquer`.
 À surveiller en janvier : la **loi de finances** peut modifier les amendes (article 83 du Code de la route ; en 2025 : article 49,
 3 catégories 20/40/60 DT). Si le décret de répartition paraît : remplir `assets/amendes.js` puis lancer le test.
 

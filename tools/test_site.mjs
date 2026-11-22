@@ -389,7 +389,39 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
 const fichiersCode = [...PAGES, "assets/page.js", "assets/pass.js", "assets/quiz.js", "assets/pages.js", "assets/lecons.js", "assets/amendes.js", "assets/panneaux.js", "assets/protection.js"];
 const datesEnDur = fichiersCode.filter(f => /\b\d{2}\/\d{2}\/20\d{2}\b/.test(lire(f)));
 check(`aucune date jj/mm/aaaa écrite en dur hors de regles.js ${datesEnDur.join(" ")}`, datesEnDur.length === 0);
-check("regles.js : date au format jj/mm/aaaa et année cohérente", /^\d{2}\/\d{2}\/\d{4}$/.test(REGLES_SITE.verifie_le) && REGLES_SITE.verifie_le.endsWith(String(REGLES_SITE.annee)));
+// 21/11/2026 : REGLES_SITE.annee = année civile (pied « © ») ; la date de vérification du texte peut dater de l'année d'avant (janvier)
+check("regles.js : date au format jj/mm/aaaa, pas après l'année du site", /^\d{2}\/\d{2}\/\d{4}$/.test(REGLES_SITE.verifie_le) && Number(REGLES_SITE.verifie_le.slice(-4)) <= REGLES_SITE.annee);
+// ---- ANNÉE AUTOMATIQUE des titres (21/11/2026, demande d'Ahmed ; règle de tools/annee.py, robot .github/workflows/annee.yml) ----
+// du 1er janvier au 31 octobre de l'année N : « N » ; du 1er novembre au 31 décembre : « N-N+1 » (on cherche déjà l'année suivante)
+{ const regle = iso => { const [y, m] = iso.split("-").map(Number); return m >= 11 ? `${y}-${y + 1}` : String(y); };
+  const jour = process.env.CODE_ROUTE_DATE || new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Tunis" }).format(new Date());
+  const an = Number(jour.slice(0, 4)), attendue = regle(jour);
+  // même règle en Python (tools/annee.py) et ici, sur des dates fixes
+  const essais = { "2026-10-31": "2026", "2026-11-01": "2026-2027", "2026-12-31": "2026-2027", "2027-01-01": "2027", "2027-06-15": "2027" };
+  let py = null;
+  try { const { execFileSync } = await import("child_process");
+    py = Object.keys(essais).every(dt => execFileSync(process.env.PYTHON || "python3", ["-c", "import sys; sys.path.insert(0, 'tools'); import annee, datetime; print(annee.annee_seo(datetime.date.fromisoformat(sys.argv[1])))", dt], { cwd: root, encoding: "utf8" }).trim() === essais[dt]);
+  } catch (e) { py = null; }
+  check("année des titres : même règle dans tools/annee.py et dans ce test (31/10 -> N, 1er novembre -> N-N+1, 1er janvier -> N+1)" + (py === null ? " (Python absent : règle JS seule)" : ""),
+    Object.entries(essais).every(([dt, a]) => regle(dt) === a) && py !== false);
+  check(`année du pied de page (© REGLES_SITE.annee) = année civile ${an} (sinon : python tools/annee.py --appliquer)`, REGLES_SITE.annee === an);
+  const annees = t => [...t.matchAll(/(?<![\d\/.\-])(20\d\d(?:-20\d\d)?)(?![\d\/\-])/g)].map(m => m[1]);
+  const champs = h => [(h.match(/<title>([^<]*)<\/title>/) || [])[1] || "", (h.match(/<meta name="description" content="([^"]*)"/) || [])[1] || "",
+    ((h.match(/<h1[^>]*>([\s\S]*?)<\/h1>/) || [])[1] || "").replace(/<[^>]+>/g, " ")].join(" | ");
+  const fautes = [];
+  for (const p of [...PAGES, ...PAGES_AR]) {
+    for (const a of annees(champs(lire(p)))) if (a !== attendue && !(a.length === 4 && Number(a) < an)) fautes.push(`${p} : « ${a} »`);
+    const src = "tools/sources/" + p.replace(/^ar\//, "");
+    if (existsSync(join(root, src)) && /\{\{ANNEE\}\}/.test(champs(lire(src))) && !p.startsWith("ar/") && !champs(lire(p)).includes(attendue)) fautes.push(`${p} : « ${attendue} » absente`);
+  }
+  for (const p of PAGES.filter(x => existsSync(join(root, "tools/sources/" + x))))
+    for (const a of annees(champs(lire("tools/sources/" + p)))) if (Number(a.slice(0, 4)) >= 2026) fautes.push(`tools/sources/${p} : « ${a} » écrite en dur (écrire {{ANNEE}})`);
+  const blocAr = (lire("tools/construire.py").match(/TEXTES_AR = \{[\s\S]*?\n\}/) || [""])[0];
+  for (const a of annees(blocAr)) if (Number(a.slice(0, 4)) >= 2026) fautes.push(`TEXTES_AR : « ${a} » écrite en dur (écrire {{ANNEE}})`);
+  check(`année des titres = « ${attendue} » le ${jour} (titres, descriptions et h1 des pages FR + AR ; aucune année future ou périmée écrite en dur)` + (fautes.length ? " — " + fautes.slice(0, 5).join(" ; ") : ""), fautes.length === 0);
+  check("accueil : titre avec l'année du jour (« code de la route tunisie " + attendue + " »)", lire("index.html").includes(`<title>Code de la route Tunisie ${attendue} :`) && lire("ar/index.html").includes(attendue));
+  const robot = existsSync(join(root, ".github/workflows/annee.yml")) ? lire(".github/workflows/annee.yml") : "";
+  check("robot annee.yml : chaque mois, refait les pages (tools/annee.py --appliquer), teste, enregistre", /cron:/.test(robot) && robot.includes("tools/annee.py --appliquer") && robot.includes("tools/test_site.mjs") && robot.includes("git push") && robot.includes("robots-site")); }
 for (const p of PAGES) {
   const s = lire(p);
   check(`${p} : titre, description, canonical`, /<title>.{20,}<\/title>/.test(s) && /name="description" content=".{50,}"/.test(s) && s.includes('rel="canonical" href="https://code.clicvia.com/'));
