@@ -814,11 +814,23 @@ async function passExamen() {
   form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(20);
   check("pass/ : téléphone faux refusé, rien envoyé", appels.length === 0 && d.getElementById("pass-status").className === "err");
   form.querySelector("[name=telephone]").value = "+216 98 765 432";
+  // 24/11/2026 (règle d'Ahmed) : e-mail OBLIGATOIRE (le code et les étapes du paiement y seront envoyés)
+  { const em = form.querySelector('input[name="email"]');
+    check("pass/ : champ e-mail obligatoire (type email, required, juste après le téléphone) en français et en arabe",
+      !!em && em.type === "email" && em.required && em.id === "pass-email" && form.querySelector("[name=telephone]").nextElementSibling === d.querySelector('label[for="pass-email"]') &&
+      /<input id="pass-email" type="email" name="email" required/.test(lire("ar/pass/index.html")) && /<input id="pass-email" type="email" name="email" required/.test(lire("pass/index.html")));
+    em.value = "";
+    form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(20);
+    check("pass/ : sans e-mail -> message « Indiquez votre e-mail », rien envoyé", appels.length === 0 && d.getElementById("pass-status").className === "err" && texte(d.getElementById("pass-status")).includes("Indiquez votre e-mail"));
+    em.value = "pas-un-email@x";
+    form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(20);
+    check("pass/ : e-mail invalide refusé, rien envoyé", appels.length === 0 && d.getElementById("pass-status").className === "err" && texte(d.getElementById("pass-status")).includes("E-mail invalide"));
+    em.value = "candidat.test@gmail.com"; }
   [...form.querySelectorAll("input[name=formule]")].find(r => r.value.startsWith("30")).checked = true;
   form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(30);
   const envoi = appels[0] ? Object.fromEntries(appels[0].o.body.entries()) : {};
-  check("pass/ : envoi Formspree (nom, téléphone 8 chiffres, formule, ligne « pour_activer »)", appels.length === 1 && appels[0].u === "https://formspree.io/f/mwlpakqj" &&
-    envoi.nom === "Test Candidat" && envoi.telephone === "98765432" && envoi.formule === "30 jours - 19 DT" && String(envoi.pour_activer).includes("action: paye") && String(envoi.pour_activer).includes("jours: 30"));
+  check("pass/ : envoi Formspree (nom, téléphone 8 chiffres, e-mail, formule, ligne « pour_activer »)", appels.length === 1 && appels[0].u === "https://formspree.io/f/mwlpakqj" &&
+    envoi.nom === "Test Candidat" && envoi.telephone === "98765432" && envoi.formule === "30 jours - 19 DT" && envoi.email === "candidat.test@gmail.com" && String(envoi.pour_activer).includes("action: paye") && String(envoi.pour_activer).includes("jours: 30"));
   check("pass/ : après l'envoi, confirmation + paiement + « Vous recevrez votre code d'accès par WhatsApp »", form.hidden && !d.getElementById("apres-pass").hidden &&
     !d.getElementById("apres-paye").hidden && texte(d.getElementById("apres-paye")).includes("Vous recevrez votre code d'accès par WhatsApp") &&
     decodeURIComponent(d.getElementById("pass-preuve-apres").href).includes("Test Candidat — 98765432"));

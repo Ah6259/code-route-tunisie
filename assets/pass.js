@@ -174,6 +174,9 @@ function brancherFormulairePass() {
     const f = form.querySelector('input[name="formule"]:checked');
     if (!val("nom")) { dire("err", "Indiquez votre nom.", "اكتب اسمك."); champ("nom").focus(); return; }
     if (!tel) { dire("err", "Téléphone : 8 chiffres, par exemple 24 321 390.", "الهاتف: " + iso("8") + " أرقام، مثال " + iso("24 321 390") + "."); champ("telephone").focus(); return; }
+    const email = val("email");
+    if (!email) { dire("err", "Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement.", "اكتب بريدك الإلكتروني: يصلك عليه رمزك وخطوات الدفع."); champ("email").focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { dire("err", "E-mail invalide : vérifiez l'adresse.", "البريد الإلكتروني غير صحيح: تحقّق من العنوان."); champ("email").focus(); return; }
     if (!f) { dire("err", "Choisissez une formule.", "اختر صيغة."); return; }
     if (!champ("conditions").checked) { dire("err", "Cochez « J'accepte les conditions du Pass Examen ».", "يجب الموافقة على شروط باقة الامتحان."); return; }
     const fini = () => {
@@ -189,9 +192,10 @@ function brancherFormulairePass() {
     champ("page").value = location.href.split("#")[0];
     const donnees = new FormData(form);
     donnees.set("telephone", tel);
+    donnees.set("email", email);
     // ligne prête à recopier dans le bouton GitHub « pass » (dépôt privé)
     const jours = (f.value.match(/\d+/) || [""])[0];
-    donnees.set("pour_activer", "action: paye ; nom: " + val("nom") + " ; telephone: " + tel + " ; jours: " + jours);
+    donnees.set("pour_activer", "action: paye ; nom: " + val("nom") + " ; telephone: " + tel + " ; email: " + email + " ; jours: " + jours);
     bouton.disabled = true;
     dire("", "Envoi…", "جارٍ الإرسال…");
     fetch(form.getAttribute("action"), { method: "POST", body: donnees, headers: { "Accept": "application/json" } })

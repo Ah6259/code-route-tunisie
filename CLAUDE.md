@@ -268,3 +268,9 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   l'accueil a des affichages, position ~9 ; les autres pages « découvertes, non indexées ») : liens des rubriques écrits dans la page
   (visibles sans JavaScript), FAQ + JSON-LD « Où télécharger le code de la route en PDF ? » (texte officiel IORT 2012 sur transport.tn,
   règles changées depuis). Version ?v=20261122a.
+
+- **24/11/2026 — E-MAIL OBLIGATOIRE dans le formulaire du Pass (règle d'Ahmed, tous les Pass)** : champ `#pass-email` (`type="email" name="email" required`)
+  juste après le téléphone dans `tools/sources/pass/index.html` (FR + AR fabriqués par construire.py) ; `assets/pass.js` refuse l'envoi sans e-mail
+  ou avec un e-mail invalide, l'envoie à Formspree et l'ajoute à `pour_activer` (un e-mail automatique enverra bientôt le code et les étapes du paiement).
+  Conditions du Pass (données gardées) et note du formulaire mentionnent l'e-mail. Tests dans test_site.mjs (champ FR/AR, sans e-mail, e-mail invalide,
+  envoi). Aucune adresse e-mail écrite dans le code (le test « aucun secret ni adresse e-mail » l'interdit). Version `?v=20261124a`.
