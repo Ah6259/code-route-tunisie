@@ -303,6 +303,8 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
     ["installation et hors connexion", existsSync(join(root, "sw.js")), /Installer sur le téléphone/],
     ["vidéo de présentation", existsSync(join(root, "video/index.html")), /Vidéo de présentation : courte vidéo/],
     ["Pass Examen (prix, code, Écouter)", existsSync(join(root, "pass/index.html")) && /Écouter/.test(js), /Pass Examen \(payant\)[\s\S]*Écouter[\s\S]*9 DT pour 7 jours[\s\S]*code/],
+    // 25/11/2026 (règle commune § 70) : code de commande créé au formulaire, motif du paiement, commande gardée et essayée toute seule
+    ["numéro de commande du Pass (motif du paiement)", /pass-commande/.test(js), /numéro de commande[\s\S]*motif du paiement[\s\S]*essaie ce code tout seul/],
     ["vie privée", true, /Pas de compte\. Votre progression, vos scores et votre code restent dans votre téléphone/],
     ["surveillance mensuelle du texte officiel", existsSync(join(root, "tools/surveiller_source.py")), /Chaque mois, un robot vérifie/],
     ["site indépendant", true, /site est indépendant/]];
@@ -467,6 +469,7 @@ check("robot surveillance.yml : mensuel, groupe de concurrence, issue + commit",
 
 await nouvellesRubriques();
 await passExamen();
+await parcoursCommande();
 await rappelPass();
 await boutonPartager();
 // ---- Affichage : éléments cachés et faux boutons (06/10/2026) ----
@@ -724,6 +727,136 @@ async function nouvellesRubriques() {
   check(`aucun secret ni adresse e-mail dans le site ${secrets.map(f => f.slice(root.length))}`, secrets.length === 0);
 }
 
+// ---- 5 ter. PARCOURS COMMUN DU PASS (25/11/2026, règle commune § 70, projets-ahmed/outils communs/pass-commun/CONSIGNES.md) ----
+// code de commande créé AU FORMULAIRE (même alphabet et même longueur que les codes d'accès), « Dernière étape », mémoire « pass-commande »
+async function parcoursCommande() {
+  const { webcrypto, pbkdf2Sync } = await import("crypto");
+  const pause = ms => new Promise(r => setTimeout(r, ms));
+  const FORME = /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;          // 8 caractères sans O/0/I/1 = format du bouton « pass » (dépôt privé)
+  const SEL = "sel-de-test", TOURS = 1000;
+  const h = c => pbkdf2Sync(c, SEL, TOURS, 32, "sha256").toString("hex");
+  const jour = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); };
+  const brancher = (w, codes = []) => {                 // vraie vérification (PBKDF2 du navigateur) sur une liste factice
+    Object.defineProperty(w, "crypto", { value: webcrypto, configurable: true });
+    w.fetch = (u, o) => { if (o && o.method === "POST") { w.envois.push(Object.fromEntries(o.body.entries())); return Promise.resolve({ ok: true, status: 200 }); }
+      return Promise.resolve({ ok: true, status: 200, json: async () => ({ sel: SEL, tours: TOURS, codes: codes.map(c => ({ h: h(c), fin: "2099-12-31" })) }) }); };
+    w.envois = [];
+  };
+  const remplir = (w, { nom = "Test Candidat", tel = "98765432", email = "candidat.test@gmail.com", conditions = true } = {}) => {
+    const f = w.document.getElementById("pass-form");
+    f.querySelector("[name=nom]").value = nom; f.querySelector("[name=telephone]").value = tel; f.querySelector("[name=email]").value = email;
+    [...f.querySelectorAll("input[name=formule]")].find(r => r.value.startsWith("30")).checked = true;
+    f.querySelector("[name=conditions]").checked = conditions;
+    return f;
+  };
+  const envoyer = async (w, f) => { f.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(40); };
+  const tousLs = w => Object.keys(w.localStorage).map(k => w.localStorage.getItem(k)).join(" ");
+
+  // -- formulaire : 5 champs obligatoires (FR + AR), rien n'est envoyé s'il en manque un
+  for (const lang of ["fr", "ar"]) {
+    const src = lire(lang === "fr" ? "pass/index.html" : "ar/pass/index.html");
+    check(`commande (${lang}) : 5 champs obligatoires dans la page (nom, téléphone, e-mail, formule, conditions)`,
+      /id="pass-nom" name="nom" required/.test(src) && /id="pass-tel" name="telephone" required/.test(src) && /name="email" required/.test(src) &&
+      (src.match(/type="radio" name="formule"/g) || []).length === 3 && /name="conditions" value="oui" required/.test(src));
+  }
+  let w = await page("pass/index.html"), d = w.document; brancher(w);
+  for (const [manque, opts] of [["nom", { nom: "" }], ["téléphone", { tel: "" }], ["e-mail", { email: "" }], ["conditions", { conditions: false }]]) {
+    await envoyer(w, remplir(w, opts));
+    check(`commande : sans ${manque}, rien n'est envoyé ni gardé, pas de code`, w.envois.length === 0 && !w.localStorage.getItem("pass-commande") && d.getElementById("apres-pass").hidden);
+  }
+  { const f = remplir(w); f.querySelectorAll("input[name=formule]").forEach(r => { r.checked = false; }); await envoyer(w, f);
+    check("commande : sans formule, rien n'est envoyé", w.envois.length === 0 && /formule/.test(texte(d.getElementById("pass-status")))); }
+
+  // -- envoi : code créé au formulaire, affiché en gros, motif = code, WhatsApp avec le code, Formspree, mémoire du téléphone
+  { let n = 0; w.fetch = () => { n++; return Promise.reject(new Error("réseau")); };
+    const f = remplir(w); await envoyer(w, f); const c1 = f.dataset.code; await envoyer(w, f);
+    check("commande : échec du réseau -> formulaire gardé, même code au 2e essai, rien gardé dans le téléphone",
+      n === 2 && FORME.test(w.joliCode(c1 || "")) && f.dataset.code === c1 && !f.hidden && !w.localStorage.getItem("pass-commande"));
+    brancher(w); }
+  await envoyer(w, remplir(w));
+  const env = w.envois[0] || {}, code = env.code || "";
+  check("commande : code au bon format (8 caractères sans O/0/I/1, ex. ABCD-EF23 : le format que le bouton « pass » accepte)", FORME.test(code));
+  check("commande : code et ligne « pour_activer … ; code: <CODE> » envoyés à Formspree (objet de l'e-mail avec le code)",
+    w.envois.length === 1 && String(env.pour_activer).endsWith(" ; code: " + code) && String(env._subject).includes(code));
+  const apres = d.getElementById("apres-pass"), gros = d.getElementById("cmd-code");
+  const visibleEl = el => { for (let e = el; e; e = e.parentElement) if (e.hidden || w.getComputedStyle(e).display === "none") return false; return !!el; };
+  check("e-mail automatique PAS encore en service : « Vous le recevez aussi par e-mail » présent mais CACHÉ (EMAIL_AUTO = false), annoncé nulle part ailleurs",
+    /const EMAIL_AUTO = false;/.test(lire("assets/pass.js")) && !!d.querySelector(".cmd-email") && !visibleEl(d.querySelector(".cmd-email")) &&
+    !/envoyé par e-mail|ويُرسل عبر البريد|يصلك أيضًا عبر البريد الإلكتروني\)/.test(lire("pass/index.html") + lire("ar/pass/index.html") + lire("pass/conditions/index.html") + lire("ar/pass/conditions/index.html")));
+  check("Dernière étape : code en GROS (dir=ltr) + « C'est votre numéro de commande : écrivez-le dans le motif du paiement, il nous sert à reconnaître votre paiement. » (phrase e-mail dans le code, cachée)",
+    !apres.hidden && d.getElementById("pass-form").hidden && texte(gros) === code && gros.getAttribute("dir") === "ltr" && gros.parentElement.contains(d.querySelector(".cmd-explique")) &&
+    texte(d.querySelector(".cmd-explique")).includes("C'est votre numéro de commande : écrivez-le dans le motif du paiement, il nous sert à reconnaître votre paiement.") &&
+    d.querySelector(".cmd-explique .cmd-email").textContent.includes("Vous le recevez aussi par e-mail."));
+  const etapes = apres.querySelectorAll(".paie-etapes > li");
+  check("Dernière étape : paiement en 3 étapes (D17 / IZI, écrans d'exemple, 24 321 390), motif = le code",
+    etapes.length === 3 && !!apres.querySelector('img[src$="d17.png"]') && !!apres.querySelector('img[src$="izi.png"]') && !!apres.querySelector('img[src$="transfert-d17.svg"]') &&
+    texte(etapes[1]).includes("24 321 390") && texte(etapes[2]).startsWith("Motif : " + code));
+  const lien = d.getElementById("pass-preuve-apres");
+  check("Dernière étape : bouton vert WhatsApp pré-rempli « Voici ma preuve de paiement — Code de la route Tunisie — code <CODE> — <formule> »",
+    !!lien && lien.classList.contains("btn-wa") && decodeURIComponent(lien.href) === "https://wa.me/21624321390?text=Voici ma preuve de paiement — Code de la route Tunisie — code " + code + " — 30 jours - 19 DT");
+  check("Dernière étape : ce qui se passe ensuite + filet « Vous avez oublié le code dans le motif ? Ce n'est pas grave… »",
+    /Ensuite : dès que votre paiement est vérifié/.test(texte(apres)) && texte(apres).includes("Vous avez oublié le code dans le motif ? Ce n'est pas grave : envoyez quand même la preuve sur WhatsApp, nous retrouvons votre demande.") && !!d.getElementById("nouvelle-commande"));
+  let memo = {}; try { memo = JSON.parse(w.localStorage.getItem("pass-commande")); } catch (e) {}
+  check("mémoire « pass-commande » = {code, formule, date} seulement", Object.keys(memo || {}).join() === "code,formule,date" && memo.code === code.replace("-", "") && memo.formule === "30 jours - 19 DT" && memo.date === jour(0));
+  check("aucune donnée personnelle dans la mémoire du téléphone (ni nom, ni téléphone, ni e-mail)", !/Test Candidat|98765432|candidat\.test/.test(tousLs(w)));
+  { const codes = new Set(Array.from({ length: 300 }, () => w.nouveauCodeCommande()));
+    check("codes créés par la page : toujours 8 caractères de l'alphabet du dépôt privé (300 essais, tous différents), crypto.getRandomValues",
+      codes.size === 300 && [...codes].every(c => FORME.test(w.joliCode(c))) && /crypto\.getRandomValues/.test(lire("assets/pass.js"))
+      && /alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"/.test(lire("assets/pass.js")) && /longueur: 8,/.test(lire("assets/pass.js"))); }
+  { const wg = await page("pass/index.html"); brancher(wg); const f = remplir(wg); f.querySelector("[name=_gotcha]").value = "robot"; await envoyer(wg, f);
+    check("piège rempli (robot) : rien envoyé, rien gardé", wg.envois.length === 0 && !wg.localStorage.getItem("pass-commande")); }
+
+  // -- retour sur la page : bandeau « commande en attente », code essayé tout seul
+  const C = code.replace("-", ""), cmd = { "pass-commande": { code: C, formule: "30 jours - 19 DT", date: jour(-3) } };
+  w = await page("pass/index.html", { ls: cmd }); d = w.document; brancher(w); await w.eval("reprendreCommande()"); await pause(50);
+  const zone = d.getElementById("commande-attente");
+  check("retour : bandeau « Votre commande en attente : code <CODE> — <formule> » EN HAUT (avant « J'ai un code »), 3 étapes + WhatsApp avec le code",
+    !!zone && (zone.compareDocumentPosition(d.getElementById("code-acces")) & 4) && texte(d.getElementById("cmd-attente")) === "Votre commande en attente : code " + code + " — 30 jours - 19 DT" &&
+    zone.querySelectorAll(".paie-etapes > li").length === 3 && decodeURIComponent(zone.querySelector("#pass-preuve-apres").href).includes("code " + code) && d.getElementById("pass-form").hidden);
+  check("retour : code pas encore activé -> « En attente de votre paiement », commande gardée, Pass fermé",
+    texte(d.getElementById("cmd-etat")).startsWith("En attente de votre paiement") && !!w.localStorage.getItem("pass-commande") && !w.passActif());
+  clic(w, d.getElementById("nouvelle-commande"));
+  check("bouton « Nouvelle commande » : commande effacée, formulaire de retour", !w.localStorage.getItem("pass-commande") && !d.getElementById("commande-attente") && !d.getElementById("pass-form").hidden && d.getElementById("apres-pass").hidden);
+  w = await page("pass/index.html", { ls: cmd }); d = w.document; brancher(w, [C]); await w.eval("reprendreCommande()"); await pause(50);
+  check("retour : code ACTIVÉ par Ahmed -> Pass ouvert tout seul (même vérification que « J'ai un code »), clé « pass-commande » effacée",
+    w.passActif() && JSON.parse(w.localStorage.getItem("crt-pass-v1")).code === C && !w.localStorage.getItem("pass-commande") && !d.getElementById("commande-attente")
+    && texte(d.getElementById("code-status")).includes("Votre paiement est validé"));
+  w = await page("pass/index.html", { ls: { "pass-commande": { code: C, formule: "30 jours - 19 DT", date: jour(-61) } } }); d = w.document;
+  check("commande gardée 60 jours au plus (plus vieille : effacée, pas de bandeau)", !w.localStorage.getItem("pass-commande") && !d.getElementById("commande-attente"));
+  w = await page("pass/index.html", { ls: { "pass-commande": "{abîmé" } }); d = w.document;
+  check("mémoire abîmée : pas de plantage, effacée", w.fautes.length === 0 && !w.localStorage.getItem("pass-commande") && !d.getElementById("commande-attente"));
+
+  // -- en arabe
+  w = await page("pass/index.html", { lang: "ar" }); d = w.document; brancher(w);
+  await envoyer(w, remplir(w));
+  const ca = (w.envois[0] || {}).code || "", ap = d.getElementById("apres-pass");
+  check("arabe : Dernière étape (code en gros, « هذا رقم طلبك: اكتبه في خانة سبب الدفع، يساعدنا على التعرّف على دفعتك. » ; phrase e-mail cachée)",
+    FORME.test(ca) && texte(d.getElementById("cmd-code")) === ca && texte(ap).includes("هذا رقم طلبك: اكتبه في خانة سبب الدفع، يساعدنا على التعرّف على دفعتك.") &&
+    d.querySelector(".cmd-email").textContent.includes("يصلك أيضًا عبر البريد الإلكتروني.") && d.querySelector(".cmd-email").hidden);
+  check("arabe : motif = le code, numéro 24321390 sans espaces, filet « نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك. »",
+    texte(ap.querySelectorAll(".paie-etapes > li")[2]).includes(ca) && texte(ap.querySelectorAll(".paie-etapes > li")[1]).includes("24321390") && !texte(ap).includes("24 321 390") &&
+    texte(ap).includes("نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك."));
+  check("arabe : WhatsApp « هذا وصل الدفع — قانون الطرقات تونس — الرمز <CODE> — <formule> »",
+    decodeURIComponent(d.getElementById("pass-preuve-apres").href) === "https://wa.me/21624321390?text=هذا وصل الدفع — قانون الطرقات تونس — الرمز " + ca + " — 30 يومًا - 19 د");
+  w = await page("pass/index.html", { lang: "ar", ls: cmd }); d = w.document; brancher(w); await w.eval("reprendreCommande()"); await pause(50);
+  check("arabe : retour = bandeau « طلبك في الانتظار: الرمز <CODE> » + « في انتظار دفعتك »", texte(d.getElementById("cmd-attente")).startsWith("طلبك في الانتظار: الرمز " + code) && texte(d.getElementById("cmd-etat")).startsWith("في انتظار دفعتك"));
+
+  // -- plus jamais « motif : nom et téléphone » (pages FR + AR, scripts) ; étape 1 = nom, téléphone WhatsApp et e-mail
+  { const mal = [], MOTS = /nom et (votre )?téléphone|votre nom et votre téléphone|اسمك ورقم هاتفك|اسم المشتري ورقم هاتفه|Nom et t%C3%A9l%C3%A9phone/i;
+    for (const p of PAGES) for (const f of [p, "ar/" + p]) if (existsSync(join(root, f)) && MOTS.test(lire(f))) mal.push(f);
+    for (const f of ["assets/pass.js", "assets/pages.js", "llms.txt"]) if (existsSync(join(root, f)) && MOTS.test(lire(f).replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, ""))) mal.push(f);
+    check(`plus aucun « motif : nom et téléphone » (pages FR + AR, scripts) ${mal}`, mal.length === 0);
+    const ccm = (await page("pass/index.html")).document.querySelector(".etapes"), cca = (await page("pass/index.html", { lang: "ar" })).document.querySelector(".etapes");
+    check("« Comment ça marche ? » : étape 1 = nom, téléphone WhatsApp et e-mail ; numéro de commande = motif (FR + AR)",
+      texte(ccm.children[0]).includes("nom, téléphone WhatsApp et e-mail") && /motif du paiement/.test(texte(ccm.children[1])) &&
+      texte(cca.children[0]).includes("الاسم وهاتف واتساب والبريد الإلكتروني") && /سبب الدفع/.test(texte(cca.children[1])));
+    const cond = texte((await page("pass/conditions/index.html")).document.querySelector(".conditions")), conda = texte((await page("pass/conditions/index.html", { lang: "ar" })).document.querySelector(".conditions"));
+    const apa = texte((await page("a-propos/index.html", { lang: "ar" })).document.body);
+    check("« Comment fonctionne le site ? » en arabe : رقم طلب = سبب الدفع, essayé tout seul", /رقم طلب[\s\S]*سبب الدفع[\s\S]*يجرّب هذا الرمز وحده/.test(apa));
+    check("conditions (FR + AR) : motif = numéro de commande, il devient le code d'accès, motif oublié = preuve WhatsApp suffit",
+      cond.includes("avec pour motif ce numéro de commande") && cond.includes("devient le code d'accès") && cond.includes("Motif oublié") && conda.includes("رقم الطلب هذا في خانة سبب الدفع")); }
+}
+
 // ---- 5 bis. Rappel de fin du Pass (20/10/2026, demande d'Ahmed) : merci + date de fin + Renouveler + Donner mon avis ----
 async function rappelPass() {
   const jour = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); };
@@ -797,8 +930,8 @@ async function passExamen() {
     ["Examens blancs illimités", "Statistiques par thème", "Révision de vos erreurs", "Pas de renouvellement automatique"].every(m => t.includes(m)));
   check("pass/ : aucun prix « TTC » ni nom de société", !/TTC|SUARL|S\.U\.A\.R\.L/i.test(lire("pass/index.html") + lire("pass/conditions/index.html")));
   const pay = d.getElementById("paiement");
-  check("pass/ : bouton « Paiement » (<details>) avec D17 et IZI (liens vers les applications officielles) au 24 321 390, mode d'emploi, plus de Wafacash, motif nom + téléphone", !!pay && pay.tagName === "DETAILS" && texte(pay.querySelector("summary")).startsWith("Paiement") &&
-    ["D17", "IZI", "Transfert rapide", "24 321 390", "votre nom et votre téléphone"].every(m => texte(pay).includes(m)) && !/Wafacash/i.test(pay.outerHTML) && ["tn.mobipost", "tn.izi.consumer", "id1475640303", "id1603653941"].every(u => pay.querySelector(`a[href*="${u}"]`)));
+  check("pass/ : bouton « Paiement » (<details>) avec D17 et IZI (liens vers les applications officielles) au 24 321 390, mode d'emploi, plus de Wafacash, motif = numéro de commande (25/11/2026)", !!pay && pay.tagName === "DETAILS" && texte(pay.querySelector("summary")).startsWith("Paiement") &&
+    ["D17", "IZI", "Transfert rapide", "24 321 390", "votre numéro de commande"].every(m => texte(pay).includes(m)) && !/Wafacash/i.test(pay.outerHTML) && ["tn.mobipost", "tn.izi.consumer", "id1475640303", "id1603653941"].every(u => pay.querySelector(`a[href*="${u}"]`)));
   check("paiement : logos D17 / IZI dans les boutons, étape 2 pour les deux applications, bouton « ? » avec les deux écrans d'exemple", ["d17.png", "izi.png", "transfert-d17.svg", "transfert-izi.svg"].every(f => existsSync(join(root, "assets/paiement", f))) && /class="appli-btn"[^>]*><img src="\.\.\/assets\/paiement\/d17\.png"/.test(lire("pass/index.html")) && /class="aide-transfert"/.test(lire("pass/index.html")) && /Transfert d’argent/.test(lire("pass/index.html")));
   check("paiement simple et rassurant (règle commune du 08/10/2026) : 3 étapes numérotées, phrase de confiance, description de l'offre cachée quand « Paiement » est ouvert", /<ol class="paie-etapes">/.test(lire("pass/index.html")) && /class="paie-confiance"/.test(lire("pass/index.html")) && /class="avantages[^"]*masque-si-paiement/.test(lire("pass/index.html")) && lire("assets/style.css").includes(":has(> details.paiement[open]) > .masque-si-paiement{display:none}"));
   const wa = d.getElementById("pass-preuve");
@@ -829,11 +962,10 @@ async function passExamen() {
   [...form.querySelectorAll("input[name=formule]")].find(r => r.value.startsWith("30")).checked = true;
   form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); await pause(30);
   const envoi = appels[0] ? Object.fromEntries(appels[0].o.body.entries()) : {};
-  check("pass/ : envoi Formspree (nom, téléphone 8 chiffres, e-mail, formule, ligne « pour_activer »)", appels.length === 1 && appels[0].u === "https://formspree.io/f/mwlpakqj" &&
-    envoi.nom === "Test Candidat" && envoi.telephone === "98765432" && envoi.formule === "30 jours - 19 DT" && envoi.email === "candidat.test@gmail.com" && String(envoi.pour_activer).includes("action: paye") && String(envoi.pour_activer).includes("jours: 30"));
-  check("pass/ : après l'envoi, confirmation + paiement + « Vous recevrez votre code d'accès par WhatsApp »", form.hidden && !d.getElementById("apres-pass").hidden &&
-    !d.getElementById("apres-paye").hidden && texte(d.getElementById("apres-paye")).includes("Vous recevrez votre code d'accès par WhatsApp") &&
-    decodeURIComponent(d.getElementById("pass-preuve-apres").href).includes("Test Candidat — 98765432"));
+  check("pass/ : envoi Formspree (nom, téléphone 8 chiffres, e-mail, formule, ligne « pour_activer » avec le code)", appels.length === 1 && appels[0].u === "https://formspree.io/f/mwlpakqj" &&
+    envoi.nom === "Test Candidat" && envoi.telephone === "98765432" && envoi.formule === "30 jours - 19 DT" && envoi.email === "candidat.test@gmail.com" && String(envoi.pour_activer).includes("action: paye") && String(envoi.pour_activer).includes("jours: 30")
+    && String(envoi.pour_activer).endsWith(" ; code: " + envoi.code));
+  check("pass/ : après l'envoi, « Dernière étape » à la place du formulaire", form.hidden && !d.getElementById("apres-pass").hidden && texte(d.getElementById("cmd-titre")).includes("Dernière étape"));
   // 20/10/2026 (décision d'Ahmed : « Enlève tous les essais gratuits ») : plus de bouton d'essai ; un essai déjà commencé va jusqu'à sa fin
   w = await page("pass/index.html"); d = w.document;
   check("pass/ : plus aucun essai à commencer (ni bouton, ni section, ni lien), le bouton doré mène au formulaire",

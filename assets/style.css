@@ -421,6 +421,18 @@ html[dir="rtl"] .abo input[name=telephone],html[dir="rtl"] .abo input[name=code]
 .apres-abo{background:var(--ok-clair);border:1px solid var(--ok);border-radius:14px;padding:16px}
 .apres-abo h3{margin:0 0 8px;font-size:16.5px}
 .apres-abo p{margin:0 0 8px}
+/* parcours commun du Pass (25/11/2026, règle commune § 70) : numéro de commande créé au formulaire, « Dernière étape », commande en attente */
+.cmd-code-zone{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:4px 0 10px}
+.cmd-code{display:inline-block;font-size:28px;font-weight:800;letter-spacing:2px;color:var(--texte);background:var(--carte);border:2px dashed var(--p);border-radius:12px;padding:6px 14px;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+.cmd-explique{flex:1 1 220px;min-width:0;margin:0!important;font-weight:600}
+.cmd-attente{font-weight:800}
+.cmd-etat{font-weight:700}
+.cmd-etat:empty{display:none}
+.cmd-filet{font-size:14px}
+.cmd-actions{margin:10px 0 0!important}
+.cmd-actions .btn-clair{width:100%;cursor:pointer;font-family:inherit}
+.commande-attente{border-top:4px solid var(--p)}
+.commande-attente .apres-abo{border:0;padding:0;background:none}
 .conditions h2{font-size:16.5px;margin:16px 0 6px}
 .conditions h2:first-child{margin-top:0}
 .conditions p{margin:0 0 8px}

@@ -105,6 +105,10 @@ preuves (`../sources/`, `../preuves…/`) sont hors du dépôt : les garder sauv
 - **Pass** : examens blancs illimités, statistiques par thème, révision de « Mes erreurs », écoute des questions.
   9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours ; plus d'essai gratuit depuis le 20/10/2026 ; pas de renouvellement automatique.
 - Paiement D17 / IZI au 24 321 390 + preuve WhatsApp ; demande par le formulaire Formspree (`mwlpakqj`).
+- **Depuis le 25/11/2026 (parcours commun du Pass)** : le formulaire crée tout de suite le **numéro de commande** (même format que les
+  codes d'accès) = motif du paiement ; une fois le paiement vérifié, Ahmed l'active tel quel (bouton « pass », action `paye` + code + nom +
+  téléphone, recopiés de la ligne `pour_activer` de l'e-mail) et il devient le code d'accès ; le téléphone garde la commande (`pass-commande`)
+  et l'essaie tout seul.
 - Activation **sans PC** : dépôt privé `Ah6259/code-route-pass`, bouton « pass » (essai, paye, arret, liste) dans l'application
   GitHub ; il publie dans `donnees/pass.json` seulement l'empreinte de chaque code et sa date de fin. Mode d'emploi : README du
   dépôt privé. Fichiers : `assets/pass.js`, `pass/`, `donnees/pass.json`. Test : `node tools/test_site.mjs` (partie 5).

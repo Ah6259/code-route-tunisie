@@ -147,7 +147,7 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   promis seulement « selon votre téléphone »). **9 DT / 7 jours, 19 DT / 30 jours, 29 DT / 90 jours** (essai gratuit SUPPRIMÉ le 20/10/2026, décision d'Ahmed)
   (une fois par téléphone), pas de renouvellement automatique, aucune période payée remboursée, vendeur = « l'éditeur du site »
   (JAMAIS le nom de la société), prix non annoncés TTC.
-- Pages : `pass/` (prix et avantages, bouton « Paiement » <details> D17/IZI 24 321 390, motif nom + téléphone,
+- Pages : `pass/` (prix et avantages, bouton « Paiement » <details> D17/IZI 24 321 390, motif = numéro de commande depuis le 25/11/2026 (avant : nom + téléphone),
   bouton vert WhatsApp, « J'ai un code » `#code-acces`, formulaire Formspree `mwlpakqj`), `pass/conditions/`.
   Bouton doré « Pass Examen » dans l'en-tête (page.js, classe `entete-pass`, `.actif` = coché), gros bouton doré dans le
   bandeau de l'accueil (`#cta-pass-zone`), carte `#fin-gratuit` à la fin d'un examen gratuit, écran `#examen-utilise`.
@@ -274,3 +274,16 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   ou avec un e-mail invalide, l'envoie à Formspree et l'ajoute à `pour_activer` (un e-mail automatique enverra bientôt le code et les étapes du paiement).
   Conditions du Pass (données gardées) et note du formulaire mentionnent l'e-mail. Tests dans test_site.mjs (champ FR/AR, sans e-mail, e-mail invalide,
   envoi). Aucune adresse e-mail écrite dans le code (le test « aucun secret ni adresse e-mail » l'interdit). Version `?v=20261124a`.
+
+- **25/11/2026 — PARCOURS COMMUN DU PASS (décision d'Ahmed, règle commune § 70 ; référence : `outils communs/pass-commun/CONSIGNES.md` de projets-ahmed)** :
+  le code est créé AU FORMULAIRE par `assets/pass.js` (`nouveauCodeCommande()`, `crypto.getRandomValues`, MÊME alphabet et longueur que les codes
+  d'accès : 8 caractères sans O/0/I/1, affiché `ABCD-EF23`) = « numéro de commande » ; envoyé à Formspree (`code`, objet de l'e-mail, ligne
+  `pour_activer … ; code: ABCD-EF23`). Bloc « Dernière étape » (`#apres-pass`) : code en gros + « C'est votre numéro de commande… », 3 étapes du
+  paiement (motif = le code ; en arabe 24321390 sans espaces), bouton WhatsApp pré-rempli avec le code, « Ensuite », filet « code oublié dans le
+  motif ? », bouton « Nouvelle commande ». Mémoire du téléphone `pass-commande` = {code, formule, date} seulement, 60 jours : au retour sur pass/,
+  bandeau « Votre commande en attente » en haut + paiement + WhatsApp, code essayé tout seul (`reprendreCommande()` : activé = Pass ouvert et clé
+  effacée ; sinon « En attente de votre paiement »). Phrase « Vous le recevez aussi par e-mail » dans le code mais CACHÉE (`EMAIL_AUTO = false` :
+  l'e-mail automatique n'est pas encore en service ; le test vérifie qu'elle n'est pas visible). Activation : dépôt privé code-route-pass, bouton
+  « pass », action `paye` + **code** + nom + téléphone (+ jours) -> ce code est activé tel quel (mauvais format ou doublon refusés ; code seul =
+  prolongation comme avant ; sans code = le robot en crée un comme avant). Conditions § 3-4-9, « Comment ça marche ? » et « Comment fonctionne le
+  site ? » (FR + AR, ligne FONCTIONS « numéro de commande ») mis à jour. Tests : bloc `parcoursCommande()` de test_site.mjs (FR + AR). Version `?v=20261125a`.
