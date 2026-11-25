@@ -323,3 +323,11 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   l'accueil, pass-a-propos) sinon l'endroit (pass-entete, pass-pied, pass-fin-examen, pass-examen-du-jour, pass-erreurs, pass-renouveler, pass-autre) ; `window.nomClicPass`.
   « Comment fonctionne le site ? » FR + AR + 2 lignes FONCTIONS ; bloc « 2 bis » de test_site.mjs (+ sabotages vérifiés) ; test des amendes : prix du Pass exclus.
   Version `?v=20261125g` (relecture/ aussi).
+
+## 25/11/2026 — plan Google (B.2 + B.3, « fais » d'Ahmed après la chute Google d'octobre)
+- **lastmod HONNÊTE** : `sitemap()` de tools/construire.py passe le plan par `tools/lastmod.py` (outil COMMUN, copié tel quel) : date du
+  dernier VRAI changement du contenu de chaque page (empreinte du titre, de la description, du texte et des images, SANS menus, pied,
+  scripts, ?v= ni dates) gardée dans `donnees/lastmod.json` (à enregistrer avec les pages) ; page noindex = hors du plan. Test :
+  `python3 tools/test_lastmod.py donnees/lastmod.json` (dans tests.yml ; données inventées + vrai plan ; vérifié par sabotage).
+- **Accueil** : partie « L'examen du code de la route en Tunisie » (3 courts paragraphes FR + AR, faits de la page Permis, décret 2000-142),
+  lisible sans JavaScript.

@@ -30,6 +30,7 @@ RACINE = os.path.dirname(ICI)
 SOURCES = os.path.join(ICI, "sources")
 sys.path.insert(0, ICI)
 import annee as ANNEE   # noqa: E402
+import lastmod   # noqa: E402  (dates honnêtes du plan du site, 25/11/2026)
 VERIFIER = "--verifier" in sys.argv[1:]
 DIFFERENCES = []
 URL_SITE = "https://code.clicvia.com/"
@@ -242,6 +243,9 @@ def sitemap(chemins, changes):
         date = auj if c in changes or loc not in anciennes else (anciennes[loc] or auj)
         lignes.append(f"  <url><loc>{loc}</loc><lastmod>{date}</lastmod></url>")
     contenu = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(lignes) + "\n</urlset>\n"
+    # plan Google du 25/11/2026 (B.2) : date du dernier VRAI changement du contenu (empreinte gardée dans donnees/lastmod.json,
+    # outil commun tools/lastmod.py) ; un ?v= ou un menu changé ne change plus la date ; une page noindex sort du plan
+    contenu = lastmod.honnete(contenu, RACINE, URL_SITE, "donnees/lastmod.json", ecrire_memoire=not VERIFIER)
     ecrire("sitemap.xml", contenu)
 
 
