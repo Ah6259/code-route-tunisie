@@ -30,12 +30,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css?v=20261125c">
-<script src="../assets/regles.js?v=20261125c"></script>
-<script src="../assets/page.js?v=20261125c"></script>
-<script src="../assets/pass.js?v=20261125c"></script>
-<script src="../assets/protection.js?v=20261125c"></script>
-<script src="../assets/pages.js?v=20261125c"></script>
+<link rel="stylesheet" href="../assets/style.css?v=20261125d">
+<script src="../assets/regles.js?v=20261125d"></script>
+<script src="../assets/page.js?v=20261125d"></script>
+<script src="../assets/pass.js?v=20261125d"></script>
+<script src="../assets/pass-commun.js?v=20261125d"></script>
+<script src="../assets/pass-reglages.js?v=20261125d"></script>
+<script src="../assets/protection.js?v=20261125d"></script>
+<script src="../assets/pages.js?v=20261125d"></script>
 </head>
 <body data-page="pass">
 <header class="entete" id="entete"></header>
@@ -104,7 +106,7 @@
       <input id="pass-nom" name="nom" required maxlength="100" autocomplete="name">
       <label class="abo-etiquette" for="pass-tel"><span data-l="fr">Téléphone WhatsApp (8 chiffres)</span></label>
       <input id="pass-tel" name="telephone" required inputmode="tel" pattern="[0-9 ]{8,11}" maxlength="11" autocomplete="tel">
-      <label class="abo-etiquette" for="pass-email"><span data-l="fr">E-mail</span><span class="email-auto" hidden><span data-l="fr"> (vous y recevez votre code et les étapes du paiement)</span></span></label>
+      <label class="abo-etiquette" for="pass-email"><span data-l="fr">E-mail</span><span class="email-auto" data-email-auto hidden><span data-l="fr"> (vous y recevez votre code et les étapes du paiement)</span></span></label>
       <input id="pass-email" type="email" name="email" required maxlength="200" autocomplete="email">
       <fieldset class="abo-choix" id="pass-formules">
         <legend><span data-l="fr">Votre formule</span></legend>
@@ -127,11 +129,11 @@
       <h3 id="cmd-titre"><span data-l="fr">Dernière étape : le paiement</span></h3>
       <p class="cmd-attente" id="cmd-attente" hidden></p>
       <div class="cmd-code-zone">
-        <strong class="cmd-code" id="cmd-code" dir="ltr"></strong>
-        <p class="cmd-explique"><span data-l="fr">C'est votre numéro de commande : écrivez-le dans le motif du paiement, il nous sert à reconnaître votre paiement.</span> <span class="cmd-email" hidden><span data-l="fr">Vous le recevez aussi par e-mail.</span></span></p>
+        <strong class="cmd-code" id="cmd-code" data-code dir="ltr"></strong>
+        <p class="cmd-explique"><span data-l="fr">C'est votre numéro de commande : écrivez-le dans le motif du paiement, il nous sert à reconnaître votre paiement.</span> <span class="cmd-email" data-email-auto hidden><span data-l="fr">Vous le recevez aussi par e-mail.</span></span></p>
       </div>
-      <p class="cmd-etat" id="cmd-etat" role="status" aria-live="polite"></p>
-      <div class="paie"><ol class="paie-etapes"><li><span data-l="fr">Ouvrez l&#39;application :</span> <span class="applis"><a class="appli-btn" href="https://play.google.com/store/apps/details?id=tn.mobipost" target="_blank" rel="noopener noreferrer"><img src="../assets/paiement/d17.png" alt="D17" width="44" height="44"></a><a class="appli-btn" href="https://play.google.com/store/apps/details?id=tn.izi.consumer" target="_blank" rel="noopener noreferrer"><img src="../assets/paiement/izi.png" alt="IZI" width="44" height="44"></a></span><br><span class="petit"><span data-l="fr">Sur iPhone :</span> <a class="appli" href="https://apps.apple.com/tn/app/digipostbank-d17/id1475640303" target="_blank" rel="noopener noreferrer">D17</a> · <a class="appli" href="https://apps.apple.com/tn/app/izi/id1603653941" target="_blank" rel="noopener noreferrer">IZI</a></span></li><li><span data-l="fr">Dans D17 : « Transfert d’argent » puis « Transfert rapide ». Dans IZI : « Transfert ». Tapez le numéro</span> <strong><span data-l="fr"><bdi dir="ltr">24 321 390</bdi></span></strong>.<br><span data-l="fr">Montant :</span> <strong><span data-l="fr">9 DT (7 jours), 19 DT (30 jours) ou 29 DT (90 jours)</span></strong><details class="aide-transfert"><summary title="Voir comment faire" aria-label="Voir comment faire">?</summary><div class="aide-images"><figure><img src="../assets/paiement/transfert-d17.svg" alt="Exemple D17 : Transfert rapide, numéro 24 321 390, montant, Envoyer" width="240" height="300" loading="lazy"><figcaption>D17</figcaption></figure><figure><img src="../assets/paiement/transfert-izi.svg" alt="Exemple IZI : Transfert, montant, numéro 24 321 390, Suivant" width="240" height="300" loading="lazy"><figcaption>IZI</figcaption></figure></div></details></li><li><span data-l="fr">Motif :</span> <strong><bdi dir="ltr" class="cmd-code-motif"></bdi></strong> <span data-l="fr">(votre numéro de commande).</span> <span data-l="fr">Puis envoyez la capture du paiement par WhatsApp (bouton vert).</span></li></ol><p class="paie-confiance"><span data-l="fr">Vous payez directement dans l&#39;application officielle de La Poste Tunisienne (D17) ou de Zitouna Paiement (IZI) : nous ne voyons jamais vos codes.</span></p></div>
+      <p class="cmd-etat" id="cmd-etat" data-etat-commande role="status" aria-live="polite"></p>
+      <div class="paie"><ol class="paie-etapes"><li><span data-l="fr">Ouvrez l&#39;application :</span> <span class="applis"><a class="appli-btn" href="https://play.google.com/store/apps/details?id=tn.mobipost" target="_blank" rel="noopener noreferrer"><img src="../assets/paiement/d17.png" alt="D17" width="44" height="44"></a><a class="appli-btn" href="https://play.google.com/store/apps/details?id=tn.izi.consumer" target="_blank" rel="noopener noreferrer"><img src="../assets/paiement/izi.png" alt="IZI" width="44" height="44"></a></span><br><span class="petit"><span data-l="fr">Sur iPhone :</span> <a class="appli" href="https://apps.apple.com/tn/app/digipostbank-d17/id1475640303" target="_blank" rel="noopener noreferrer">D17</a> · <a class="appli" href="https://apps.apple.com/tn/app/izi/id1603653941" target="_blank" rel="noopener noreferrer">IZI</a></span></li><li><span data-l="fr">Dans D17 : « Transfert d’argent » puis « Transfert rapide ». Dans IZI : « Transfert ». Tapez le numéro</span> <strong><span data-l="fr"><bdi dir="ltr">24 321 390</bdi></span></strong>.<br><span data-l="fr">Montant :</span> <strong><span data-l="fr">9 DT (7 jours), 19 DT (30 jours) ou 29 DT (90 jours)</span></strong><details class="aide-transfert"><summary title="Voir comment faire" aria-label="Voir comment faire">?</summary><div class="aide-images"><figure><img src="../assets/paiement/transfert-d17.svg" alt="Exemple D17 : Transfert rapide, numéro 24 321 390, montant, Envoyer" width="240" height="300" loading="lazy"><figcaption>D17</figcaption></figure><figure><img src="../assets/paiement/transfert-izi.svg" alt="Exemple IZI : Transfert, montant, numéro 24 321 390, Suivant" width="240" height="300" loading="lazy"><figcaption>IZI</figcaption></figure></div></details></li><li><span data-l="fr">Motif :</span> <strong><bdi dir="ltr" class="cmd-code-motif" data-code></bdi></strong> <span data-l="fr">(votre numéro de commande).</span> <span data-l="fr">Puis envoyez la capture du paiement par WhatsApp (bouton vert).</span></li></ol><p class="paie-confiance"><span data-l="fr">Vous payez directement dans l&#39;application officielle de La Poste Tunisienne (D17) ou de Zitouna Paiement (IZI) : nous ne voyons jamais vos codes.</span></p></div>
         <a class="btn-wa" id="pass-preuve-apres" href="https://wa.me/21624321390" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1 1 8.4 19z"/><path d="M9 8.6c0 3.4 2.9 6.4 6.4 6.4l1-1.4-2-1-1 .9c-1-.4-2.1-1.5-2.5-2.5l.9-1-1-2z"/></svg><span data-l="fr">Envoyer la preuve de paiement par WhatsApp</span></a>
       <p><b><span data-l="fr">Ensuite :</span></b> <span data-l="fr">dès que votre paiement est vérifié (en général sous 24 heures), nous activons ce numéro : il devient votre code d'accès. Sur ce téléphone, la page l'essaie toute seule quand vous revenez et ouvre votre Pass ; sur un autre appareil, tapez-le une fois dans « J'ai un code » en haut de cette page. Pas de renouvellement automatique.</span></p>
       <p class="cmd-filet"><span data-l="fr">Vous avez oublié le code dans le motif ? Ce n'est pas grave : envoyez quand même la preuve sur WhatsApp, nous retrouvons votre demande.</span></p>

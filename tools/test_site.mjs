@@ -86,7 +86,7 @@ check("au moins 3 questions publiées par thème (pour l'examen)", [1,2,3,4,5,6,
 // ---- 2. Pages chargées comme un navigateur ---------------------------------------
 // Pass Examen actif dans le navigateur (code factice gardé sur l'appareil, date de fin lointaine)
 const PASS_TEST = JSON.stringify({ code: "ABCDEF23", fin: "2099-12-31", verifie: "2099-12-31" });
-async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false, pass = false, examenFait = false, ls = null } = {}) {
+async function page(chemin, { lang = "fr", query = "", stockage = null, fichier = false, pass = false, examenFait = false, ls = null, avant = null } = {}) {
   // UNE ADRESSE PAR LANGUE (08/11/2026) : la page arabe est ar/<chemin> ; video/ et relecture/ n'existent qu'à une adresse (?lang=)
   if (lang === "ar" && !chemin.startsWith("ar/") && existsSync(join(root, "ar", chemin))) chemin = "ar/" + chemin;
   const dossier = dirname(join(root, chemin));
@@ -102,6 +102,7 @@ async function page(chemin, { lang = "fr", query = "", stockage = null, fichier 
     beforeParse(w) { if (stockage) w.localStorage.setItem("crt-progression-v1", typeof stockage === "string" ? stockage : JSON.stringify(stockage));
       if (pass) w.localStorage.setItem("crt-pass-v1", PASS_TEST);
       if (ls) for (const [k, v] of Object.entries(ls)) w.localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v));
+      if (avant) avant(w);   // avant les scripts de la page (ex. faux réseau du parcours de commande)
       if (examenFait) { const n = new Date(); w.localStorage.setItem("crt-examen-gratuit-v1", n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0")); } }
   });
   await new Promise(ok => dom.window.addEventListener("load", ok));
@@ -326,7 +327,7 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
     // 25/11/2026 (règle commune § 70) : code de commande créé au formulaire, motif du paiement, commande gardée et essayée toute seule
     ["numéro de commande du Pass (motif du paiement)", /pass-commande/.test(js), /numéro de commande[\s\S]*motif du paiement[\s\S]*essaie ce code tout seul/],
     // 25/11/2026 (A.17) : e-mail de confirmation automatique (service api-email.clicvia.com, Resend)
-    ["e-mail de confirmation automatique du Pass", /const EMAIL_AUTO = true;/.test(lire("assets/pass.js")), /E-mail de confirmation : dans la minute qui suit, vous recevez aussi tout cela par e-mail[\s\S]*Resend/],
+    ["e-mail de confirmation automatique du Pass", /emailAuto: true,/.test(lire("assets/pass-reglages.js")), /E-mail de confirmation : dans la minute qui suit, vous recevez aussi tout cela par e-mail[\s\S]*Resend/],
     ["vie privée", true, /Pas de compte\. Votre progression, vos scores et votre code restent dans votre téléphone/],
     ["surveillance mensuelle du texte officiel", existsSync(join(root, "tools/surveiller_source.py")), /Chaque mois, un robot vérifie/],
     ["site indépendant", true, /site est indépendant/]];
@@ -410,7 +411,7 @@ check("page 404 commune à la racine publiée : 404.html (nom du site, couleur) 
   existsSync(join(root, "404.html")) && existsSync(join(root, "404.js")) && lire("404.html").includes("<title>Page introuvable — Code de la route Tunisie</title>")
   && lire("404.html").includes('<script src="/404.js"></script>') && lire("404.js").includes("Recherche de la page"));
 check("À propos : la page introuvable et les liens Confidentialité / Conditions sont expliqués (FR + AR)", lire("a-propos/index.html").includes("Page introuvable, confidentialité, conditions") && lire("ar/a-propos/index.html").includes("صفحة غير موجودة، الخصوصية، الشروط"));
-const fichiersCode = [...PAGES, "assets/page.js", "assets/pass.js", "assets/quiz.js", "assets/pages.js", "assets/lecons.js", "assets/amendes.js", "assets/panneaux.js", "assets/protection.js"];
+const fichiersCode = [...PAGES, "assets/page.js", "assets/pass.js", "assets/pass-reglages.js", "assets/quiz.js", "assets/pages.js", "assets/lecons.js", "assets/amendes.js", "assets/panneaux.js", "assets/protection.js"];
 const datesEnDur = fichiersCode.filter(f => /\b\d{2}\/\d{2}\/20\d{2}\b/.test(lire(f)));
 check(`aucune date jj/mm/aaaa écrite en dur hors de regles.js ${datesEnDur.join(" ")}`, datesEnDur.length === 0);
 // 21/11/2026 : REGLES_SITE.annee = année civile (pied « © ») ; la date de vérification du texte peut dater de l'année d'avant (janvier)
@@ -544,6 +545,28 @@ async function boutonPartager() {
     && ["code-route-fr.svg", "code-route-fr.png", "code-route-ar.svg", "code-route-ar.png"].every(q)
     && lire("assets/qr/code-route-fr.svg").includes("https://code.clicvia.com/<") && lire("assets/qr/code-route-ar.svg").includes("https://code.clicvia.com/ar/<")); }
 
+
+// 25/11/2026 (PASS.1, module commun du parcours d'achat, règle commune § 70.8) : assets/pass-commun.js = COPIE EXACTE du module de
+// projets-ahmed (« outils communs/pass-commun/pass-commun.js », recopié par synchroniser.py) ; assets/pass-reglages.js = ce qui est propre au site
+{ const { createHash } = await import("crypto");
+  const copie = readFileSync(join(root, "assets/pass-commun.js")), emp = createHash("sha256").update(copie).digest("hex");
+  const attendue = existsSync(join(root, "assets/pass-commun.empreinte")) ? lire("assets/pass-commun.empreinte").trim() : "";
+  check("module commun du Pass : assets/pass-commun.js NON modifié dans le site (empreinte écrite par synchroniser.py)", emp === attendue);
+  // dépôt général à côté (variable PROJETS_AHMED, puis ../projets-ahmed…) ; absent sur GitHub : comparaison sautée
+  const PROJ = [process.env.PROJETS_AHMED, join(root, "../projets-ahmed"), join(root, "../../projets-ahmed"), join(root, "../.."), "/home/user/projets-ahmed"]
+    .filter(Boolean).find(x => existsSync(join(x, "outils communs/pass-commun/pass-commun.js")));
+  if (PROJ) check("module commun du Pass : copie identique au module de projets-ahmed (sinon : python3 synchroniser.py)",
+    readFileSync(join(PROJ, "outils communs/pass-commun/pass-commun.js")).equals(copie));
+  else console.log("  (comparaison avec le module de projets-ahmed sautée : dépôt absent, normal sur GitHub)");
+  const scripts = h => (h.match(/<script src="[^"]*assets\/[^"?]+/g) || []).map(x => x.replace(/^.*assets\//, ""));
+  const sp = scripts(lire("pass/index.html")), sa = scripts(lire("ar/pass/index.html"));
+  check("module commun du Pass : pass/ et ar/pass/ chargent pass.js, puis pass-commun.js, puis pass-reglages.js (seulement ces pages)",
+    [sp, sa].every(x => x.indexOf("pass.js") >= 0 && x.indexOf("pass.js") < x.indexOf("pass-commun.js") && x.indexOf("pass-commun.js") === x.indexOf("pass-reglages.js") - 1)
+    && !/pass-commun\.js/.test(lire("index.html") + lire("examen/index.html") + lire("pass/conditions/index.html"))
+    && !/brancherFormulairePass|nouveauCodeCommande|envoyerEmail|reprendreCommande/.test(lire("assets/pass.js")));
+  const wm = await page("pass/index.html");
+  check(`module commun du Pass : branché sur le formulaire (version ${wm.PassCommun && wm.PassCommun.version}), réglage du site « code-route »`,
+    !!wm.PassCommun && wm.PassCommun.reglage && wm.PassCommun.reglage.site === "code-route" && wm.document.getElementById("pass-form").getAttribute("data-branche") === "1"); }
 
 console.log(erreurs ? `\n${erreurs} PROBLÈME(S) sur ${total} vérifications` : `\nTOUT PASSE (${total} vérifications)`);
 process.exit(erreurs ? 1 : 0);
@@ -791,11 +814,11 @@ async function parcoursCommande() {
     check("commande : sans formule, rien n'est envoyé", w.envois.length === 0 && /formule/.test(texte(d.getElementById("pass-status")))); }
 
   // -- envoi : code créé au formulaire, affiché en gros, motif = code, WhatsApp avec le code, Formspree, mémoire du téléphone
-  { let n = 0, ne = 0; w.fetch = u => { if (/api-email\.clicvia\.com/.test(u)) ne++; else n++; return Promise.reject(new Error("réseau")); };
-    const f = remplir(w); await envoyer(w, f); const c1 = f.dataset.code; await envoyer(w, f);
-    check("commande : échec du réseau -> formulaire gardé, même code au 2e essai, rien gardé dans le téléphone, e-mail automatique demandé à chaque essai avec le MÊME code (le service limite à 2 par adresse)",
-      n === 2 && ne === 2 && FORME.test(w.joliCode(c1 || "")) && f.dataset.code === c1 && !f.hidden && !w.localStorage.getItem("pass-commande"));
-    brancher(w); }
+  { let n = 0, ne = 0; const cs = []; w.fetch = (u, o) => { if (/api-email\.clicvia\.com/.test(u)) ne++; else { n++; cs.push(o.body.get("code")); } return Promise.reject(new Error("réseau")); };
+    const f = remplir(w); await envoyer(w, f); await envoyer(w, f);
+    check("commande : échec du réseau -> formulaire gardé, même code au 2e essai, rien gardé dans le téléphone, e-mail automatique demandé UNE fois par commande (module commun)",
+      n === 2 && ne === 1 && FORME.test(cs[0] || "") && cs[1] === cs[0] && !f.hidden && !w.localStorage.getItem("pass-commande"));
+    w = await page("pass/index.html"); d = w.document; brancher(w); }   // nouvelle visite : nouvelle commande (son e-mail sera demandé)
   await envoyer(w, remplir(w));
   const env = w.envois[0] || {}, code = env.code || "";
   check("commande : code au bon format (8 caractères sans O/0/I/1, ex. ABCD-EF23 : le format que le bouton « pass » accepte)", FORME.test(code));
@@ -804,7 +827,7 @@ async function parcoursCommande() {
   const apres = d.getElementById("apres-pass"), gros = d.getElementById("cmd-code");
   const visibleEl = el => { for (let e = el; e; e = e.parentElement) if (e.hidden || w.getComputedStyle(e).display === "none") return false; return !!el; };
   check("e-mail automatique EN SERVICE (25/11/2026, A.17) : « Vous le recevez aussi par e-mail » AFFICHÉ (EMAIL_AUTO = true)",
-    /const EMAIL_AUTO = true;/.test(lire("assets/pass.js")) && !!d.querySelector(".cmd-email") && visibleEl(d.querySelector(".cmd-email")));
+    /emailAuto: true,/.test(lire("assets/pass-reglages.js")) && !!d.querySelector(".cmd-email") && visibleEl(d.querySelector(".cmd-email")));
   { const e = w.emails[0], j = e ? JSON.parse(e[1].body) : {};
     check("e-mail automatique (FR) : UNE demande à https://api-email.clicvia.com/inscription (POST, JSON) avec site code-route, langue fr, nom, e-mail, CE code (ABCD-EF23), formule exacte",
       w.emails.length === 1 && e[0] === "https://api-email.clicvia.com/inscription" && e[1].method === "POST" && /application\/json/.test(e[1].headers["Content-Type"])
@@ -830,16 +853,17 @@ async function parcoursCommande() {
   let memo = {}; try { memo = JSON.parse(w.localStorage.getItem("pass-commande")); } catch (e) {}
   check("mémoire « pass-commande » = {code, formule, date} seulement", Object.keys(memo || {}).join() === "code,formule,date" && memo.code === code.replace("-", "") && memo.formule === "30 jours - 19 DT" && memo.date === jour(0));
   check("aucune donnée personnelle dans la mémoire du téléphone (ni nom, ni téléphone, ni e-mail)", !/Test Candidat|98765432|candidat\.test/.test(tousLs(w)));
-  { const codes = new Set(Array.from({ length: 300 }, () => w.nouveauCodeCommande()));
+  { const R = w.PassCommun.reglage.code, codes = new Set(Array.from({ length: 300 }, () => w.PassCommun.nouveauCode(R.alphabet, R.longueur)));
     check("codes créés par la page : toujours 8 caractères de l'alphabet du dépôt privé (300 essais, tous différents), crypto.getRandomValues",
-      codes.size === 300 && [...codes].every(c => FORME.test(w.joliCode(c))) && /crypto\.getRandomValues/.test(lire("assets/pass.js"))
-      && /alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"/.test(lire("assets/pass.js")) && /longueur: 8,/.test(lire("assets/pass.js"))); }
+      codes.size === 300 && [...codes].every(c => FORME.test(R.affiche(c))) && /crypto\.getRandomValues/.test(lire("assets/pass-commun.js"))
+      && /alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"/.test(lire("assets/pass.js")) && /longueur: 8,/.test(lire("assets/pass.js"))
+      && /code: \{ alphabet: PASS\.alphabet, longueur: PASS\.longueur,/.test(lire("assets/pass-reglages.js"))); }
   { const wg = await page("pass/index.html"); brancher(wg); const f = remplir(wg); f.querySelector("[name=_gotcha]").value = "robot"; await envoyer(wg, f);
     check("piège rempli (robot) : rien envoyé (ni Formspree ni e-mail automatique), rien gardé", wg.envois.length === 0 && wg.emails.length === 0 && !wg.localStorage.getItem("pass-commande")); }
 
   // -- retour sur la page : bandeau « commande en attente », code essayé tout seul
   const C = code.replace("-", ""), cmd = { "pass-commande": { code: C, formule: "30 jours - 19 DT", date: jour(-3) } };
-  w = await page("pass/index.html", { ls: cmd }); d = w.document; brancher(w); await w.eval("reprendreCommande()"); await pause(50);
+  w = await page("pass/index.html", { ls: cmd, avant: x => brancher(x) }); d = w.document; await pause(80);
   const zone = d.getElementById("commande-attente");
   check("retour : bandeau « Votre commande en attente : code <CODE> — <formule> » EN HAUT (avant « J'ai un code »), 3 étapes + WhatsApp avec le code",
     !!zone && (zone.compareDocumentPosition(d.getElementById("code-acces")) & 4) && texte(d.getElementById("cmd-attente")) === "Votre commande en attente : code " + code + " — 30 jours - 19 DT" &&
@@ -848,7 +872,7 @@ async function parcoursCommande() {
     texte(d.getElementById("cmd-etat")).startsWith("En attente de votre paiement") && !!w.localStorage.getItem("pass-commande") && !w.passActif());
   clic(w, d.getElementById("nouvelle-commande"));
   check("bouton « Nouvelle commande » : commande effacée, formulaire de retour", !w.localStorage.getItem("pass-commande") && !d.getElementById("commande-attente") && !d.getElementById("pass-form").hidden && d.getElementById("apres-pass").hidden);
-  w = await page("pass/index.html", { ls: cmd }); d = w.document; brancher(w, [C]); await w.eval("reprendreCommande()"); await pause(50);
+  w = await page("pass/index.html", { ls: cmd, avant: x => brancher(x, [C]) }); d = w.document; await pause(80);
   check("retour : code ACTIVÉ par Ahmed -> Pass ouvert tout seul (même vérification que « J'ai un code »), clé « pass-commande » effacée",
     w.passActif() && JSON.parse(w.localStorage.getItem("crt-pass-v1")).code === C && !w.localStorage.getItem("pass-commande") && !d.getElementById("commande-attente")
     && texte(d.getElementById("code-status")).includes("Votre paiement est validé"));
@@ -885,7 +909,7 @@ async function parcoursCommande() {
     texte(ap).includes("نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك."));
   check("arabe : WhatsApp « هذا وصل الدفع — قانون الطرقات تونس — الرمز <CODE> — <الاسم> — <formule> » (code ET nom)",
     decodeURIComponent(d.getElementById("pass-preuve-apres").href) === "https://wa.me/21624321390?text=هذا وصل الدفع — قانون الطرقات تونس — الرمز " + ca + " — Test Candidat — 30 يومًا - 19 د");
-  w = await page("pass/index.html", { lang: "ar", ls: cmd }); d = w.document; brancher(w); await w.eval("reprendreCommande()"); await pause(50);
+  w = await page("pass/index.html", { lang: "ar", ls: cmd, avant: x => brancher(x) }); d = w.document; await pause(80);
   check("arabe : retour = bandeau « طلبك في الانتظار: الرمز <CODE> » + « في انتظار دفعتك »", texte(d.getElementById("cmd-attente")).startsWith("طلبك في الانتظار: الرمز " + code) && texte(d.getElementById("cmd-etat")).startsWith("في انتظار دفعتك"));
 
   // -- plus jamais « motif : nom et téléphone » (pages FR + AR, scripts) ; étape 1 = nom, téléphone WhatsApp et e-mail

@@ -301,3 +301,15 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   votre code… » / « Vous le recevez aussi par e-mail » affichées ; CSP de `pass/` (+ `https://api-email.clicvia.com` dans connect-src) ; Resend cité
   (formulaire, conditions, « Comment fonctionne le site ? » FR + AR + ligne FONCTIONS). Tests : le JSON est passé au VRAI `verifier()` (worker.js +
   sites.json de projets-ahmed s'il est à côté ; sinon sauté). Retour en arrière : `EMAIL_AUTO = false`. Version `?v=20261125c`.
+
+- **25/11/2026 — Pass : MODULE COMMUN du parcours d'achat (PASS.1, règle commune § 70.8 ; `outils communs/pass-commun/` de projets-ahmed)** :
+  la page pass/ (FR + ar/) charge `assets/pass.js` (codes d'accès, Pass ouvert, rappels : inchangé), puis **`assets/pass-commun.js`** (COPIE EXACTE
+  du module de projets-ahmed, empreinte `assets/pass-commun.empreinte` : NE JAMAIS LA MODIFIER ICI ; on améliore le module puis
+  `python3 "outils communs/pass-commun/synchroniser.py"`), puis **`assets/pass-reglages.js`** (propre au site : nom, 3 formules + texte arabe,
+  code `PASS.alphabet` / `PASS.longueur` affiché ABCD-EF23, textes du site, `pour_activer` avec `jours`, `dejaActif`, `essayerCode` = `activerCode()`,
+  `passOuvert` « Votre paiement est validé… », au retour `auRetour` remonte la « Dernière étape » en haut (zone `#commande-attente` créée avant
+  « J'ai un code », ligne `#cmd-attente`, titre caché), « Nouvelle commande » = `form.reset()`). Source `tools/sources/pass/index.html` : les 2 scripts
+  + attributs `data-code`, `data-email-auto`, `data-etat-commande`. Ancien code du formulaire retiré de pass.js. Rien ne change pour le visiteur
+  (comparaison avant / après FR + AR) ; différence voulue : e-mail automatique UNE fois par commande (même après une panne de Formspree).
+  Tests : bloc « module commun du Pass » de test_site.mjs (empreinte, copie identique si projets-ahmed est à côté — variable `PROJETS_AHMED` —,
+  scripts dans l'ordre, module branché), `page(…, { avant })` pour le faux réseau du retour. Version `?v=20261125d`.
