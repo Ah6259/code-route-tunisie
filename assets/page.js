@@ -206,6 +206,38 @@ function htmlPhoto(id, classe) {
   </figure>`;
 }
 
+/* Clics vers le Pass Examen (25 novembre 2026, demande d'Ahmed, modèle Alerte Concours ; pas de gratuité) : chaque lien qui mène à la page
+   pass/ (FR ou ar/) est compté dans GoatCounter comme un ÉVÉNEMENT « /code-route-tunisie/clic/<nom> » (préfixe du site dans le compteur
+   commun). Nom = attribut data-clic (encadrés des leçons, panneaux, amendes ; questions de l'accueil…) sinon l'endroit du lien (en-tête, pied,
+   bouton doré de l'accueil, fin d'examen gratuit…). Rien si GoatCounter est absent ou bloqué ; le lien s'ouvre toujours.
+   Avec un Pass actif, les encadrés « Testez-vous en conditions réelles » sont cachés (inutile de proposer ce qu'on a déjà). */
+(function () {
+  var ZONES = [["#cta-pass", "pass-accueil"], ["#cta-pass-fin, #fin-gratuit", "pass-fin-examen"], ["#cta-pass-examen, #examen-utilise", "pass-examen-du-jour"],
+    ["#cta-pass-erreurs, #erreurs-pass", "pass-erreurs"], [".rappel-pass", "pass-renouveler"], ["a.entete-pass", "pass-entete"], ["#pied", "pass-pied"]];
+  var TITRES = { "pass-lecon": "Clic vers le Pass (fin d'une leçon)", "pass-panneaux": "Clic vers le Pass (page panneaux)", "pass-amendes": "Clic vers le Pass (page amendes)",
+    "pass-accueil": "Clic vers le Pass (accueil)", "pass-fin-examen": "Clic vers le Pass (fin d'un examen gratuit)", "pass-entete": "Clic vers le Pass (en-tête)",
+    "pass-pied": "Clic vers le Pass (pied de page)", "pass-erreurs": "Clic vers le Pass (Mes erreurs)", "pass-examen-du-jour": "Clic vers le Pass (examen du jour déjà fait)",
+    "pass-renouveler": "Clic « Renouveler mon Pass »", "pass-a-propos": "Clic vers le Pass (Comment fonctionne le site ?)" };
+  window.nomClicPass = function (a) {
+    var u; try { u = new URL(a.getAttribute("href") || "", location.href); } catch (x) { return ""; }
+    if (!/\/pass\/$/.test(u.pathname) || /\/pass\/$/.test(location.pathname)) return "";      // seulement vers pass/, jamais depuis pass/
+    var nom = (a.getAttribute("data-clic") || "").replace(/[^a-z-]/g, "");
+    for (var i = 0; !nom && i < ZONES.length; i++) if (a.closest(ZONES[i][0])) nom = ZONES[i][1];
+    return nom || "pass-autre";
+  };
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest && e.target.closest("a[href]");
+    var nom = a ? window.nomClicPass(a) : "";
+    if (!nom) return;
+    try { if (window.goatcounter && typeof window.goatcounter.count === "function")
+      window.goatcounter.count({ path: "/code-route-tunisie/clic/" + nom, title: TITRES[nom] || "Clic vers le Pass", event: true }); } catch (x) {}
+  });
+  function cacherSiPass() {
+    if (typeof passActif === "function" && passActif()) document.querySelectorAll(".encadre-pass").forEach(function (x) { x.hidden = true; });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", cacherSiPass); else cacherSiPass();
+})();
+
 /* Installation sur le téléphone : service worker PRUDENT (sw.js : réseau d'abord pour les pages et les données).
    Seulement en https (jamais en file: pendant les tests locaux). */
 if ("serviceWorker" in navigator && location.protocol === "https:") {

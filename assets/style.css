@@ -573,3 +573,10 @@ html[dir="rtl"] .paie-etapes>li::before{left:auto;right:12px}
   :root:not([data-theme="light"]) .btn-video-partager{background:var(--carte)}
   :root:not([data-theme="light"]) .partage{background:#157A3F}
 }
+/* 25/11/2026 — encadré « Testez-vous en conditions réelles » vers le Pass Examen (fin des leçons, panneaux, amendes ; pas de gratuité) */
+.encadre-pass{border-inline-start:5px solid #F2B33D;background:var(--orange-clair)}
+.encadre-pass p{margin:0 0 10px}
+.encadre-pass .encadre-texte{font-weight:700;font-size:16.5px;line-height:1.45;color:var(--texte)}
+.encadre-pass .encadre-boutons{margin:0 0 8px}
+.encadre-pass .encadre-boutons .btn{text-decoration:none;max-width:100%;white-space:normal}
+.encadre-pass .encadre-prix{font-size:13.5px;color:var(--texte);margin:0}

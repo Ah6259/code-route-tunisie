@@ -313,3 +313,13 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   (comparaison avant / après FR + AR) ; différence voulue : e-mail automatique UNE fois par commande (même après une panne de Formspree).
   Tests : bloc « module commun du Pass » de test_site.mjs (empreinte, copie identique si projets-ahmed est à côté — variable `PROJETS_AHMED` —,
   scripts dans l'ordre, module branché), `page(…, { avant })` pour le faux réseau du retour. Version `?v=20261125d`.
+
+- **25/11/2026 — ENCADRÉS VERS LE PASS + CLICS COMPTÉS (décision d'Ahmed : amener vers la page d'achat, PAS DE GRATUITÉ : aucun essai ni formule gratuite, prix inchangés ; modèle Alerte Concours)** :
+  CR.1 : encadré `#encadre-pass` (`<!--encadre-pass-->…<!--/encadre-pass-->`, sources `tools/sources/lecons|panneaux|amendes/index.html`) : « Testez-vous en conditions
+  réelles : examens blancs illimités avec le Pass Examen (dès 9 DT) » / « اختبر نفسك في ظروف حقيقية… », vrai bouton `.btn` « Voir le Pass Examen » -> `../pass/`
+  (reste dans ar/ sur une page arabe), prix 9/19/29 DT ; leçons : juste sous `#lecon` (fin de chaque leçon) ; caché si un Pass est actif. Le bouton doré caché de
+  l'en-tête reste comme avant (CR.2 non demandé). C.1 : `assets/page.js` compte chaque clic vers pass/ (FR ou ar/, jamais depuis pass/) en ÉVÉNEMENT GoatCounter
+  `/code-route-tunisie/clic/<nom>` (seulement si `goatcounter.count` existe) : nom = `data-clic` (pass-lecon, pass-panneaux, pass-amendes, pass-accueil = questions de
+  l'accueil, pass-a-propos) sinon l'endroit (pass-entete, pass-pied, pass-fin-examen, pass-examen-du-jour, pass-erreurs, pass-renouveler, pass-autre) ; `window.nomClicPass`.
+  « Comment fonctionne le site ? » FR + AR + 2 lignes FONCTIONS ; bloc « 2 bis » de test_site.mjs (+ sabotages vérifiés) ; test des amendes : prix du Pass exclus.
+  Version `?v=20261125g` (relecture/ aussi).
