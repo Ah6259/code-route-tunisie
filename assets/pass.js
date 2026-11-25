@@ -193,21 +193,23 @@ function formuleTexte(f) {
   if (!m || document.documentElement.lang !== "ar") return String(f || "");
   return m[1] + " " + (m[1] === "7" ? "أيام" : "يومًا") + " - " + m[2] + " د";
 }
-function lienPreuve(code, formule) {
-  const ar = document.documentElement.lang === "ar", c = joliCode(code), f = formuleTexte(formule);
-  const txt = ar ? "هذا وصل الدفع — قانون الطرقات تونس — الرمز " + c + " — " + f
-                 : "Voici ma preuve de paiement — Code de la route Tunisie — code " + c + " — " + f;
+// Message WhatsApp de la preuve : code + NOM + formule (25 novembre 2026, demande d’Ahmed). Le nom vient du formulaire au moment de
+// l'envoi ; il n'est JAMAIS gardé par le téléphone : au retour sur la page (bandeau), le message garde le code et la formule.
+function lienPreuve(code, formule, nom) {
+  const ar = document.documentElement.lang === "ar", c = joliCode(code), f = formuleTexte(formule), n = nom ? " — " + nom : "";
+  const txt = ar ? "هذا وصل الدفع — قانون الطرقات تونس — الرمز " + c + n + " — " + f
+                 : "Voici ma preuve de paiement — Code de la route Tunisie — code " + c + n + " — " + f;
   return "https://wa.me/" + PASS.whatsapp + "?text=" + encodeURIComponent(txt);
 }
 // Affiche la « Dernière étape » (mode "nouvelle" : juste après le formulaire ; "attente" : retour sur la page, en haut)
-function afficherCommande(cmd, mode) {
+function afficherCommande(cmd, mode, nom) {
   const apres = document.getElementById("apres-pass"), form = document.getElementById("pass-form");
   if (!apres) return;
   const c = joliCode(cmd.code);
   const code = document.getElementById("cmd-code"); if (code) code.textContent = c;
   apres.querySelectorAll(".cmd-code-motif").forEach(x => { x.textContent = c; });
   apres.querySelectorAll(".cmd-email").forEach(x => { x.hidden = !EMAIL_AUTO; });
-  document.querySelectorAll("a.btn-wa#pass-preuve, a.btn-wa#pass-preuve-apres").forEach(x => x.setAttribute("href", lienPreuve(cmd.code, cmd.formule)));
+  document.querySelectorAll("a.btn-wa#pass-preuve, a.btn-wa#pass-preuve-apres").forEach(x => x.setAttribute("href", lienPreuve(cmd.code, cmd.formule, nom)));
   const att = document.getElementById("cmd-attente"), titre = document.getElementById("cmd-titre");
   if (att) {
     att.hidden = mode !== "attente";
@@ -268,6 +270,8 @@ function brancherFormulairePass() {
   const form = document.getElementById("pass-form");
   if (!form || form.dataset.branche) return;
   form.dataset.branche = "1";
+  // « vous y recevez votre code et les étapes du paiement » : montré seulement quand l'e-mail automatique marche
+  document.querySelectorAll(".email-auto").forEach(x => { x.hidden = !EMAIL_AUTO; });
   const statut = document.getElementById("pass-status"), bouton = form.querySelector("button[type=submit]");
   const dire = (classe, fr, ar) => { statut.className = classe; statut.textContent = T(fr, ar); };
   const champ = n => form.querySelector('[name="' + n + '"]');
@@ -291,7 +295,11 @@ function brancherFormulairePass() {
     if (!val("nom")) { dire("err", "Indiquez votre nom.", "اكتب اسمك."); champ("nom").focus(); return; }
     if (!tel) { dire("err", "Téléphone : 8 chiffres, par exemple 24 321 390.", "الهاتف: " + iso("8") + " أرقام، مثال " + iso("24 321 390") + "."); champ("telephone").focus(); return; }
     const email = val("email");
-    if (!email) { dire("err", "Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement.", "اكتب بريدك الإلكتروني: يصلك عليه رمزك وخطوات الدفع."); champ("email").focus(); return; }
+    if (!email) {
+      if (EMAIL_AUTO) dire("err", "Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement.", "اكتب بريدك الإلكتروني: يصلك عليه رمزك وخطوات الدفع.");
+      else dire("err", "Indiquez votre e-mail.", "اكتب بريدك الإلكتروني.");
+      champ("email").focus(); return;
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { dire("err", "E-mail invalide : vérifiez l'adresse.", "البريد الإلكتروني غير صحيح: تحقّق من العنوان."); champ("email").focus(); return; }
     if (!f) { dire("err", "Choisissez une formule.", "اختر صيغة."); return; }
     if (!champ("conditions").checked) { dire("err", "Cochez « J'accepte les conditions du Pass Examen ».", "يجب الموافقة على شروط باقة الامتحان."); return; }
@@ -300,7 +308,7 @@ function brancherFormulairePass() {
     const cmd = { code: form.dataset.code, formule: f.value, date: aujourdhui() };
     const fini = robot => {
       if (!robot) ecrireCommande(cmd);
-      afficherCommande(cmd, "nouvelle");
+      afficherCommande(cmd, "nouvelle", val("nom"));             // nom dans le message WhatsApp, jamais dans la mémoire
       const apres = document.getElementById("apres-pass");
       if (apres) { try { apres.scrollIntoView({ block: "start" }); } catch (x) {} }
     };

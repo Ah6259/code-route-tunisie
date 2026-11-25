@@ -287,3 +287,9 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   « pass », action `paye` + **code** + nom + téléphone (+ jours) -> ce code est activé tel quel (mauvais format ou doublon refusés ; code seul =
   prolongation comme avant ; sans code = le robot en crée un comme avant). Conditions § 3-4-9, « Comment ça marche ? » et « Comment fonctionne le
   site ? » (FR + AR, ligne FONCTIONS « numéro de commande ») mis à jour. Tests : bloc `parcoursCommande()` de test_site.mjs (FR + AR). Version `?v=20261125a`.
+
+- **25/11/2026 (soir, demande d'Ahmed)** : le message WhatsApp de la preuve de paiement contient le code ET le NOM (« Voici ma preuve de paiement —
+  Code de la route Tunisie — code <CODE> — <nom> — <formule> » / « هذا وصل الدفع — … — الرمز <CODE> — <nom> — <formule> ») ; le nom vient du
+  formulaire au moment de l'envoi, JAMAIS de la mémoire `pass-commande` (au retour, bandeau = code + formule seulement). Étiquette « E-mail » seule et
+  erreur « Indiquez votre e-mail. » : la promesse « vous y recevez votre code et les étapes du paiement » (`.email-auto`, cachée) et l'erreur longue ne
+  servent que si `EMAIL_AUTO = true`. Tests FR + AR (sabotage vérifié). Version `?v=20261125b`.

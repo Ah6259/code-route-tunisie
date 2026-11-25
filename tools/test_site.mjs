@@ -792,8 +792,8 @@ async function parcoursCommande() {
     etapes.length === 3 && !!apres.querySelector('img[src$="d17.png"]') && !!apres.querySelector('img[src$="izi.png"]') && !!apres.querySelector('img[src$="transfert-d17.svg"]') &&
     texte(etapes[1]).includes("24 321 390") && texte(etapes[2]).startsWith("Motif : " + code));
   const lien = d.getElementById("pass-preuve-apres");
-  check("Dernière étape : bouton vert WhatsApp pré-rempli « Voici ma preuve de paiement — Code de la route Tunisie — code <CODE> — <formule> »",
-    !!lien && lien.classList.contains("btn-wa") && decodeURIComponent(lien.href) === "https://wa.me/21624321390?text=Voici ma preuve de paiement — Code de la route Tunisie — code " + code + " — 30 jours - 19 DT");
+  check("Dernière étape : bouton vert WhatsApp pré-rempli « Voici ma preuve de paiement — Code de la route Tunisie — code <CODE> — <nom> — <formule> » (code ET nom, 25/11/2026)",
+    !!lien && lien.classList.contains("btn-wa") && decodeURIComponent(lien.href) === "https://wa.me/21624321390?text=Voici ma preuve de paiement — Code de la route Tunisie — code " + code + " — Test Candidat — 30 jours - 19 DT");
   check("Dernière étape : ce qui se passe ensuite + filet « Vous avez oublié le code dans le motif ? Ce n'est pas grave… »",
     /Ensuite : dès que votre paiement est vérifié/.test(texte(apres)) && texte(apres).includes("Vous avez oublié le code dans le motif ? Ce n'est pas grave : envoyez quand même la preuve sur WhatsApp, nous retrouvons votre demande.") && !!d.getElementById("nouvelle-commande"));
   let memo = {}; try { memo = JSON.parse(w.localStorage.getItem("pass-commande")); } catch (e) {}
@@ -812,7 +812,7 @@ async function parcoursCommande() {
   const zone = d.getElementById("commande-attente");
   check("retour : bandeau « Votre commande en attente : code <CODE> — <formule> » EN HAUT (avant « J'ai un code »), 3 étapes + WhatsApp avec le code",
     !!zone && (zone.compareDocumentPosition(d.getElementById("code-acces")) & 4) && texte(d.getElementById("cmd-attente")) === "Votre commande en attente : code " + code + " — 30 jours - 19 DT" &&
-    zone.querySelectorAll(".paie-etapes > li").length === 3 && decodeURIComponent(zone.querySelector("#pass-preuve-apres").href).includes("code " + code) && d.getElementById("pass-form").hidden);
+    zone.querySelectorAll(".paie-etapes > li").length === 3 && decodeURIComponent(zone.querySelector("#pass-preuve-apres").href) === "https://wa.me/21624321390?text=Voici ma preuve de paiement — Code de la route Tunisie — code " + code + " — 30 jours - 19 DT" && d.getElementById("pass-form").hidden);
   check("retour : code pas encore activé -> « En attente de votre paiement », commande gardée, Pass fermé",
     texte(d.getElementById("cmd-etat")).startsWith("En attente de votre paiement") && !!w.localStorage.getItem("pass-commande") && !w.passActif());
   clic(w, d.getElementById("nouvelle-commande"));
@@ -826,6 +826,17 @@ async function parcoursCommande() {
   w = await page("pass/index.html", { ls: { "pass-commande": "{abîmé" } }); d = w.document;
   check("mémoire abîmée : pas de plantage, effacée", w.fautes.length === 0 && !w.localStorage.getItem("pass-commande") && !d.getElementById("commande-attente"));
 
+  // -- 25/11/2026 : e-mail automatique pas encore en service -> l'étiquette ne promet rien (FR + AR), erreur courte
+  for (const lang of ["fr", "ar"]) {
+    const wl = await page("pass/index.html", { lang }); brancher(wl); const dl = wl.document, lab = dl.querySelector('label[for="pass-email"]'), cache = lab && lab.querySelector(".email-auto");
+    const court = lab ? texte(lab.querySelector(`:scope > [data-l="${lang}"]`)) : "";
+    await envoyer(wl, remplir(wl, { email: "" }));
+    check(`formulaire (${lang}) : étiquette « ${lang === "fr" ? "E-mail" : "البريد الإلكتروني"} » seule, promesse « ${lang === "fr" ? "vous y recevez votre code et les étapes du paiement" : "يصلك عليه رمزك وخطوات الدفع"} » cachée (EMAIL_AUTO = false) ; erreur courte`,
+      court === (lang === "fr" ? "E-mail" : "البريد الإلكتروني") && !!cache && !visibleEl(cache)
+      && cache.textContent.includes(lang === "fr" ? "vous y recevez votre code et les étapes du paiement" : "يصلك عليه رمزك وخطوات الدفع")
+      && texte(dl.getElementById("pass-status")) === (lang === "fr" ? "Indiquez votre e-mail." : "اكتب بريدك الإلكتروني.") && wl.envois.length === 0);
+  }
+
   // -- en arabe
   w = await page("pass/index.html", { lang: "ar" }); d = w.document; brancher(w);
   await envoyer(w, remplir(w));
@@ -836,8 +847,8 @@ async function parcoursCommande() {
   check("arabe : motif = le code, numéro 24321390 sans espaces, filet « نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك. »",
     texte(ap.querySelectorAll(".paie-etapes > li")[2]).includes(ca) && texte(ap.querySelectorAll(".paie-etapes > li")[1]).includes("24321390") && !texte(ap).includes("24 321 390") &&
     texte(ap).includes("نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك."));
-  check("arabe : WhatsApp « هذا وصل الدفع — قانون الطرقات تونس — الرمز <CODE> — <formule> »",
-    decodeURIComponent(d.getElementById("pass-preuve-apres").href) === "https://wa.me/21624321390?text=هذا وصل الدفع — قانون الطرقات تونس — الرمز " + ca + " — 30 يومًا - 19 د");
+  check("arabe : WhatsApp « هذا وصل الدفع — قانون الطرقات تونس — الرمز <CODE> — <الاسم> — <formule> » (code ET nom)",
+    decodeURIComponent(d.getElementById("pass-preuve-apres").href) === "https://wa.me/21624321390?text=هذا وصل الدفع — قانون الطرقات تونس — الرمز " + ca + " — Test Candidat — 30 يومًا - 19 د");
   w = await page("pass/index.html", { lang: "ar", ls: cmd }); d = w.document; brancher(w); await w.eval("reprendreCommande()"); await pause(50);
   check("arabe : retour = bandeau « طلبك في الانتظار: الرمز <CODE> » + « في انتظار دفعتك »", texte(d.getElementById("cmd-attente")).startsWith("طلبك في الانتظار: الرمز " + code) && texte(d.getElementById("cmd-etat")).startsWith("في انتظار دفعتك"));
 
