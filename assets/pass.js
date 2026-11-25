@@ -164,9 +164,19 @@ function telephoneTn(v) {
    du dépôt privé, champ code) et il devient le code d'accès. Le téléphone garde la commande (clé « pass-commande » :
    code, formule, date ; rien d'autre) pendant 60 jours et essaie le code tout seul à chaque retour sur pass/. */
 PASS.cleCommande = "pass-commande";
-// E-mail automatique (code + étapes du paiement) PAS ENCORE en service (novembre 2026) : la phrase « Vous le recevez aussi par e-mail »
-// reste cachée tant que ce n'est pas vrai. Le jour où l'e-mail part vraiment : true (et changer le test « e-mail pas encore annoncé »).
-const EMAIL_AUTO = false;
+// E-mail automatique au client (A.17) : EN SERVICE depuis le 25 novembre 2026 (service « email-clients » de Clicvia + Resend, copie à Ahmed).
+// EMAIL_AUTO = true : phrases « vous y recevez votre code… » / « Vous le recevez aussi par e-mail » affichées et demande envoyée au service ;
+// false = tout caché, rien envoyé (retour en arrière en un mot si le service tombe).
+const EMAIL_AUTO = true;
+const EMAIL_API = "https://api-email.clicvia.com/inscription";
+// envoi au service d'e-mail : sans attendre la réponse, jamais bloquant (Formspree et le code restent la voie principale)
+function envoyerEmail(d) {
+  if (!EMAIL_AUTO || !window.fetch) return;
+  try {
+    fetch(EMAIL_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d), keepalive: true })
+      .catch(function () {});
+  } catch (e) {}
+}
 PASS.joursCommande = 60;
 function joliCode(c) { return c.slice(0, 4) + "-" + c.slice(4); }
 function nouveauCodeCommande() {
@@ -322,6 +332,9 @@ function brancherFormulairePass() {
     // ligne prête à recopier dans le bouton GitHub « pass » (dépôt privé) : le robot active CE code tel quel
     const jours = (f.value.match(/\d+/) || [""])[0];
     donnees.set("pour_activer", "action: paye ; nom: " + val("nom") + " ; telephone: " + tel + " ; email: " + email + " ; jours: " + jours + " ; code: " + joliCode(cmd.code));
+    // e-mail automatique au client (code, prix, paiement, WhatsApp, page du Pass ; langue de la page ; Ahmed en copie)
+    envoyerEmail({ site: "code-route", langue: document.documentElement.lang === "ar" ? "ar" : "fr", nom: val("nom"), email: email,
+      code: joliCode(cmd.code), formule: f.value });
     bouton.disabled = true;
     dire("", "Envoi…", "جارٍ الإرسال…");
     fetch(form.getAttribute("action"), { method: "POST", body: donnees, headers: { "Accept": "application/json" } })

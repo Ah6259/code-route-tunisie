@@ -293,3 +293,11 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   formulaire au moment de l'envoi, JAMAIS de la mémoire `pass-commande` (au retour, bandeau = code + formule seulement). Étiquette « E-mail » seule et
   erreur « Indiquez votre e-mail. » : la promesse « vous y recevez votre code et les étapes du paiement » (`.email-auto`, cachée) et l'erreur longue ne
   servent que si `EMAIL_AUTO = true`. Tests FR + AR (sabotage vérifié). Version `?v=20261125b`.
+
+- **25/11/2026 — E-MAIL AUTOMATIQUE EN SERVICE (A.17, méthode `outils communs/email-clients/BRANCHER-UN-SITE.md` de projets-ahmed, modèle Alerte Concours)** :
+  `assets/pass.js` : `EMAIL_AUTO = true`, `envoyerEmail()` envoie (sans attendre, jamais bloquant) au service `https://api-email.clicvia.com/inscription`
+  le JSON `{ site: "code-route", langue, nom, email, code: "ABCD-EF23", formule: "30 jours - 19 DT" }` juste avant Formspree (jamais si le piège
+  est rempli) -> e-mail au client (code, prix, paiement, WhatsApp, page du Pass) dans la langue de la page, Ahmed en copie. Promesses « vous y recevez
+  votre code… » / « Vous le recevez aussi par e-mail » affichées ; CSP de `pass/` (+ `https://api-email.clicvia.com` dans connect-src) ; Resend cité
+  (formulaire, conditions, « Comment fonctionne le site ? » FR + AR + ligne FONCTIONS). Tests : le JSON est passé au VRAI `verifier()` (worker.js +
+  sites.json de projets-ahmed s'il est à côté ; sinon sauté). Retour en arrière : `EMAIL_AUTO = false`. Version `?v=20261125c`.
