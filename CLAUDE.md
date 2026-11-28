@@ -331,3 +331,14 @@ Fichier lu automatiquement par Claude Code au début de chaque session dans ce d
   `python3 tools/test_lastmod.py donnees/lastmod.json` (dans tests.yml ; données inventées + vrai plan ; vérifié par sabotage).
 - **Accueil** : partie « L'examen du code de la route en Tunisie » (3 courts paragraphes FR + AR, faits de la page Permis, décret 2000-142),
   lisible sans JavaScript.
+
+## 28/11/2026 — encadrés vers le Pass sur Entraînement et Permis (audit en ligne § 71, « fais tout » d'Ahmed ; pas de gratuité, prix inchangés)
+- `tools/sources/entrainement/index.html` : encadré `#encadre-pass` juste sous `#quiz` : « Prêt pour l'examen ? Examens blancs illimités dans les conditions
+  réelles avec le Pass Examen (dès 9 DT) » / « مستعد للامتحان؟ … », bouton « Voir le Pass Examen » -> `../pass/`, `data-clic="pass-entrainement"`, prix 9/19/29 DT.
+  Caché si un Pass est actif ET sur l'écran « Mes erreurs » réservé au Pass (`#erreurs-pass`, qui présente déjà le Pass : `rendreEntrainement()` de quiz.js).
+- `tools/sources/permis/index.html` : même encadré sous l'étape « 3. L'examen » (avant l'étape 4) : « Préparez l'épreuve du code : examens blancs illimités avec
+  le Pass Examen (dès 9 DT) » / « استعد لاختبار الكود: … », `data-clic="pass-permis"`.
+- `examen/` : rien ajouté (fonction payante elle-même ; ses liens vers pass/ — `#examen-utilise`, `#fin-gratuit` — étaient déjà comptés par endroit).
+- page.js : titres GoatCounter des 2 nouveaux noms ; « Comment fonctionne le site ? » FR + AR + ligne FONCTIONS ; bloc « 2 bis » de test_site.mjs étendu
+  (texte par page et langue, place dans la page, visible / caché avec Pass, caché sur « Mes erreurs », clic compté FR + AR, rien sans GoatCounter) ;
+  7 sabotages vérifiés. Version `?v=20261128a` (relecture/ aussi).

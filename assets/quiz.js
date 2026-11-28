@@ -147,6 +147,9 @@ function lancerEntrainement() {
 }
 function rendreEntrainement() {
   const e = entrainement, zone = document.getElementById("quiz");
+  // encadré « Prêt pour l'examen ? » (28 novembre 2026) : caché sur l'écran « Mes erreurs » réservé au Pass (qui présente déjà le Pass) et si un Pass est actif
+  const encadre = document.getElementById("encadre-pass");
+  if (encadre) encadre.hidden = e.theme === "erreurs-pass" || (typeof passActif === "function" && passActif());
   const titre = document.getElementById("titre-page");
   if (!e.theme) {
     titre.textContent = T("Entraînement par thème", "التدريب حسب المحور");

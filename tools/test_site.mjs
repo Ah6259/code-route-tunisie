@@ -330,6 +330,8 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
     ["e-mail de confirmation automatique du Pass", /emailAuto: true,/.test(lire("assets/pass-reglages.js")), /E-mail de confirmation : dans la minute qui suit, vous recevez aussi tout cela par e-mail[\s\S]*Resend/],
     // 25/11/2026 (décision d'Ahmed, pas de gratuité) : encadré vers le Pass à la fin des leçons, panneaux, amendes ; clics comptés
     ["encadré « Testez-vous en conditions réelles » vers le Pass", /id="encadre-pass"/.test(lire("lecons/index.html") + lire("panneaux/index.html") + lire("amendes/index.html")), /« Testez-vous en conditions réelles »[\s\S]*fin de chaque leçon[\s\S]*Panneaux et Amendes[\s\S]*caché si votre Pass est actif/],
+    // 28/11/2026 (audit § 71) : encadrés sous l'entraînement par thème et sur la page Permis
+    ["encadrés « Prêt pour l'examen ? » (entraînement) et « Préparez l'épreuve du code » (permis)", /data-clic="pass-entrainement"/.test(lire("entrainement/index.html")) && /data-clic="pass-permis"/.test(lire("permis/index.html")), /« Prêt pour l'examen \? »[\s\S]*entraînement par thème[\s\S]*page Permis[\s\S]*Préparez l'épreuve du code[\s\S]*cachés si votre Pass est actif/],
     ["clics vers le Pass comptés (GoatCounter, sans savoir qui)", /\/code-route-tunisie\/clic\//.test(js), /sans savoir qui vous êtes, les clics sur les liens qui mènent au Pass Examen/],
     ["vie privée", true, /Pas de compte\. Votre progression, vos scores et votre code restent dans votre téléphone/],
     ["surveillance mensuelle du texte officiel", existsSync(join(root, "tools/surveiller_source.py")), /Chaque mois, un robot vérifie/],
@@ -342,20 +344,36 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
 // ---- 2 bis. ENCADRÉS VERS LE PASS + CLICS COMPTÉS (25/11/2026, décision d'Ahmed : « pas de gratuité », modèle Alerte Concours) ----
 { const enc = h => (h.match(/<!--encadre-pass-->([\s\S]*?)<!--\/encadre-pass-->/) || [])[1] || "";
   const ko = [];
-  for (const [f, clic] of [["lecons/index.html", "pass-lecon"], ["panneaux/index.html", "pass-panneaux"], ["amendes/index.html", "pass-amendes"]]) for (const pref of ["", "ar/"]) {
+  const TEXTE_ENC = { lecons: [/Testez-vous en conditions réelles : examens blancs illimités avec le Pass Examen \(dès 9&nbsp;DT\)/, /اختبر نفسك في ظروف حقيقية/],
+    entrainement: [/Prêt pour l'examen \? Examens blancs illimités dans les conditions réelles avec le Pass Examen \(dès 9&nbsp;DT\)/, /مستعد للامتحان؟ امتحانات تجريبية بلا حدود/],
+    permis: [/Préparez l'épreuve du code : examens blancs illimités avec le Pass Examen \(dès 9&nbsp;DT\)/, /استعد لاختبار الكود: امتحانات تجريبية بلا حدود/] };
+  TEXTE_ENC.panneaux = TEXTE_ENC.amendes = TEXTE_ENC.lecons;
+  for (const [f, clic] of [["lecons/index.html", "pass-lecon"], ["panneaux/index.html", "pass-panneaux"], ["amendes/index.html", "pass-amendes"],
+    ["entrainement/index.html", "pass-entrainement"], ["permis/index.html", "pass-permis"]]) for (const pref of ["", "ar/"]) {
     const h = lire(pref + f), e = enc(h), m = e.match(/<a class="btn" id="encadre-btn" href="([^"]*)" data-clic="([a-z-]+)">/) || [];
-    const bonTexte = pref ? /اختبر نفسك في ظروف حقيقية/.test(e) && !/Testez-vous/.test(e) : /Testez-vous en conditions réelles : examens blancs illimités avec le Pass Examen \(dès 9&nbsp;DT\)/.test(e) && !AR.test(e);
+    const [reFr, reAr] = TEXTE_ENC[dirname(f)];
+    const bonTexte = pref ? reAr.test(e) && !/[À-ÿ]|Pass Examen|Testez|Prêt|Préparez/.test(e.replace(/<[^>]+>/g, "")) : reFr.test(e) && !AR.test(e);
     const cible = join(root, pref + dirname(f), m[1] || "x", "index.html");
     if (!(m[1] === "../pass/" && existsSync(cible) && m[2] === clic && bonTexte && /29&nbsp;DT|>29</.test(e) && (h.match(/id="encadre-pass"/g) || []).length === 1)) ko.push(pref + f);
     if (/gratuit|offert|essai|مجان/i.test(e)) ko.push(pref + f + " (gratuité)");
   }
-  check("encadré « Testez-vous en conditions réelles » sur leçons, panneaux, amendes (FR + ar/) : texte de la langue, prix, vrai bouton vers pass/ de la même langue, clic nommé, aucune gratuité" + (ko.length ? " — " + ko.join(", ") : ""), !ko.length);
+  check("encadré vers le Pass sur leçons, panneaux, amendes, entraînement, permis (FR + ar/) : texte de la langue, prix, vrai bouton vers pass/ de la même langue, clic nommé, aucune gratuité" + (ko.length ? " — " + ko.join(", ") : ""), !ko.length);
   check("leçons : l'encadré vient APRÈS le contenu de la leçon (#lecon)", /<div id="lecon"><\/div>\s*<!--encadre-pass-->/.test(lire("lecons/index.html")) && /<div id="lecon"><\/div>\s*<!--encadre-pass-->/.test(lire("ar/lecons/index.html")));
   const wl = await page("lecons/index.html", { query: "&theme=3" }), el = wl.document.getElementById("encadre-pass");
   check("leçon 3 affichée : encadré visible sous la leçon, aucune erreur", wl.fautes.length === 0 && el && !el.hidden && wl.document.querySelector("#lecon").children.length > 0
     && (wl.document.getElementById("lecon").compareDocumentPosition(el) & 4));
   const wp = await page("lecons/index.html", { query: "&theme=3", pass: true });
   check("leçon avec un Pass actif : encadré caché", wp.document.getElementById("encadre-pass").hidden === true);
+  // 28/11/2026 : entraînement (sous le quiz) et permis (sous l'étape « 3. L'examen »)
+  check("entraînement : l'encadré vient juste APRÈS la zone du quiz (#quiz), FR + ar/", ["", "ar/"].every(p => /<div id="quiz"><\/div>\s*<!--encadre-pass-->/.test(lire(p + "entrainement/index.html"))));
+  check("permis : l'encadré vient APRÈS l'étape « 3. L'examen » et AVANT l'étape 4, FR + ar/", ["", "ar/"].every(p => /3\. (L'examen|الامتحان)[\s\S]*<\/section>\s*<!--encadre-pass-->[\s\S]*<!--\/encadre-pass-->\s*<section class="carte">\s*<h2><span[^>]*>4\. /.test(lire(p + "permis/index.html").replace(/&#x27;|&#39;/g, "'"))));
+  for (const [chemin, opts] of [["entrainement/index.html", { query: "&theme=4" }], ["entrainement/index.html", { lang: "ar" }], ["permis/index.html", {}], ["permis/index.html", { lang: "ar" }]]) {
+    const w1 = await page(chemin, opts), e1 = w1.document.getElementById("encadre-pass");
+    const w2 = await page(chemin, { ...opts, pass: true }), e2 = w2.document.getElementById("encadre-pass");
+    check(`${opts.lang === "ar" ? "ar/" : ""}${chemin}${opts.query || ""} : encadré visible sans Pass, caché avec un Pass actif, aucune erreur`, !!e1 && !e1.hidden && !!e2 && e2.hidden === true && !w1.fautes.length && !w2.fautes.length);
+  }
+  const we = await page("entrainement/index.html", { query: "&erreurs=1" });
+  check("« Mes erreurs » sans Pass (écran qui présente déjà le Pass) : l'encadré est caché (pas de doublon)", !!we.document.getElementById("erreurs-pass") && we.document.getElementById("encadre-pass").hidden === true);
   // clics comptés (faux GoatCounter), FR et AR ; rien (et aucune erreur) sans GoatCounter
   const essai = async (chemin, opts, sel, gc = true) => {
     const w = await page(chemin, opts), comptes = [], erreurs = [];
@@ -368,6 +386,8 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
   for (const [chemin, opts, sel, nom] of [
     ["lecons/index.html", { query: "&theme=2" }, "#encadre-btn", "pass-lecon"], ["lecons/index.html", { lang: "ar", query: "&theme=2" }, "#encadre-btn", "pass-lecon"],
     ["panneaux/index.html", {}, "#encadre-btn", "pass-panneaux"], ["amendes/index.html", { lang: "ar" }, "#encadre-btn", "pass-amendes"],
+    ["entrainement/index.html", { query: "&theme=1" }, "#encadre-btn", "pass-entrainement"], ["entrainement/index.html", { lang: "ar" }, "#encadre-btn", "pass-entrainement"],
+    ["permis/index.html", {}, "#encadre-btn", "pass-permis"], ["permis/index.html", { lang: "ar" }, "#encadre-btn", "pass-permis"],
     ["index.html", {}, 'a[data-clic="pass-accueil"]', "pass-accueil"], ["index.html", { lang: "ar" }, 'a[data-clic="pass-accueil"]', "pass-accueil"],
     ["permis/index.html", {}, '#pied a[href$="pass/"]', "pass-pied"], ["examen/index.html", { examenFait: true }, "#entete a.entete-pass", "pass-entete"],
     ["examen/index.html", { examenFait: true }, "#cta-pass-examen", "pass-examen-du-jour"], ["entrainement/index.html", { query: "&erreurs=1" }, "#cta-pass-erreurs", "pass-erreurs"]]) {
@@ -377,6 +397,10 @@ check("à propos : date vérifiée = REGLES_SITE", texte(d.getElementById("verif
   }
   const s0 = await essai("lecons/index.html", { query: "&theme=2" }, "#encadre-btn", false);
   check("sans GoatCounter (bloqué) : aucun compte, aucune erreur, le lien reste", !!s0.a && !s0.comptes.length && !s0.erreurs.length);
+  for (const ch of ["entrainement/index.html", "permis/index.html"]) {
+    const r0 = await essai(ch, {}, "#encadre-btn", false);
+    check(`${ch} sans GoatCounter : aucun compte, aucune erreur, le lien reste`, !!r0.a && !r0.comptes.length && !r0.erreurs.length);
+  }
   const s1 = await essai("lecons/index.html", { query: "&theme=2" }, '#pied a[href$="lecons/"]');
   check("lien qui ne mène pas au Pass (Leçons du pied) : rien compté", !!s1.a && !s1.comptes.length);
   const s2 = await essai("pass/index.html", {}, '#pied a[href$="pass/"]');
